@@ -1,0 +1,136 @@
+extends ../frame
+
+block content
+	div.ui.aligned.segment
+		div.ui.breadcrumb
+			a.section 合同管理
+			i.right.chevron.icon.divider
+			div.active.section 合同列表
+	div.ui.segment.small.form
+		div.equal.width.fields
+			div.field
+				label 合同编号
+				input(type="text", id="contractNumber", placeholder="合同编号")
+			div.field
+				label 甲方名称
+				input(type="text", id="contractNumber", placeholder="甲方名称")
+			div.field
+				label 乙方名称
+				input(type="text", id="contractNumber", placeholder="乙方名称")
+			div.field
+				label 生效时间
+				input(type="text", id="effectiveTime", placeholder="生效时间", readonly="readonly")
+			div.field
+				label 结束时间
+				input(type="text", id="endTime", placeholder="结束时间", readonly="readonly")
+			div.field
+				label 销售名称
+				input(type="text", id="endTime", placeholder="销售名称")
+		div.equal.width.fields
+			div.field
+				label 合同状态
+				select.ui.dropdown#contractType
+					option(value="-1") 待确认
+					option(value="") 待生效
+					option(value="1") 执行中
+					option(value="2") 逾期
+					option(value="3") 执行完成
+			div.field
+				label 合同类型
+				select.ui.dropdown#contractType
+					option(value="") 广告合同
+					option(value="1") vin合同
+					options(value="2") 其他合同
+			div.field
+				label 大区
+				select.ui.dropdown#region
+					option(value="") 广告合同
+					option(value="1") vin合同
+					options(value="2") 其他合同
+			div.field
+				label 省
+				select.ui.dropdown#privince
+					option(value="") 广告合同
+					option(value="1") vin合同
+					options(value="2") 其他合同
+			div.field
+				label 市
+				select.ui.dropdown#city
+					option(value="") 广告合同
+					option(value="1") vin合同
+					options(value="2") 其他合同
+		div.fields
+			div.field
+				button#queryBtn.ui.primary.button 查询
+			div.field
+				button.ui.primary.button 导出
+	div.ui.stacked.segment
+		table.ui.celled.selectable.striped.grey.table
+			thead
+				tr.ui.center.aligned.segment
+					th 合同号
+					th 甲方
+					th 甲方地区
+					th 乙方
+					th 合同类型
+					th 生效时间
+					th 结束时间
+					th 合同金额
+					th 保证金
+					th 应付总额
+					th 已付金额
+					th 已开票数量
+					th 已开票金额
+					th 对应销售
+					th 合同状态
+					th 逾期天数
+					th 录入时间
+					th 操作
+			tbody
+				each list, i in contractList.list
+					tr.ui.center.aligned.segment
+						td #{list.contract_number}
+						td #{list.first_party_name}
+						td #{list.region_name + "-" + list.province_name + "-" + list.city_name}
+						td #{list.sencond_party_name}
+						td #{list.contract_type_name}
+						td #{list.effective_time}
+						td #{list.end_time}
+						td #{list.contract_price}
+						td #{list.deposit}
+						td #{list.contract_price + list.deposit}
+						td #{list.paid_price}
+						td #{list.invoice_count}
+						td #{list.invoice_price}
+						td #{list.saler_name}
+						td
+							case list.contract_status
+								when 0
+									待生效
+								when 1
+									执行中
+								when 2
+									完成
+								when 3
+									逾期
+						td #{list.overdue_days > -1 ? list.overdue_days : "--"}
+						td #{list.create_time}
+						td
+							button.ui.primary.aligned.button 详情
+			tfoot
+				tr
+					th(colspan="18")
+						div.ui.right.floated.pagination.menu
+							a.icon.item
+								i.left.chevron.icon(data-disable="#{contractList.pagination.isFirst}")
+							each num, i in contractList.pagination.count
+								if contractList.pagination.pageNo == num
+									a.item.active #{num}
+								else
+									a.item #{num}
+							a.icon.item
+								i.right.chevron.icon(data-disable="#{contractList.pagination.isLast}")
+	script.
+		require(["/app/config.js"], function() {
+			require(["/app/contract/contractList.js"]);
+		});

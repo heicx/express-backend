@@ -1,0 +1,24 @@
+extends layout
+
+block frame
+    div.login-form.ui.segment.container
+        h2.ui.center.aligned.header.grey 后台登录
+        div.ui.form
+            form(action="/login" method="POST")
+                div.field
+                    label 用户名
+                    div.ui.left.icon.input
+                        input(type="text", placeholder="用户名", id="userName" name="username", value="test")
+                        i.user.icon
+                div.field
+                    label 密码
+                    div.ui.left.icon.input
+                        input(type="password", placeholder="用户密码" name="password" id="userPwd", value="123456")
+                        i.lock.icon
+                div#loginBtn.ui.blue.submit.button.fluid Login
+                div#formMsg.ui.tral.warning.message.aligned.center
+                    div.header 请输入用户名
+                script.
+                    require(["/app/config.js"], function() {
+                        require(["/app/login.js"]);
+                    });

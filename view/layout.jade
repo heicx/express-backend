@@ -1,0 +1,26 @@
+doctype
+html
+    head
+        meta(http-equiv="Content-Type", content="text/html;charset=UTF-8")
+        meta(name="viewport", content="width=device-width,minimum-scale=1.0,maximum-scale=1.0")
+        meta(content="yes",name="apple-mobile-web-app-capable")
+        title 后台
+        link(rel="stylesheet", href="/assets/css/semantic.min.css")
+        link(rel="stylesheet", href="/assets/css/components/dropdown.min.css")
+        link(rel="stylesheet", href="/assets/css/components/dimmer.min.css")
+        link(rel="stylesheet", href="/assets/css/components/modal.min.css")
+        link(rel="stylesheet", href="/assets/libs/jquery-plugins/jquery-ui/themes/smoothness/jquery-ui.min.css")
+        link(rel="stylesheet", href="/assets/css/style.css")
+        script(src="/assets/libs/requirejs/require.js")
+        script.
+            require(["/app/config.js"], function() {
+                require(["ui-events"]);
+            })
+    body
+        block frame
+        div.ui.active.dimmer(id="loadingLayer", style="display:none;")
+            div.ui.text.loader
+        div.ui.modal
+            div.header 小提示
+            div.content
+                p.ui.center.aligned.header Message.

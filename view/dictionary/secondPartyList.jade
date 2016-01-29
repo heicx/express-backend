@@ -1,0 +1,56 @@
+extends ../frame
+block content
+div.html.ui.top.aligned.segment
+    div.ui.breadcrumb
+        a.section 字典管理
+        i.right.chevron.icon.divider
+        div.active.section 乙方管理
+div.ui.segment.grid.aligned.small.form
+    div.ten.wide.column.centered
+        div.inline.fields
+            div.fifteen.wide.field
+                input(type="text", placeholder="乙方名称")
+            div.one.wide.field
+                button.ui.primary.button 查询
+div.ui.grid.aligned.segment
+    div.ten.wide.column.centered
+        table.ui.grey.compact.selectable.celled.striped.table
+            thead
+                tr.center.aligned
+                    th 甲方名称
+                    th 地区
+                    th 操作
+            tbody
+                tr.center.aligned
+                    td Cell
+                    td Cell
+                    td Cell
+                tr.center.aligned
+                    td Cell
+                    td Cell
+                    td Cell
+            tfoot
+                tr
+                    th(colspan="6")
+                        div#addUserBtn.ui.right.floated.small.primary.labeled.icon.button 添加甲方
+                            i.user.icon
+            div#firstPartyModal.ui.modal
+                div.header 添加甲方
+                i.close.icon
+                div.content
+                    div.ui.segment.small.form
+                        div.field
+                            label 用户名称
+                            input(type="text", placeholder="用户名称")
+                        div.field
+                            label 邮箱
+                            input(type="text", placeholder="xxxx@email.com")
+                        div.field
+                            label 密码
+                            input(type="text", placeholder="请输入6位以上密码")
+                        div.field
+                            button.ui.primary.button 确定
+                                script.
+    require(["/app/config.js"], function() {
+    require(["/app/user/userList.js"]);
+});

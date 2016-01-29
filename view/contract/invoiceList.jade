@@ -1,0 +1,113 @@
+extends ../frame
+
+block content
+	div.ui.aligned.segment
+		div.ui.breadcrumb
+			a.section 合同管理
+			i.right.chevron.icon.divider
+			div.active.section 开票列表
+	div.ui.segment.small.form
+		div.equal.width.fields
+			div.field
+				label 合同编号
+				input(type="text", placeholder="合同编号")
+			div.field
+				label 甲方名称
+				input(type="text", placeholder="甲方名称")
+			div.field
+				label 乙方名称
+				input(type="text", placeholder="乙方名称")
+			div.field
+				label 生效时间
+				input(type="text", placeholder="生效时间")
+			div.field
+				label 结束时间
+				input(type="text", placeholder="结束时间")
+			div.field
+				label 销售名称
+				input(type="text", placeholder="销售名称")
+		div.equal.width.fields
+			div.field
+				label 发票号
+				input(type="text", placeholder="发票号")
+			div.field
+				label 开票起始
+				input(type="text", placeholder="开票起始时间")
+			div.field
+				label 开票结束
+				input(type="text", placeholder="开票起始时间")
+			div.field
+				label 记录起始
+				input(type="text", placeholder="记录起始时间")
+			div.field
+				label 记录结束
+				input(type="text", placeholder="记录结束时间")
+		div.fields
+			div.field
+				button.ui.primary.button 查询
+			div.field
+				button.ui.primary.button 导出
+	div.ui.stacked.segment
+		table.ui.celled.selectable.striped.grey.table
+			thead
+				tr
+					th 合同号
+					th 甲方
+					th 甲方地区
+					th 乙方
+					th 合同类型
+					th 生效时间
+					th 结束时间
+					th 合同金额
+					th 应付总额
+					th 回款金额
+					th 回款时间
+					th 入账银行
+					th 销售名称
+					th 记录人
+					th 记录时间
+			tbody
+				tr
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+				tr
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+					td Cell
+			tfoot
+				tr
+					th(colspan="18")
+						div.ui.right.floated.pagination.menu
+							a.icon.item
+								i.left.chevron.icon
+							a.item.active 1
+							a.item 2
+							a.item 3
+							a.item 4
+							a.icon.item
+								i.right.chevron.icon

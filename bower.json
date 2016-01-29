@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "description": "",
+  "main": "app.js",
+  "authors": [
+    "heicx_sudo"
+  ],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6",
+    "jquery": "~2.1.4",
+    "moment": "~2.11.1"
+  }
+}
