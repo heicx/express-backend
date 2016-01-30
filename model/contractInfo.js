@@ -25,6 +25,7 @@ module.exports = function(orm, db) {
 			pageIndex: pageNo
 		}
 
+		console.log(params);
 		Contract.count(function(err, listCount) {
 			container.count = listCount;
 

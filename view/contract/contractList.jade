@@ -13,10 +13,10 @@ block content
 				input(type="text", id="contractNumber", placeholder="合同编号")
 			div.field
 				label 甲方名称
-				input(type="text", id="contractNumber", placeholder="甲方名称")
+				input(type="text", id="firstPartyName", placeholder="甲方名称")
 			div.field
 				label 乙方名称
-				input(type="text", id="contractNumber", placeholder="乙方名称")
+				input(type="text", id="secondPartyName", placeholder="乙方名称")
 			div.field
 				label 生效时间
 				input(type="text", id="effectiveTime", placeholder="生效时间", readonly="readonly")
@@ -25,11 +25,11 @@ block content
 				input(type="text", id="endTime", placeholder="结束时间", readonly="readonly")
 			div.field
 				label 销售名称
-				input(type="text", id="endTime", placeholder="销售名称")
+				input(type="text", id="salerName", placeholder="销售名称")
 		div.equal.width.fields
 			div.field
 				label 合同状态
-				select.ui.dropdown#contractType
+				select.ui.dropdown#contractStatus
 					option(value="-1") 待确认
 					option(value="") 待生效
 					option(value="1") 执行中
@@ -130,6 +130,8 @@ block content
 									a.item #{num}
 							a.icon.item
 								i.right.chevron.icon(data-disable="#{contractList.pagination.isLast}")
+			div.ui.inverted.dimmer(id="listLoader")
+				div.ui.loader
 	script.
 		require(["/app/config.js"], function() {
 			require(["/app/contract/contractList.js"]);

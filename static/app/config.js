@@ -11,7 +11,8 @@ require.config({
         "dropdown": "assets/css/components/dropdown",
         "modal": "assets/css/components/modal.min",
         "dimmer": "assets/css/components/dimmer.min",
-        "ui-events": "app/public/ui-events"
+        "ui-events": "app/public/ui-events",
+        "base": "config/base"
     },
     shim: {
         "jquery-ui": {
