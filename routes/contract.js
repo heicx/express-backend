@@ -5,11 +5,7 @@ var login = require("./login");
 var fetchContractList = function (req, res, next) {
 	var contractModel = req.models.contract_info;
 	var async = req.query.async || false;
-	var params = {
-		pageNo: req.query.pageNo || 1
-	};
-
-	console.log(req.query);
+	var params = req.query;
 
 	contractModel.getContractInfo(params, function(err, data) {
 		if(async) {

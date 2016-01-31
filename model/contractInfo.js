@@ -21,11 +21,22 @@ module.exports = function(orm, db) {
 	Contract.getContractInfo = function (params, callback) {
 		var pageNo = params.pageNo || 1;
 		var prePageNum = 20;
+		var strWhere = "";
 		var container = {
 			pageIndex: pageNo
 		}
 
-		console.log(params);
+		utils.paramsFilter(params, function(data) {
+			for(var name in data) {
+				strWhere += name + "=" + data[name] + " and ";
+			}
+
+			if(strWhere !== "") {
+				strWhere = "where " + strWhere.substring(0, strWhere.length - 4);
+			}
+		});
+
+
 		Contract.count(function(err, listCount) {
 			container.count = listCount;
 
@@ -49,6 +60,7 @@ module.exports = function(orm, db) {
 					+ "LEFT JOIN contract_region_area g ON f.id = g.region_id "
 					+ "LEFT JOIN area h ON g.area_id = h.id "
 					+ "LEFT JOIN area i ON b.city_id = i.id "
+					+ strWhere
 					+ "GROUP BY a.contract_number LIMIT ?,?";
 
 				db.driver.execQuery(sql, [(pageNo - 1) * prePageNum, prePageNum], function(err, resultData) {

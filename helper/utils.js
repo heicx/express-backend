@@ -39,9 +39,11 @@ exports.arrToJSON = function(arr) {
     return obj;
 }
 
-exports.isPosiInterger = function(str) {
-    return (parseInt(str) == str);
+exports.paramsFilter = function(data, cb) {
+    delete data["_"] && delete data["async"] && delete data["pageNo"];
+    return cb(data);
 }
+
 
 exports.paginationMath = function(curPageNo, totalPageNo) {
     var oPagination = {
