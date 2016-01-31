@@ -53,7 +53,8 @@ app.use(function(req, res, next) {
 var login = require("./routes/login");
 //var user = require("./routes/user");
 var contract = require("./routes/contract");
-//var dictionary = require("./routes/dictionary");
+var firstParty = require("./routes/firstParty");
+var contractType = require("./routes/contractType");
 
 /**
  * 首页定位
@@ -64,6 +65,11 @@ var contract = require("./routes/contract");
 //
 app.use("/", login.routes);
 app.use("/contract", contract);
+app.use("/dictionary/firstParty", firstParty);
+
+app.use("/dictionary/contractType/", contractType);
+
+
 //
 ///**
 // * 登陆

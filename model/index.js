@@ -6,6 +6,7 @@ var setup = function(db, cb) {
     require("./user")(orm, db);
     require("./contractInfo")(orm, db);
     require("./firstParty")(orm, db);
+    require("./contractType")(orm, db);
     //require("./secondParty")(orm, db);
 
     return cb(null, db)

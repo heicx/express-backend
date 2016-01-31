@@ -22,14 +22,11 @@ block content
 						th 地区
 						th 操作
 				tbody
-					tr.center.aligned
-						td Cell
-						td Cell
-						td Cell
-					tr.center.aligned
-						td Cell
-						td Cell
-						td Cell
+					each list, i in firstPartyList
+						tr.center.aligned
+							td #{list.first_party_name}
+							td #{list.region_name}
+							td #{list.area_name}
 				tfoot
 					tr
 						th(colspan="6")

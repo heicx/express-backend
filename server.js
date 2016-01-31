@@ -41,7 +41,7 @@ app.use(session({
 var login = require("./routes/login");
 var user = require("./routes/user");
 var contract = require("./routes/contract");
-var dictionary = require("./routes/dictionary");
+var dictionary = require("./routes/firstParty");
 
 /**
  * 首页定位
