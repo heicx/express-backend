@@ -7,7 +7,12 @@ module.exports = function(orm, db) {
 	});
 
     regionArea.getExistAreaId = function(params, callback) {
-        regionArea.find({status: 1}, function(err, resultData) {
+        var _initParams = {status: 1};
+
+        if(params.region_id)
+            _initParams.region_id = params.region_id;
+
+        regionArea.find(_initParams, function(err, resultData) {
             callback(null, resultData);
         });
     }

@@ -2,7 +2,8 @@ define(["jquery"], function($) {
     var config = {
         host: "http://" + window.location.host,
         address: {
-            contractList: "/contract/list"
+            contractList: "/contract/list",
+            region: "/dictionary/region/list"
         }
     }
 

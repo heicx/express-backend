@@ -2,44 +2,54 @@ var express = require("express");
 var router = express.Router();
 var login = require("./login");
 var when = require("when");
-var models = null;
 
-var getArea = function(regionData) {
-    var deferred = when.defer();
-    var areaModel = models.area;
+var getArea = function(req, cb) {
+    var areaModel = req.models.area;
 
     areaModel.getAllArea(null, function(err, areaData) {
-        regionData.allArea = areaData;
-        deferred.resolve(regionData);
+        cb(areaData);
     });
-
-    return deferred.promise;
 }
 
-var getExistArea = function(regionData) {
+var getExistArea = function(req) {
     var deferred = when.defer();
-    var regionAreaModel = models.contract_region_area;
+    var regionAreaModel = req.models.contract_region_area;
+    var params = req.query;
 
-    regionAreaModel.getExistAreaId(null, function(err, existAreaData) {
-        regionData.existAreaData = existAreaData;
-        deferred.resolve(regionData);
+    regionAreaModel.getExistAreaId(params, function(err, existAreaData) {
+        var arrExist = [];
+
+        for(var i=0; i < existAreaData.length; i++) {
+            arrExist.push(existAreaData[i].id);
+        }
+
+        deferred.resolve(arrExist);
     });
 
     return deferred.promise;
 }
 
 var fetchRegionList = function (req, res) {
-    var contractRegionModel;
+    var async = req.query.async || false;
+    var params = req.query;
+    var contractRegionModel = req.models.contract_region;
 
-    models = req.models;
-    contractRegionModel = models.contract_region;
+    contractRegionModel.getRegionList(params, function(err, regionData) {
+        var promiseData = {region: regionData};
 
-    contractRegionModel.getRegionList(null, function(err, regionData) {
-        var regionData = {region: regionData};
+        getArea(req, function(areaData) {
+            promiseData.allArea = areaData;
 
-        getArea(regionData).then(getExistArea).then(function(regionData) {
-            res.render("dictionary/region", {regionList: regionData, userinfo: JSON.parse(req.session.user)});
-        })
+            getExistArea(req).then(function(existData) {
+                promiseData.existArea = existData;
+
+                if(async) {
+                    res.json(promiseData);
+                }else {
+                    res.render("dictionary/region", {regionList: promiseData, userinfo: JSON.parse(req.session.user)});
+                }
+            });
+        });
 	});
 }
 

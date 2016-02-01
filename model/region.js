@@ -6,9 +6,10 @@ module.exports = function(orm, db) {
 	});
 
     region.getRegionList = function(params, callback) {
+        var strWhere = params.region_id ? " where a.id = " + params.region_id : "";
 		var sql = "SELECT a.id, a.region_name, c.area_name FROM contract_region a "
 				+ "LEFT JOIN contract_region_area b ON a.id = b.region_id "
-				+ "LEFT JOIN area c ON c.id = b.area_id";
+				+ "LEFT JOIN area c ON c.id = b.area_id" + strWhere;
 
 		db.driver.execQuery(sql, function(err, resultData) {
             if(resultData) {

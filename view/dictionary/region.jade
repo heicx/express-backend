@@ -19,13 +19,13 @@ block content
                             td #{i}
                             td #{list.area_name}
                             td
-                                button.ui.primary.aligned.button(data-regionid="#{list.region_id}") 编辑
+                                button.ui.primary.aligned.button.region-edit(data-regionid="#{list.region_id}") 编辑
                 tfoot
                     tr
                         th(colspan="6")
-                            div#addUserBtn.ui.right.floated.small.primary.labeled.icon.button 添加大区
+                            div#addRegionBtn.ui.right.floated.small.primary.labeled.icon.button 添加大区
                                 i.plus.icon
-                div#firstPartyModal.ui
+                div#regionModal.ui.modal
                     div.header 添加大区
                     i.close.icon
                     div.content
@@ -36,11 +36,11 @@ block content
                             div.ui.horizontal.divider 请选择大区内包含的省份
                             div.ui.four.column.left.aligned.stackable.grid.segment
                                 each area, j in regionList.allArea
-                                    each existArea, k in regionList.existAreaData
+                                    - var arrExistAreaId = regionList.existArea;
                                         div.column
                                             div.ui.checked.checkbox
-                                                if j==k
-                                                    input(type="checkbox", checked)
+                                                if (j in arrExistAreaId)
+                                                    input(type="checkbox", checked, disabled)
                                                 else
                                                     input(type="checkbox")
                                                 label #{area.area_name}
@@ -48,5 +48,5 @@ block content
                                 button.ui.primary.button 确定
     script.
         require(["/app/config.js"], function () {
-            require(["/app/user/userList.js"]);
+            require(["/app/dictionary/region.js"]);
         });
