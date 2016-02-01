@@ -1,19 +1,45 @@
 var express = require("express");
 var router = express.Router();
 var login = require("./login");
+var when = require("when");
+var models = null;
 
-var fetchRegionList = function (req, res, next) {
-	var contractRegionModel = req.models.contract_region;
-	var async = req.query.async || false;
-	var params = req.query;
+var getArea = function(regionData) {
+    var deferred = when.defer();
+    var areaModel = models.area;
 
-    contractRegionModel.getRegionList(params, function(err, data) {
-		if(async) {
-			res.json({regionList: data});
-		}else {
-            console.log(data);
-            res.render("dictionary/region", {regionList: data, userinfo: JSON.parse(req.session.user)});
-        }
+    areaModel.getAllArea(null, function(err, areaData) {
+        regionData.allArea = areaData;
+        deferred.resolve(regionData);
+    });
+
+    return deferred.promise;
+}
+
+var getExistArea = function(regionData) {
+    var deferred = when.defer();
+    var regionAreaModel = models.contract_region_area;
+
+    regionAreaModel.getExistAreaId(null, function(err, existAreaData) {
+        regionData.existAreaData = existAreaData;
+        deferred.resolve(regionData);
+    });
+
+    return deferred.promise;
+}
+
+var fetchRegionList = function (req, res) {
+    var contractRegionModel;
+
+    models = req.models;
+    contractRegionModel = models.contract_region;
+
+    contractRegionModel.getRegionList(null, function(err, regionData) {
+        var regionData = {region: regionData};
+
+        getArea(regionData).then(getExistArea).then(function(regionData) {
+            res.render("dictionary/region", {regionList: regionData, userinfo: JSON.parse(req.session.user)});
+        })
 	});
 }
 

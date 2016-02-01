@@ -10,6 +10,8 @@ var setup = function(db, cb) {
     require("./contractType")(orm, db);
     require("./contractBank")(orm, db);
     require("./region")(orm, db);
+    require("./area")(orm, db);
+    require("./regionArea")(orm, db);
 
     return cb(null, db);
 }
