@@ -9,11 +9,10 @@ var fetchContractTypeList = function (req, res, next) {
 
 	contractTypeModel.getContractTypeList(params, function(err, data) {
 		if(async) {
-			res.json({contractList: data});
-		}else
-			console.log(123123123);
-			console.log(data);
-		//res.render("dictionary/firstPartyList", {firstPartyList: data, userinfo: JSON.parse(req.session.user)});
+			res.json({contractTypeList: data});
+		}else {
+            res.render("dictionary/contractType", {contractTypeList: data, userinfo: JSON.parse(req.session.user)});
+        }
 	});
 }
 

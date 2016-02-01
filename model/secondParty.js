@@ -1,28 +1,12 @@
-var utils = require("../helper/utils");
-var qs = require("querystring");
-var when = require("when");
-
-exports.get = function(data) {
-	var deferred = when.defer();
-	var options = {
-		method: "GET",
-		path: "/contract/second-party/index"
-	};
-
-    oData = qs.stringify(data);
-	utils.sendRequest(oData, options, function(response) {
-		var chunk = "";
-
-        response.on("data", function(data) {
-            chunk += data;
-        });
-
-        response.on("end", function() {
-            var oChunk = JSON.parse(chunk);
-
-            deferred.resolve(oChunk);
-		});
+module.exports = function(orm, db) {
+	var secondParty = db.define("contract_second_party", {
+		id: {type: "serial", key: true},
+		second_party_name: String
 	});
 
-	return deferred.promise;
+	secondParty.getSecondPartyList = function(params, callback) {
+		secondParty.find(function(err, resultData) {
+			callback(null, resultData);
+		});
+	}
 }

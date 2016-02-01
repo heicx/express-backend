@@ -9,7 +9,7 @@ var fetchFirstPartyList = function (req, res, next) {
 
 	firstPartyModel.getFirstPartyList(params, function(err, data) {
 		if(async) {
-			res.json({contractList: data});
+			res.json({firstPartyList: data});
 		}else
 			res.render("dictionary/firstPartyList", {firstPartyList: data, userinfo: JSON.parse(req.session.user)});
 	});

@@ -6,7 +6,7 @@ module.exports = function(orm, db) {
 
 	contractType.getContractTypeList = function(params, callback) {
 		contractType.find(function(err, resultData) {
-			console.log(resultData);
+			callback(null, resultData);
 		});
 	}
 }

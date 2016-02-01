@@ -54,35 +54,19 @@ var login = require("./routes/login");
 //var user = require("./routes/user");
 var contract = require("./routes/contract");
 var firstParty = require("./routes/firstParty");
+var secondParty = require("./routes/secondParty");
 var contractType = require("./routes/contractType");
+var contractBank = require("./routes/contractBank");
+var region = require("./routes/region");
 
-/**
- * 首页定位
- */
-//app.get("/", login.isLogin, function(req, res, next) {
-//    res.redirect("/contract/list");
-//});
-//
 app.use("/", login.routes);
 app.use("/contract", contract);
 app.use("/dictionary/firstParty", firstParty);
+app.use("/dictionary/secondParty", secondParty);
+app.use("/dictionary/contractType", contractType);
+app.use("/dictionary/contractBank", contractBank);
+app.use("/dictionary/region", region);
 
-app.use("/dictionary/contractType/", contractType);
-
-
-//
-///**
-// * 登陆
-// */
-//app.get("/login", function(req, res, next) {
-//    if(!req.session || !req.session.userinfo) {
-//        res.render("login");
-//    }else {
-//        res.redirect("/contract/list");
-//    }
-//});
-
-//app.post("/login", login.checkUser);
 app.get("*", function(req, res, next) {
     res.status(404).end("404");
 });

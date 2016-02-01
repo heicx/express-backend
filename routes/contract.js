@@ -10,8 +10,9 @@ var fetchContractList = function (req, res, next) {
 	contractModel.getContractInfo(params, function(err, data) {
 		if(async) {
 			res.json({contractList: data});
-		}else
-			res.render("contract/contractList", {contractList: data, userinfo: JSON.parse(req.session.user)});
+		}else {
+            res.render("contract/contractList", {contractList: data, userinfo: JSON.parse(req.session.user)});
+        }
 	});
 }
 

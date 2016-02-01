@@ -1,0 +1,38 @@
+extends ../frame
+
+block content
+	div.html.ui.top.aligned.segment
+		div.ui.breadcrumb
+			a.section 字典管理
+			i.right.chevron.icon.divider
+			div.active.section 入账银行管理
+	div.ui.grid.aligned.segment
+		div.ten.wide.column.centered
+			table.ui.grey.compact.selectable.celled.striped.table
+				thead
+					tr.center.aligned
+						th 银行名称
+				tbody
+					each list, i in contractBankList
+						tr.center.aligned
+							td #{list.bank_name}
+				tfoot
+					tr
+						th(colspan="6")
+							div#addUserBtn.ui.right.floated.small.primary.labeled.icon.button 添加银行
+								i.plus.icon
+				div#firstPartyModal.ui.modal
+					div.header 添加银行
+					i.close.icon
+					div.content
+						div.ui.segment.small.form
+							div.field
+								label 银行名称
+								input(type="text", placeholder="银行名称")
+							div.field
+								button.ui.primary.button 确定
+							
+	script.
+		require(["/app/config.js"], function() {
+			require(["/app/user/userList.js"]);
+		});

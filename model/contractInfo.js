@@ -57,8 +57,7 @@ module.exports = function(orm, db) {
 					+ "LEFT JOIN contract_type d ON a.contract_type = d.id "
 					+ "LEFT JOIN contract_invoice e ON a.contract_number = e.id "
 					+ "LEFT JOIN contract_region f ON b.region_id = f.id "
-					+ "LEFT JOIN contract_region_area g ON f.id = g.region_id "
-					+ "LEFT JOIN area h ON g.area_id = h.id "
+					+ "LEFT JOIN area h ON b.province_id = h.id "
 					+ "LEFT JOIN area i ON b.city_id = i.id "
 					+ strWhere
 					+ "GROUP BY a.contract_number LIMIT ?,?";
