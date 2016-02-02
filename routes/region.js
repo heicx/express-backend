@@ -63,7 +63,7 @@ var addRegion = function(req, res) {
         regionName: req.body.regionName
     };
 
-    //res.status(404).end();
+    res.status(404).end();
     regionModel = regionModel || req.models.contract_region;
     regionModel.addRegion(params, function(err, message) {
         console.log(message);
