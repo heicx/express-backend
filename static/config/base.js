@@ -3,7 +3,9 @@ define(["jquery"], function($) {
         host: "http://" + window.location.host,
         address: {
             contractList: "/contract/list",
-            region: "/dictionary/region/list"
+            region: "/dictionary/region/list",
+            addRegion: "/dictionary/region/add",
+            editRegion: "/dictionary/region/edit"
         }
     }
 
@@ -11,13 +13,16 @@ define(["jquery"], function($) {
         getData: function(api, params, async, successCallback, errorCallback) {
             var strTemp = "", __url = "";
 
-            for(var i in params) {
-                if(params[i] === "")
-                    continue;
-                else {
-                    strTemp += "&" + i + "=" + params[i];
+            if(params) {
+                for(var i in params) {
+                    if(params[i] === "")
+                        continue;
+                    else {
+                        strTemp += "&" + i + "=" + params[i];
+                    }
                 }
             }
+
             __url = config.host + api + "?async=true" + strTemp;
 
             $.ajax({
@@ -34,7 +39,7 @@ define(["jquery"], function($) {
                 }
             })
         },
-        postData: function(api, args, async, successCallback, errorCallback) {
+        postData: function(api, params, async, successCallback, errorCallback) {
             var __url = config.host + api;
 
             $.ajax({
@@ -43,7 +48,7 @@ define(["jquery"], function($) {
                 async: async,
                 url: __url,
                 dataType: "json",
-                data: args,
+                data: params,
                 success: function(returnData) {
                     successCallback(returnData);
                 },

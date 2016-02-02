@@ -2,8 +2,13 @@ var express = require("express");
 var router = express.Router();
 
 var isLogin = function(req, res, next) {
+    var async = req.query.async || false;
+
 	if(!req.session || !req.session.user) {
-		res.redirect("/login");
+        if(async)
+            res.json({message: "未登录"});
+        else
+            res.redirect("/login");
     }else {
     	next();
     }

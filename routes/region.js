@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var login = require("./login");
 var when = require("when");
+var regionModel, regionAreaModel;
 
 var getArea = function(req, cb) {
     var areaModel = req.models.area;
@@ -13,9 +14,9 @@ var getArea = function(req, cb) {
 
 var getExistArea = function(req) {
     var deferred = when.defer();
-    var regionAreaModel = req.models.contract_region_area;
     var params = req.query;
 
+    regionAreaModel = regionAreaModel || req.models.contract_region_area;
     regionAreaModel.getExistAreaId(params, function(err, existAreaData) {
         var arrExist = [];
 
@@ -32,9 +33,9 @@ var getExistArea = function(req) {
 var fetchRegionList = function (req, res) {
     var async = req.query.async || false;
     var params = req.query;
-    var contractRegionModel = req.models.contract_region;
 
-    contractRegionModel.getRegionList(params, function(err, regionData) {
+    regionModel = regionModel || req.models.contract_region;
+    regionModel.getRegionList(params, function(err, regionData) {
         var promiseData = {region: regionData};
 
         getArea(req, function(areaData) {
@@ -53,6 +54,26 @@ var fetchRegionList = function (req, res) {
 	});
 }
 
-router.get("/list", login.islogin, fetchRegionList);
+var editRegion = function() {
+
+}
+
+var addRegion = function(req, res) {
+    var params = {
+        regionName: req.body.regionName
+    };
+
+    res.status(404).end();
+    regionModel = regionModel || req.models.contract_region;
+    regionModel.addRegion(params, function(err, message) {
+        console.log(message);
+        // 成功 再insert另一张表
+    })
+}
+
+router.use(login.islogin);
+router.get("/list", fetchRegionList);
+router.post("/add", addRegion);
+//router.post("/edit", editRegion);
 
 module.exports = router;

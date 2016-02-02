@@ -35,4 +35,14 @@ module.exports = function(orm, db) {
             }
 		});
 	}
+
+    region.addRegion = function(params, callback) {
+        if(params.length > 0) {
+            region.create(params, function(err, items) {
+                console.log(items);
+            });
+        }else {
+            callback(null, {stauts: false, message: "大区名称不能为空"});
+        }
+    }
 }
