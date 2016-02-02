@@ -26,26 +26,26 @@ block content
                             div#addRegionBtn.ui.right.floated.small.primary.labeled.icon.button 添加大区
                                 i.plus.icon
                 div#regionModal.ui.modal
-                    div.header 添加大区
+                    div.header 大区选择
                     i.close.icon
                     div.content
                         div.ui.segment.small.form
                             div.field
                                 label 大区名称
-                                input(type="text", placeholder="大区名称")
+                                input(type="text", id="regionName", placeholder="大区名称")
                             div.ui.horizontal.divider 请选择大区内包含的省份
-                            div.ui.four.column.left.aligned.stackable.grid.segment
+                            div.ui.four.column.left.aligned.stackable.grid.segment#regionItems
                                 each area, j in regionList.allArea
                                     - var arrExistAreaId = regionList.existArea;
                                         div.column
                                             div.ui.checked.checkbox
-                                                if (j in arrExistAreaId)
+                                                if (arrExistAreaId.indexOf(area.id) > -1)
                                                     input(type="checkbox", checked, disabled)
                                                 else
                                                     input(type="checkbox")
                                                 label #{area.area_name}
                             div.field
-                                button.ui.primary.button 确定
+                                button.ui.primary.button#confirmRegionBtn 确定
     script.
         require(["/app/config.js"], function () {
             require(["/app/dictionary/region.js"]);
