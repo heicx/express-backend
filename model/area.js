@@ -7,8 +7,8 @@ module.exports = function(orm, db) {
 	});
 
     area.getAllArea = function(params, callback) {
-        area.find({parentid: 0, id: orm.gt(0)}, function(err, resultData) {
-            callback(null, resultData);
+        area.find({parentid: 0, id: orm.gt(0)}, function(err, areaData) {
+            callback(err, areaData);
 		});
 	}
 }

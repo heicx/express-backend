@@ -1,13 +1,17 @@
 define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
     $(function() {
+
+        /**
+         * 渲染模块
+         */
         var render = {
-            regionItemsList: function(resultData, cb) {     /** 渲染大区复选项,禁用已选项 **/
-                var arrExistArea = resultData.existArea;
-                var oAllArea = resultData.allArea;
+            regionItemsList: function(res, cb) {     /** 渲染大区复选项,禁用已选项 **/
+                var arrExistArea = res.data.existArea;
+                var oAllArea = res.data.allArea;
                 var strJoint = "", strProperty = "", _strProperty = "", j = 0;
 
-                if(resultData["_dataType"] === "edit") {
-                    for(var regionName in resultData.region) {
+                if(res["_dataType"] === "edit") {
+                    for(var regionName in res.data.region) {
                         strProperty = "checked";
                         $("#regionName").val(regionName);
                     }
@@ -27,9 +31,23 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
             },
             regionList: function() {        /** 渲染大区列表 **/
 
+            },
+            modalMsg: function(msg) {       /** 控制弹出层的提示信息的显示与隐藏 **/
+                var _msg = msg || "";
+
+                $("#modalMsg p").html(_msg);
+
+                if(_msg === "") {
+                    $('#modalMsg').removeClass("hidden").transition('fade');
+                }else {
+                    $('#modalMsg').closest(".hidden").transition('fade');
+                }
             }
         }
 
+        /**
+         * 验证模块
+         */
         var validate = {
             regionName : function(name) {
                 if(name === "")
@@ -49,11 +67,11 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
          * 打开添加大区复选项界面
          */
         $("#addRegionBtn").on("click", function() {
-            base.common.getData(base.api.region, null, false, function(resultData) {
+            base.common.getData(base.api.allArea, null, false, function(resultData) {
                 render.regionItemsList(resultData, function(str) {
                     $("#regionItems").html(str);
                     $("#confirmRegionBtn").attr("data-type", "add").html("添加");
-                    $('#regionModal').modal('show');
+                    $('#regionModal').modal("setting", "transition", "fade down").modal("show");
                 });
             }, function(err) {});
         });
@@ -66,13 +84,14 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                 region_id: $(this).data("regionid")
             }
 
-            base.common.getData(base.api.region, params, false, function(resultData) {
+            // 获取所有省份
+            base.common.getData(base.api.allArea, params, false, function(resultData) {
                 resultData["_dataType"] = "edit";
 
                 render.regionItemsList(resultData, function(str) {
                     $("#regionItems").html(str);
                     $("#confirmRegionBtn").attr("data-type", "edit").html("更新");
-                    $('#regionModal').modal('show');
+                    $('#regionModal').modal("setting", "transition", "fade down").modal("show");
                 });
             }, function(err) {});
         });
@@ -90,6 +109,7 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                 arrAreaId.push($checkedArea.eq(i).data("id"));
             }
 
+            // 对提交信息进行验证
             oCheckRegionNameRes = validate.regionName(regionName);
             oCheckAreaIdRes = validate.areaId(arrAreaId);
 
@@ -98,21 +118,30 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                 params["areaIds"] = arrAreaId;
 
                 if(type === "add") {
+                    // 添加大区
                     base.common.postData(base.api.addRegion, params, false, function(resultData) {
-                        console.log(resultData);
+                        if(resultData.status) {
+                            console.log(resultData);
+                        }else {
+                            render.modalMsg(resultData.message);
+                        }
                     }, function(err) {});
                 }else if(type === "edit") {
+                    // 编辑大区
                     base.common.postData(base.api.editRegion, params, false, function(resultData) {
-                        render.regionItemsList(resultData, function(str) {
-                            $("#regionItems").html(str);
-                            $("#confirmRegionBtn").attr("data-type", "edit").html("更新");
-                            $('#regionModal').modal('show');
-                        });
+
                     }, function(err) {});
                 }
             }else {
-                alert(oCheckRegionNameRes.message || oCheckAreaIdRes.message);
+                render.modalMsg(oCheckRegionNameRes.message || oCheckAreaIdRes.message);
             }
         });
+
+        /**
+         * 监听弹出层的关闭事件
+         */
+        $('#regionModal').modal("setting", "onHide", function() {
+            render.modalMsg();
+        })
     });
 });

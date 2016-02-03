@@ -2,17 +2,17 @@ var express = require("express");
 var router = express.Router();
 var login = require("./login");
 var when = require("when");
-var regionModel, regionAreaModel;
+var regionModel, regionAreaModel, areaModel;
 
-var getArea = function(req, cb) {
-    var areaModel = req.models.area;
+var fetchAllArea = function(req, cb) {
+    areaModel = areaModel || req.models.area;
 
     areaModel.getAllArea(null, function(err, areaData) {
         cb(areaData);
     });
 }
 
-var getExistArea = function(req) {
+var fetchExistArea = function(req) {
     var deferred = when.defer();
     var params = req.query;
 
@@ -21,7 +21,7 @@ var getExistArea = function(req) {
         var arrExist = [];
 
         for(var i=0; i < existAreaData.length; i++) {
-            arrExist.push(existAreaData[i].id);
+            arrExist.push(existAreaData[i].area_id);
         }
 
         deferred.resolve(arrExist);
@@ -30,27 +30,33 @@ var getExistArea = function(req) {
     return deferred.promise;
 }
 
-var fetchRegionList = function (req, res) {
+var fetchRegionAreaList = function (req, res) {
     var async = req.query.async || false;
     var params = req.query;
 
     regionModel = regionModel || req.models.contract_region;
-    regionModel.getRegionList(params, function(err, regionData) {
-        var promiseData = {region: regionData};
+    regionModel.getRegionList(params, function(err, region) {
+        var promiseData = {};
 
-        getArea(req, function(areaData) {
-            promiseData.allArea = areaData;
+        if(region.status) {
+            promiseData.region = region.data;
 
-            getExistArea(req).then(function(existData) {
-                promiseData.existArea = existData;
+            fetchAllArea(req, function(areaData) {
+                promiseData.allArea = areaData;
 
-                if(async) {
-                    res.json(promiseData);
-                }else {
-                    res.render("dictionary/region", {regionList: promiseData, userinfo: JSON.parse(req.session.user)});
-                }
+                fetchExistArea(req).then(function(existData) {
+                    promiseData.existArea = existData;
+
+                    if(async) {
+                        res.json({status: true, data: promiseData});
+                    }else {
+                        res.render("dictionary/region", {regionList: promiseData, userinfo: JSON.parse(req.session.user)});
+                    }
+                });
             });
-        });
+        }else {
+            res.json(region);
+        }
 	});
 }
 
@@ -60,19 +66,49 @@ var editRegion = function() {
 
 var addRegion = function(req, res) {
     var params = {
-        regionName: req.body.regionName
+        region_name: req.body.regionName
     };
 
-    res.status(404).end();
     regionModel = regionModel || req.models.contract_region;
-    regionModel.addRegion(params, function(err, message) {
-        console.log(message);
-        // 成功 再insert另一张表
+    regionAreaModel = regionAreaModel || req.models.contract_region_area;
+
+    // 添加大区
+    regionModel.addRegion(params, function(err, region) {
+        if(region.status && region.data.id) {
+            var i = 0, params = [];
+
+            for(; i < req.body.areaIds.length; i++) {
+                params.push({
+                    "region_id": region.data.id,
+                    "area_id": req.body.areaIds[i]
+                });
+            }
+
+            // 添加大区下的所选地区
+            regionAreaModel.addRegionArea(params, function(err, regionArea) {
+                if(err) console.log(err);
+
+                if(regionArea.data.length > 0) {
+                    var _params = {
+                        region_id: regionArea.data[0].region_id
+                    }
+
+                    // 获取已添加的大区及地区
+                    regionModel.getRegionList(_params, function(err, region) {
+                        res.json({status: true, data: region});
+                    });
+                }else {
+                    res.json({status: false, message: "添加大区下的所选失败"});
+                }
+            });
+        }else {
+            res.json(region).end();
+        }
     })
 }
 
 router.use(login.islogin);
-router.get("/list", fetchRegionList);
+router.get("/list", fetchRegionAreaList);
 router.post("/add", addRegion);
 //router.post("/edit", editRegion);
 

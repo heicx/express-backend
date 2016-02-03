@@ -6,7 +6,7 @@ module.exports = function(orm, db) {
 
     contractBank.getContractBankList = function(params, callback) {
         contractBank.find(function(err, resultData) {
-			callback(null, resultData);
+			callback(err, resultData);
 		});
 	}
 }

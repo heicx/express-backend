@@ -44,7 +44,9 @@ block content
                                                 else
                                                     input(type="checkbox")
                                                 label #{area.area_name}
-                            div.field
+                            div.ui.field.segment.basic.center.aligned
+                                div.ui.floating.hidden.message#modalMsg
+                                    p
                                 button.ui.primary.button#confirmRegionBtn 确定
     script.
         require(["/app/config.js"], function () {

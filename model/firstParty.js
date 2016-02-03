@@ -15,7 +15,7 @@ module.exports = function(orm, db) {
 				+ "left join area d on d.id = c.area_id";
 
 		db.driver.execQuery(sql, function(err, resultData) {
-			callback(null, resultData);
+			callback(err, resultData);
 		});
 	}
 }

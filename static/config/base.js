@@ -3,7 +3,7 @@ define(["jquery"], function($) {
         host: "http://" + window.location.host,
         address: {
             contractList: "/contract/list",
-            region: "/dictionary/region/list",
+            allArea: "/dictionary/region/list",
             addRegion: "/dictionary/region/add",
             editRegion: "/dictionary/region/edit"
         }

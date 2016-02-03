@@ -6,7 +6,7 @@ module.exports = function(orm, db) {
 
 	secondParty.getSecondPartyList = function(params, callback) {
 		secondParty.find(function(err, resultData) {
-			callback(null, resultData);
+			callback(err, resultData);
 		});
 	}
 }

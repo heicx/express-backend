@@ -66,7 +66,7 @@ module.exports = function(orm, db) {
 					container.list = resultData;
 					container.pagination = utils.paginationMath(pageNo, container.totalPageNum);
 					//container.pagination = utils.paginationMath(2,11);
-					callback(null, container);
+					callback(err, container);
 				});
 			}
 		});

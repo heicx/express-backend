@@ -13,9 +13,7 @@ module.exports = function(orm, db) {
 
 	User.getUser = function(params, callback) {
 		User.find({user_name: params.name, user_password: params.password}, function(err, userData) {
-			if(err) console.log(err);
-
-			callback(null, userData);
+			callback(err, userData);
 		})
 	}
 }
