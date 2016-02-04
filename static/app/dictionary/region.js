@@ -60,6 +60,22 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                     return {status: false, message: "请选择大区所包含的省份"};
                 else
                     return {status: true};
+            },
+            isModify: function(originData, modifyData) {
+                if(originData.regionName === modifyData.regionName && this._sort(originData.areaIds) === modifyData.areaIds.toString())
+                    return {status: false, message: "数据没有任何变化哦"};
+                else
+                    return {status: true};
+            },
+            _sort: function(str) {
+                if(typeof str === "string" && str !== "") {
+                    return str.split(",").sort(function(a, b) {
+                        var _a = parseInt(a), _b = parseInt(b);
+                        return _a > _b ? 1 : -1;
+                    }).toString();
+                }else {
+                    return "";
+                }
             }
         }
 
@@ -90,7 +106,13 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
 
                 render.regionItemsList(resultData, function(str) {
                     $("#regionItems").html(str);
-                    $("#confirmRegionBtn").attr({"data-type": "edit", "data-region": params.region_id}).html("更新");
+
+                    $("#confirmRegionBtn").attr({
+                        "data-type": "edit",
+                        "data-region": params.region_id,
+                        "data-area": resultData.data.existArea,
+                        "region-name": $("#regionName").val()
+                    }).html("更新");
                     $('#regionModal').modal("setting", "transition", "fade down").modal("show");
                 });
             }, function(err) {});
@@ -129,8 +151,8 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                                     areaItem += newRegion[regionName].area_name[i] + ",";
                                 }
 
-                                regionItem += "<tr class='center aligned'><td>" + regionName + "</td><td>"
-                                            + areaItem.substring(0, areaItem.length -1)
+                                regionItem += "<tr class='center aligned' data-region='" + newRegion[regionName].region_id + "'><td>"
+                                            + regionName + "</td><td>" + areaItem.substring(0, areaItem.length -1)
                                             + "</td><td><button data-region='" + newRegion[regionName].region_id + "' "
                                             + "class='ui primary aligned button region-edit'>编辑</button></td></tr>";
                             }
@@ -143,11 +165,34 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                     }, function(err) {});
                 }else if(type === "edit") {
                     // 编辑大区
-                    params["regionId"] = $(this).attr("data-region");
+                    var originData = {
+                        regionName: $(this).attr("region-name"),
+                        areaIds: $(this).attr("data-area")
+                    }
+                    var regionModify = validate.isModify(originData, params);
 
-                    base.common.postData(base.api.editRegion, params, false, function(resultData) {
-                        console.log(resultData);
-                    }, function(err) {});
+                    if(regionModify.status) {
+                        params["regionId"] = $(this).attr("data-region");
+                        base.common.postData(base.api.editRegion, params, false, function(resultData) {
+                            if(resultData.status) {
+                                var $regionItem, strRegionName = "", strAreaName = "";
+
+                                for(var name in resultData.data) {
+                                    $regionItem = $("#regionList tr[data-region=" + resultData.data[name].region_id + "]");
+
+                                    strRegionName = name;
+                                    strAreaName = resultData.data[name].area_name.join(",");
+                                }
+
+                                $regionItem.find("td").eq(0).html(strRegionName);
+                                $regionItem.find("td").eq(1).html(strAreaName);
+
+                                $('#regionModal').modal("setting", "transition", "fade down").modal("hide");
+                            }
+                        }, function(err) {});
+                    }else {
+                        render.modalMsg(regionModify.message);
+                    }
                 }
             }else {
                 render.modalMsg(oCheckRegionNameRes.message || oCheckAreaIdRes.message);

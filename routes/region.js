@@ -53,25 +53,21 @@ var fetchRegionAreaList = function (req, res) {
     regionModel.getRegionList(params, function(err, region) {
         var promiseData = {};
 
-        if(region.status) {
-            promiseData.region = region.data;
+        promiseData.region = region.data || [];
 
-            fetchAllArea(req, function(areaData) {
-                promiseData.allArea = areaData;
+        fetchAllArea(req, function(areaData) {
+            promiseData.allArea = areaData;
 
-                fetchExistArea(req).then(function(existData) {
-                    promiseData.existArea = existData;
+            fetchExistArea(req).then(function(existData) {
+                promiseData.existArea = existData;
 
-                    if(async) {
-                        res.json({status: true, data: promiseData});
-                    }else {
-                        res.render("dictionary/region", {regionList: promiseData, userinfo: JSON.parse(req.session.user)});
-                    }
-                });
+                if(async) {
+                    res.json({status: true, data: promiseData});
+                }else {
+                    res.render("dictionary/region", {regionList: promiseData, userinfo: JSON.parse(req.session.user)});
+                }
             });
-        }else {
-            res.json(region);
-        }
+        });
 	});
 }
 
@@ -92,7 +88,13 @@ var editRegion = function(req, res) {
     regionModel.updateRegion(params, function(err, region) {
         if(region.status) {
             regionAreaModel.updateAreaByRegionId(params, function(err, regionArea) {
+                if(regionArea.status) {
+                    regionModel.getRegionList(params, function(err, region) {
+                        res.json(region);
+                    });
+                }else {
                     res.json(regionArea);
+                }
             });
         }
     });

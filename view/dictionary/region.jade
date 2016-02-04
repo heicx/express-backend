@@ -16,7 +16,7 @@ block content
                 tbody#regionList
                     each list, i in regionList.region
                         - var strAreaJoint = "";
-                        tr.center.aligned
+                        tr.center.aligned(data-region="#{list.region_id}")
                             td #{i}
                             each name, j in list.area_name
                                 - strAreaJoint += name + ",";

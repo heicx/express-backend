@@ -68,30 +68,37 @@ module.exports = function(orm, db) {
 
 
     /**
-     *
+     * 更新大区
      * @param params{regionId: 大区ID, regionName: 大区名称, areaIds: 大区所包含的地区id}
      * @param callback
      */
     region.updateRegion = function(params, callback) {
-        // 查找要编辑更新的大区
-        region.find({id: params.region_id}, function(err, existData) {
-            var promiseData = {
-                status: false,
-                message: "大区名称修改失败"
-            }
-
+        // 排除当前大区id,同时查询并校验大区名称是否已经存在
+        region.find({region_name: params.regionName, id: orm.ne(params.regionId)}, function(err, existData) {
             if(existData.length > 0) {
-                // 对大区名称进行更新修改
-                existData[0].save({region_name: params.region_name}, function(err) {
-                    if(!err) {
-                        promiseData.status = true;
-                        promiseData.message = "大区名称更新成功";
+                callback(err, {status: false, message: "大区名称已存在"});
+            }else {
+                // 查找要编辑更新的大区
+                region.find({id: params.region_id}, function(err, existData) {
+                    var promiseData = {
+                        status: false,
+                        message: "大区名称修改失败"
                     }
 
-                    callback(err, promiseData);
+                    if(existData.length > 0) {
+                        // 对大区名称进行更新修改
+                        existData[0].save({region_name: params.region_name}, function(err) {
+                            if(!err) {
+                                promiseData.status = true;
+                                promiseData.message = "大区名称更新成功";
+                            }
+
+                            callback(err, promiseData);
+                        });
+                    }else {
+                        callback(err, promiseData);
+                    }
                 });
-            }else {
-                callback(err, promiseData);
             }
         });
     }

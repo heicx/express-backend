@@ -73,8 +73,9 @@ module.exports = function(orm, db) {
                 }else {
                     callback(null, {status: false, message: "貌似没有新增地区"});
                 }
+            }else {
+                callback(err, {status: false, message: "没有此大区信息"});
             }
-                //callback(null, {status: true, message: "删除成功"});
         });
     }
 }
