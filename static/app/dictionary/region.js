@@ -79,9 +79,9 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
         /**
          * 打开编辑大区复选项界面
          */
-        $(".region-edit").on("click", function() {
+        $("#regionList").on("click", ".region-edit", function() {
             var params = {
-                region_id: $(this).data("regionid")
+                region_id: $(this).attr("data-region")
             }
 
             // 获取所有省份
@@ -90,7 +90,7 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
 
                 render.regionItemsList(resultData, function(str) {
                     $("#regionItems").html(str);
-                    $("#confirmRegionBtn").attr("data-type", "edit").html("更新");
+                    $("#confirmRegionBtn").attr({"data-type": "edit", "data-region": params.region_id}).html("更新");
                     $('#regionModal').modal("setting", "transition", "fade down").modal("show");
                 });
             }, function(err) {});
@@ -101,12 +101,12 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
          */
         $("#confirmRegionBtn").on("click", function() {
             var params = {}, i = 0, arrAreaId = [], oCheckAreaIdRes, oCheckRegionNameRes;
-            var type = $(this).data("type");
+            var type = $(this).attr("data-type");
             var regionName = $("#regionName").val();
             var $checkedArea = $("#regionItems").find(".checkbox input:checked").not("input:disabled");
 
             for(; i < $checkedArea.length; i++) {
-                arrAreaId.push($checkedArea.eq(i).data("id"));
+                arrAreaId.push($checkedArea.eq(i).attr("data-id"));
             }
 
             // 对提交信息进行验证
@@ -121,15 +121,32 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                     // 添加大区
                     base.common.postData(base.api.addRegion, params, false, function(resultData) {
                         if(resultData.status) {
-                            console.log(resultData);
+                            var regionItem = "", i = 0, areaItem = "";
+                            var newRegion = resultData.data;
+
+                            for(regionName in newRegion) {
+                                for(; i < newRegion[regionName].area_name.length; i++) {
+                                    areaItem += newRegion[regionName].area_name[i] + ",";
+                                }
+
+                                regionItem += "<tr class='center aligned'><td>" + regionName + "</td><td>"
+                                            + areaItem.substring(0, areaItem.length -1)
+                                            + "</td><td><button data-region='" + newRegion[regionName].region_id + "' "
+                                            + "class='ui primary aligned button region-edit'>编辑</button></td></tr>";
+                            }
+
+                            $('#regionModal').modal("setting", "transition", "fade down").modal("hide");
+                            $("#regionList").append(regionItem);
                         }else {
                             render.modalMsg(resultData.message);
                         }
                     }, function(err) {});
                 }else if(type === "edit") {
                     // 编辑大区
-                    base.common.postData(base.api.editRegion, params, false, function(resultData) {
+                    params["regionId"] = $(this).attr("data-region");
 
+                    base.common.postData(base.api.editRegion, params, false, function(resultData) {
+                        console.log(resultData);
                     }, function(err) {});
                 }
             }else {
@@ -142,6 +159,6 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
          */
         $('#regionModal').modal("setting", "onHide", function() {
             render.modalMsg();
-        })
+        });
     });
 });

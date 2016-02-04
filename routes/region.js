@@ -4,6 +4,11 @@ var login = require("./login");
 var when = require("when");
 var regionModel, regionAreaModel, areaModel;
 
+/**
+ * 获取所有地区
+ * @param req
+ * @param cb
+ */
 var fetchAllArea = function(req, cb) {
     areaModel = areaModel || req.models.area;
 
@@ -12,6 +17,11 @@ var fetchAllArea = function(req, cb) {
     });
 }
 
+/**
+ * 根据地区id获取已存在的地区
+ * @param req
+ * @returns {Promise}
+ */
 var fetchExistArea = function(req) {
     var deferred = when.defer();
     var params = req.query;
@@ -30,6 +40,11 @@ var fetchExistArea = function(req) {
     return deferred.promise;
 }
 
+/**
+ * 获取大区及地区相关数据
+ * @param req
+ * @param res
+ */
 var fetchRegionAreaList = function (req, res) {
     var async = req.query.async || false;
     var params = req.query;
@@ -60,10 +75,35 @@ var fetchRegionAreaList = function (req, res) {
 	});
 }
 
-var editRegion = function() {
+/**
+ * 编辑大区
+ * @param req
+ * @param res
+ */
+var editRegion = function(req, res) {
+    var params = {
+        region_id: req.body.regionId,
+        region_name: req.body.regionName,
+        area_ids: req.body.areaIds
+    }
+
+    regionAreaModel = regionAreaModel || req.models.contract_region_area;
+    regionModel = regionModel || req.models.contract_region;
+    regionModel.updateRegion(params, function(err, region) {
+        if(region.status) {
+            regionAreaModel.updateAreaByRegionId(params, function(err, regionArea) {
+                    res.json(regionArea);
+            });
+        }
+    });
 
 }
 
+/**
+ * 添加大区
+ * @param req
+ * @param res
+ */
 var addRegion = function(req, res) {
     var params = {
         region_name: req.body.regionName
@@ -95,7 +135,7 @@ var addRegion = function(req, res) {
 
                     // 获取已添加的大区及地区
                     regionModel.getRegionList(_params, function(err, region) {
-                        res.json({status: true, data: region});
+                        res.json(region);
                     });
                 }else {
                     res.json({status: false, message: "添加大区下的所选失败"});
@@ -110,6 +150,6 @@ var addRegion = function(req, res) {
 router.use(login.islogin);
 router.get("/list", fetchRegionAreaList);
 router.post("/add", addRegion);
-//router.post("/edit", editRegion);
+router.post("/edit", editRegion);
 
 module.exports = router;

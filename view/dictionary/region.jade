@@ -13,13 +13,16 @@ block content
                         th 大区名称
                         th 对应省份
                         th 操作
-                tbody
+                tbody#regionList
                     each list, i in regionList.region
+                        - var strAreaJoint = "";
                         tr.center.aligned
                             td #{i}
-                            td #{list.area_name}
+                            each name, j in list.area_name
+                                - strAreaJoint += name + ",";
+                            td #{strAreaJoint.substring(0, strAreaJoint.length-1)}
                             td
-                                button.ui.primary.aligned.button.region-edit(data-regionid="#{list.region_id}") 编辑
+                                button.ui.primary.aligned.button.region-edit(data-region="#{list.region_id}") 编辑
                 tfoot
                     tr
                         th(colspan="6")
@@ -35,15 +38,6 @@ block content
                                 input(type="text", id="regionName", placeholder="大区名称")
                             div.ui.horizontal.divider 请选择大区内包含的省份
                             div.ui.four.column.left.aligned.stackable.grid.segment#regionItems
-                                each area, j in regionList.allArea
-                                    - var arrExistAreaId = regionList.existArea;
-                                        div.column
-                                            div.ui.checked.checkbox
-                                                if (arrExistAreaId.indexOf(area.id) > -1)
-                                                    input(type="checkbox", checked, disabled)
-                                                else
-                                                    input(type="checkbox")
-                                                label #{area.area_name}
                             div.ui.field.segment.basic.center.aligned
                                 div.ui.floating.hidden.message#modalMsg
                                     p
