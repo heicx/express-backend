@@ -58,6 +58,7 @@ var secondParty = require("./routes/secondParty");
 var contractType = require("./routes/contractType");
 var contractBank = require("./routes/contractBank");
 var region = require("./routes/region");
+var area = require("./routes/area")
 
 app.use("/", login.routes);
 app.use("/contract", contract);
@@ -66,6 +67,7 @@ app.use("/dictionary/secondParty", secondParty);
 app.use("/dictionary/contractType", contractType);
 app.use("/dictionary/contractBank", contractBank);
 app.use("/dictionary/region", region);
+app.use("/area", area);
 
 app.get("*", function(req, res, next) {
     res.status(404).end("404");
