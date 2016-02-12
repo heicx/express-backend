@@ -1,36 +1,24 @@
-define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
+define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($, base) {
     $(function() {
 
         /**
          * 渲染模块
          */
         var render = {
-            regionItemsList: function(res, cb) {     /** 渲染大区复选项,禁用已选项 **/
-                var arrExistArea = res.data.existArea;
-                var oAllArea = res.data.allArea;
-                var strJoint = "", strProperty = "", _strProperty = "", j = 0;
+            firstPartyList: function(res, cb) {     /** 渲染甲方列表 **/
+                var strJoint = "";
 
-                if(res["_dataType"] === "edit") {
-                    for(var regionName in res.data.region) {
-                        strProperty = "checked";
-                        $("#regionName").val(regionName);
+                if(res.status) {
+                    var i = 0;
+
+                    for(; i < res.data.length; i++) {
+                        strJoint += "<tr class='center aligned'><td>" + res.data[i].first_party_name
+                                  + "</td><td>" + res.data[i].region_name + "-" + res.data[i].area_name
+                                  + "-" + res.data[i].city_name + "</td></tr>";
                     }
-                }else {
-                    strProperty = "checked disabled";
-                    $("#regionName").val("");
-                }
-
-                for(; j < oAllArea.length; j++) {
-                    _strProperty = (arrExistArea.indexOf(oAllArea[j].id) > -1) ? strProperty : "";
-
-                    strJoint += "<div class='column'><div class='ui checked checkbox'><input type='checkbox' " + _strProperty
-                        +  " data-id='" + oAllArea[j].id + "'><label>" + oAllArea[j].area_name + "</label></div></div>";
                 }
 
                 cb(strJoint);
-            },
-            regionList: function() {        /** 渲染大区列表 **/
-
             },
             modalMsg: function(msg) {       /** 控制弹出层的提示信息的显示与隐藏 **/
                 var _msg = msg || "";
@@ -49,160 +37,150 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
          * 验证模块
          */
         var validate = {
-            regionName : function(name) {
+            firstPartyName : function(name) {
                 if(name === "")
-                    return {status: false, message: "请输入大区名称"};
+                    return {status: false, message: "请输入甲方名称"};
                 else
                     return {status: true};
             },
-            areaId : function(arr) {
-                if(arr.length === 0)
-                    return {status: false, message: "请选择大区所包含的省份"};
-                else
-                    return {status: true};
-            },
-            isModify: function(originData, modifyData) {
-                if(originData.regionName === modifyData.regionName && this._sort(originData.areaIds) === modifyData.areaIds.toString())
-                    return {status: false, message: "数据没有任何变化哦"};
-                else
-                    return {status: true};
-            },
-            _sort: function(str) {
-                if(typeof str === "string" && str !== "") {
-                    return str.split(",").sort(function(a, b) {
-                        var _a = parseInt(a), _b = parseInt(b);
-                        return _a > _b ? 1 : -1;
-                    }).toString();
-                }else {
-                    return "";
+            areaItems: function(areaArr) {
+                var i = 0;
+                var promise = {
+                    status: true
+                }
+
+                if(areaArr.length > 0) {
+                    for(; i < areaArr.length; i++) {
+                        if(!areaArr[i]) {
+                            promise.status = false;
+                            promise.message = "请选择地区";
+                            break;
+                        }
+                    }
+
+                    return promise;
                 }
             }
         }
 
         /**
-         * 打开添加大区复选项界面
+         * 甲方名称查询
          */
-        $("#addRegionBtn").on("click", function() {
-            base.common.getData(base.api.allArea, null, false, function(resultData) {
-                render.regionItemsList(resultData, function(str) {
-                    $("#regionItems").html(str);
-                    $("#confirmRegionBtn").attr("data-type", "add").html("添加");
-                    $('#regionModal').modal("setting", "transition", "fade down").modal("show");
-                });
+        $("#queryBtn").on("click", function() {
+            var params = {};
+            var firstPartyName = $("#firstPartyName").val();
+
+            params["firstPartyName"] = firstPartyName;
+            base.common.getData(base.api.queryFirstParty, params, false, function(resultData) {
+                if(resultData.status) {
+                    render.firstPartyList(resultData, function(str) {
+                        $("#firstPartyList").html(str);
+                    });
+                }
             }, function(err) {});
         });
 
         /**
-         * 打开编辑大区复选项界面
+         * 打开添加甲方
          */
-        $("#regionList").on("click", ".region-edit", function() {
-            var params = {
-                region_id: $(this).attr("data-region")
-            }
-
-            // 获取所有省份
-            base.common.getData(base.api.allArea, params, false, function(resultData) {
-                resultData["_dataType"] = "edit";
-
-                render.regionItemsList(resultData, function(str) {
-                    $("#regionItems").html(str);
-
-                    $("#confirmRegionBtn").attr({
-                        "data-type": "edit",
-                        "data-region": params.region_id,
-                        "data-area": resultData.data.existArea,
-                        "region-name": $("#regionName").val()
-                    }).html("更新");
-                    $('#regionModal').modal("setting", "transition", "fade down").modal("show");
-                });
-            }, function(err) {});
+        $("#addFirstPartyBtn").on("click", function() {
+            $("#firstPartyFullName").val("").focus();
+            $('#firstPartyModal').modal("setting", "transition", "fade down").modal("show");
         });
 
         /**
-         * 大区复选项的提交 or 更新操作
+         * 确认添加甲方
          */
-        $("#confirmRegionBtn").on("click", function() {
-            var params = {}, i = 0, arrAreaId = [], oCheckAreaIdRes, oCheckRegionNameRes;
-            var type = $(this).attr("data-type");
-            var regionName = $("#regionName").val();
-            var $checkedArea = $("#regionItems").find(".checkbox input:checked").not("input:disabled");
-
-            for(; i < $checkedArea.length; i++) {
-                arrAreaId.push($checkedArea.eq(i).attr("data-id"));
-            }
+        $("#confirmFirstPartyBtn").on("click", function() {
+            var params = {}, oFirstPartyNameRes, oAreaRes;
+            var firstPartyName = $("#firstPartyFullName").val();
+            var regionId = $("#regionDropdown option:selected").val();
+            var provinceId = $("#provinceDropdown option:selected").val();
+            var cityId = $("#cityDropdown option:selected").val();
+            var arrArea = [regionId, provinceId, cityId];
 
             // 对提交信息进行验证
-            oCheckRegionNameRes = validate.regionName(regionName);
-            oCheckAreaIdRes = validate.areaId(arrAreaId);
+            oFirstPartyNameRes = validate.firstPartyName(firstPartyName);
+            oAreaRes = validate.areaItems(arrArea);
 
-            if(oCheckRegionNameRes.status && oCheckAreaIdRes.status) {
-                params["regionName"] = regionName;
-                params["areaIds"] = arrAreaId;
+            if(oFirstPartyNameRes.status && oAreaRes.status) {
+                params["firstPartyName"] = firstPartyName;
+                params["regionId"] = regionId;
+                params["provinceId"] = provinceId;
+                params["cityId"] = cityId;
 
-                if(type === "add") {
-                    // 添加大区
-                    base.common.postData(base.api.addRegion, params, false, function(resultData) {
-                        if(resultData.status) {
-                            var regionItem = "", i = 0, areaItem = "";
-                            var newRegion = resultData.data;
+                // 添加甲方
+                base.common.postData(base.api.addFirstParty, params, false, function(res) {
+                    if(res.status) {
+                        var i = 0, firstPartyItem = "";
 
-                            for(regionName in newRegion) {
-                                for(; i < newRegion[regionName].area_name.length; i++) {
-                                    areaItem += newRegion[regionName].area_name[i] + ",";
-                                }
-
-                                regionItem += "<tr class='center aligned' data-region='" + newRegion[regionName].region_id + "'><td>"
-                                            + regionName + "</td><td>" + areaItem.substring(0, areaItem.length -1)
-                                            + "</td><td><button data-region='" + newRegion[regionName].region_id + "' "
-                                            + "class='ui primary aligned button region-edit'>编辑</button></td></tr>";
-                            }
-
-                            $('#regionModal').modal("setting", "transition", "fade down").modal("hide");
-                            $("#regionList").append(regionItem);
-                        }else {
-                            render.modalMsg(resultData.message);
+                        for(; i < res.data.length; i++) {
+                            firstPartyItem += "<tr class='center aligned'><td>" + res.data[i].first_party_name
+                                            + "</td><td>" + res.data[i].region_name + "-" + res.data[i].area_name
+                                            + "-" + res.data[i].city_name + "</td></tr>";
                         }
-                    }, function(err) {});
-                }else if(type === "edit") {
-                    // 编辑大区
-                    var originData = {
-                        regionName: $(this).attr("region-name"),
-                        areaIds: $(this).attr("data-area")
-                    }
-                    var regionModify = validate.isModify(originData, params);
 
-                    if(regionModify.status) {
-                        params["regionId"] = $(this).attr("data-region");
-                        base.common.postData(base.api.editRegion, params, false, function(resultData) {
-                            if(resultData.status) {
-                                var $regionItem, strRegionName = "", strAreaName = "";
-
-                                for(var name in resultData.data) {
-                                    $regionItem = $("#regionList tr[data-region=" + resultData.data[name].region_id + "]");
-
-                                    strRegionName = name;
-                                    strAreaName = resultData.data[name].area_name.join(",");
-                                }
-
-                                $regionItem.find("td").eq(0).html(strRegionName);
-                                $regionItem.find("td").eq(1).html(strAreaName);
-
-                                $('#regionModal').modal("setting", "transition", "fade down").modal("hide");
-                            }
-                        }, function(err) {});
+                        console.log(123123);
+                        $('#firstPartyModal').modal("setting", "transition", "fade down").modal("hide");
+                        $("#firstPartyList").append(firstPartyItem);
                     }else {
-                        render.modalMsg(regionModify.message);
+                        render.modalMsg(res.message);
                     }
-                }
+                }, function(err) {});
             }else {
-                render.modalMsg(oCheckRegionNameRes.message || oCheckAreaIdRes.message);
+                render.modalMsg(oFirstPartyNameRes.message || oAreaRes.message);
             }
+        });
+
+
+        /**
+         * 选择大区
+         */
+        $("#regionDropdown").change(function() {
+            var params = {
+                region_id: $(this).val()
+            }
+
+            base.common.getData(base.api.getProvince, params, false, function(resultData) {
+                var i = 0;
+                var oProvince = resultData.province;
+                var strOptions = "<option value=''>请选择省</option>";
+
+
+                for(; i < oProvince.length; i++) {
+                    strOptions += "<option value='" + oProvince[i].area_id + "'>" + oProvince[i].province_name + "</option>";
+                }
+
+                $("#provinceDropdown").html(strOptions);
+            }, function(err) {});
+        });
+
+        /**
+         * 选择省份
+         */
+        $("#provinceDropdown").change(function() {
+            var params = {
+                area_id: $(this).val()
+            }
+
+            base.common.getData(base.api.getCity, params, false, function(resultData) {
+                var i = 0;
+                var oProvince = resultData.city;
+                var strOptions = "<option value=''>请选择市</option>";
+
+
+                for(; i < oProvince.length; i++) {
+                    strOptions += "<option value='" + oProvince[i].id + "'>" + oProvince[i].city_name + "</option>";
+                }
+
+                $("#cityDropdown").html(strOptions);
+            }, function(err) {});
         });
 
         /**
          * 监听弹出层的关闭事件
          */
-        $('#regionModal').modal("setting", "onHide", function() {
+        $('#firstPartyModal').modal("setting", "onHide", function() {
             render.modalMsg();
         });
     });

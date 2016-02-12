@@ -1,55 +1,63 @@
 extends ../frame
 
 block content
-	div.html.ui.top.aligned.segment
-		div.ui.breadcrumb
-			a.section 字典管理
-			i.right.chevron.icon.divider
-			div.active.section 甲方管理
-	div.ui.segment.grid.aligned.small.form
-		div.ten.wide.column.centered
-			div.inline.fields
-				div.fifteen.wide.field
-					input(type="text", placeholder="甲方名称")
-				div.one.wide.field
-					button.ui.primary.button 查询
-	div.ui.grid.aligned.segment
-		div.ten.wide.column.centered
-			table.ui.grey.compact.selectable.celled.striped.table
-				thead
-					tr.center.aligned
-						th 甲方名称
-						th 地区
-						th 操作
-				tbody
-					each list, i in firstPartyList
-						tr.center.aligned
-							td #{list.first_party_name}
-							td #{list.region_name}
-							td #{list.area_name}
-				tfoot
-					tr
-						th(colspan="6")
-							div#addUserBtn.ui.right.floated.small.primary.labeled.icon.button 添加甲方
-								i.user.icon
-				div#firstPartyModal.ui.modal
-					div.header 添加甲方
-					i.close.icon
-					div.content
-						div.ui.segment.small.form
-							div.field
-								label 用户名称
-								input(type="text", placeholder="用户名称")
-							div.field
-								label 邮箱
-								input(type="text", placeholder="xxxx@email.com")
-							div.field
-								label 密码
-								input(type="text", placeholder="请输入6位以上密码")
-							div.field
-								button.ui.primary.button 确定
-							
-	script.
-		require(["/app/config.js"], function() {
-			require(["/app/user/userList.js"]);
-		});
+    div.html.ui.top.aligned.segment
+        div.ui.breadcrumb
+            a.section 字典管理
+            i.right.chevron.icon.divider
+            div.active.section 甲方管理
+    div.ui.segment.grid.aligned.small.form
+        div.ten.wide.column.centered
+            div.inline.fields
+                div.sixteen.wide.field
+                    input(type="text", id="firstPartyName", placeholder="甲方名称")
+                div.two.wide.field
+                    button.ui.primary.button#queryBtn 查询
+    div.ui.grid.aligned.segment
+        div.ten.wide.column.centered
+            table.ui.grey.compact.selectable.celled.striped.table
+                thead
+                    tr.center.aligned
+                        th 甲方名称
+                        th 地区
+                tbody#firstPartyList
+                    each list, i in firstPartyList
+                        tr.center.aligned
+                            td #{list.first_party_name}
+                            td #{list.region_name + "-" + list.area_name + "-" + list.city_name}
+                tfoot
+                    tr
+                        th(colspan="6")
+                            div#addFirstPartyBtn.ui.right.floated.small.primary.labeled.icon.button 添加甲方
+                                i.user.icon
+                div#firstPartyModal.ui.modal
+                    div.header 添加甲方
+                    i.close.icon
+                    div.content
+                        div.ui.segment.small.form
+                            div.field
+                                label 甲方名称
+                                input(type="text", id="firstPartyFullName", placeholder="甲方名称")
+                            div.field
+                                label 地区
+                                div.three.fields
+                                    div.field
+                                        select.ui.dropdown#regionDropdown
+                                            option(value="") 请选择大区
+                                            each region, i in regionlist
+                                                option(value="#{region.id}") #{region.region_name}
+                                    div.field
+                                        select.ui.dropdown#provinceDropdown
+                                            option(value="") 请选择省
+                                    div.field
+                                        select.ui.dropdown#cityDropdown
+                                            option(value="") 请选择市
+                            div.ui.field.segment.basic.center.aligned
+                                div.ui.floating.hidden.message#modalMsg
+                                    p
+                                button.ui.primary.button#confirmFirstPartyBtn 确定
+
+    script.
+        require(["/app/config.js"], function () {
+            require(["/app/dictionary/firstPartyList.js"]);
+        });
