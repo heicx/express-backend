@@ -60,36 +60,43 @@ exports.arrToJSON = function(arr) {
  * }
  *
  * basic = {
- *     name: {keyword: "like", prefix: "user", signL: "%", signR: "%"},
+ *     name: {keyword: "like", prefix: "user", sign: ["%", "%"]},
  *     age: "user",
  *     score: {keyword: "<", prefix: "class"}
  * }
  *
  * 返回值:
- * strCondition: name=? and user.age>? and class.score < ?
+ * strCondition: name like ? and user.age>? and class.score < ?
  * arrVal: ["robin", 30, 80]
  */
 exports.ormFilter = function(origin, basic, cb) {
-    var prefix, i = 0, j = 0, arrCondition = [], arrArgs = [], leftSign = "", rightSign = "";
+    var prefix, i = 0, j = 0, arrCondition = [], arrArgs = [], strL, strR;
     var keywords = [">", "<", "in", "like"];
 
+
     for (i in basic) {
-        // 验证value是否为string类型
-        if(typeof basic[i] === "string") {
-            prefix = basic[i] ? (basic[i] + "." + i) : i;
-        }else {
-            prefix =  basic[i].prefix ? (basic[i].prefix + "." + i) : i;
-
-            if(basic[i].signL || basic[i].signR){
-                
-            }
-        }
-
-
-
         for (j in origin) {
             if (typeof basic === "object" && Object.prototype.toString.call(basic).toLowerCase() === "[object object]" && !basic.length) {
                 if(j === i) {
+                    strL = "", strR = "";
+
+                    // 拼装查询字段名称
+                    if(typeof basic[i] === "string") {
+                        prefix = basic[i] ? (basic[i] + "." + i) : i;
+                    }else {
+                        prefix =  basic[i].prefix ? (basic[i].prefix + "." + i) : i;
+                    }
+
+                    // 拼装orm查询需要的字段值的通配符
+                    if(basic[i].sign) {
+                        if(basic[i].sign instanceof Array) {
+                            strL =  basic[i].sign[0] || "";
+                            strR = basic[i].sign[1] || "";
+                        }else if(typeof basic[i].sign === "string") {
+                            strL = basic[i].sign;
+                        }
+                    }
+
                     // 验证value的keyword属性值是否在存在于keywords.
                     if(_.indexOf(keywords, basic[i].keyword) > -1) {
                         arrCondition.push(prefix + " " + basic[i].keyword + " ?");
@@ -97,8 +104,7 @@ exports.ormFilter = function(origin, basic, cb) {
                         arrCondition.push(prefix + " = ?");
                     }
 
-                    if(basic[i].signL)
-                    arrArgs.push(origin[j]);
+                    arrArgs.push(strL + origin[j] + strR);
                 }
             }
         }

@@ -11,6 +11,7 @@ require.config({
         "dropdown": "assets/css/components/dropdown",
         "modal": "assets/css/components/modal.min",
         "dimmer": "assets/css/components/dimmer.min",
+        "popup": "assets/css/components/popup.min",
         "ui-events": "app/public/ui-events",
         "base": "config/base"
     },

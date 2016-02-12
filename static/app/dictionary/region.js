@@ -38,9 +38,9 @@ define(["jquery", "base", "transition", "dimmer", "modal"], function($, base) {
                 $("#modalMsg p").html(_msg);
 
                 if(_msg === "") {
-                    $('#modalMsg').removeClass("hidden").transition('fade');
+                    $("#modalMsg").removeClass("hidden").transition("fade");
                 }else {
-                    $('#modalMsg').closest(".hidden").transition('fade');
+                    $("#modalMsg").closest(".hidden").transition("fade");
                 }
             }
         }

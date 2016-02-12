@@ -5,7 +5,13 @@ define(["jquery"], function($) {
             contractList: "/contract/list",
             allArea: "/dictionary/region/list",
             addRegion: "/dictionary/region/add",
-            editRegion: "/dictionary/region/edit"
+            editRegion: "/dictionary/region/edit",
+            queryFirstParty: "/dictionary/firstParty/list",
+            querySecondParty: "/dictionary/secondParty/list",
+            addFirstParty: "/dictionary/firstParty/add",
+            addSecondParty: "/dictionary/secondParty/add",
+            getProvince: "/area/province",
+            getCity: "/area/city"
         }
     }
 

@@ -1,17 +1,35 @@
 var express = require("express");
 var router = express.Router();
 var login = require("./login");
+var contractModel, contractTypeModel, regionModel;
 
 var fetchContractList = function (req, res, next) {
-	var contractModel = req.models.contract_info;
 	var async = req.query.async || false;
 	var params = req.query;
 
-	contractModel.getContractInfo(params, function(err, data) {
+    contractModel = contractModel || req.models.contract_info;
+    contractTypeModel = contractTypeModel || req.models.contract_type;
+    regionModel = regionModel || req.models.contract_region;
+	contractModel.getContractInfo(params, function(err, contractList) {
+        var contract = {data: contractList};
+
 		if(async) {
-			res.json({contractList: data});
+			res.json(contract);
 		}else {
-            res.render("contract/contractList", {contractList: data, userinfo: JSON.parse(req.session.user)});
+            // 获取所有合同类型
+            contractTypeModel.getContractTypeList(null, function(err, contractType) {
+                if(!err) {
+                    contract.type = contractType
+
+                    // 获取所有大区
+                    regionModel.getAllRegion(null, function(err, region) {
+                        if(!err) {
+                            contract.region = region;
+                            res.render("contract/contractList", {contract: contract, userinfo: JSON.parse(req.session.user)});
+                        }
+                    });
+                }
+            });
         }
 	});
 }

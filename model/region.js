@@ -6,6 +6,17 @@ module.exports = function(orm, db) {
 	});
 
     /**
+     * 获取所有大区
+     * @param params
+     * @param callback
+     */
+    region.getAllRegion = function(params, callback) {
+        region.find(function(err, region) {
+            callback(err, region);
+        });
+    }
+
+    /**
      * 获取大区及包含的地区
      * @param params{region_id: 大区id}
      * @param callback

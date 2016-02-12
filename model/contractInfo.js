@@ -16,25 +16,45 @@ module.exports = function(orm, db) {
 		deposit_remaining: Number,
 		saler_name: String,
 		contract_status: Number
-	})
+	});
 
 	Contract.getContractInfo = function (params, callback) {
 		var pageNo = params.pageNo || 1;
 		var prePageNum = 20;
-		var strWhere = "";
 		var container = {
 			pageIndex: pageNo
 		}
-
-		utils.paramsFilter(params, function(data) {
-			for(var name in data) {
-				strWhere += name + "=" + data[name] + " and ";
-			}
-
-			if(strWhere !== "") {
-				strWhere = "where " + strWhere.substring(0, strWhere.length - 4);
-			}
-		});
+        var arrOutput = {
+            contract_number: "a",
+            first_party_name: {
+                keyword: "like",
+                sign: ["%", "%"],
+                prefix: "b"
+            },
+            second_party_name: {
+                keyword: "like",
+                sign: ["%", "%"],
+                prefix: "c"
+            },
+            effective_time: {
+                keyword: ">",
+                prefix: "a"
+            },
+            end_time: {
+                keyword: "<",
+                prefix: "a"
+            },
+            saler_name: {
+                keyword: "like",
+                sign: ["%", "%"],
+                prefix: "a"
+            },
+            contract_status: "a",
+            contract_type: "a",
+            region_id: "b",
+            province_id: "b",
+            city_id: "b"
+        }
 
 
 		Contract.count(function(err, listCount) {
@@ -45,9 +65,17 @@ module.exports = function(orm, db) {
 
 				callback(null, container);
 			}else {
-				container.totalPageNum = Math.ceil(listCount / prePageNum);
+                var strCondition = "", arrArgs = [];
+                var arrLimit = [(pageNo - 1) * prePageNum, prePageNum];
+                var sql;
 
-				var sql = "SELECT a.contract_number, b.first_party_name, c.second_party_name, d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days,"
+                // 过滤查询字段,产出关联条件语句及实参数据.
+                utils.ormFilter(params, arrOutput, function(str, arr) {
+                    strCondition = str ? " where " + str : "";
+                    arrArgs = arr.concat(arrLimit);
+                });
+
+				sql = "SELECT a.contract_number, b.first_party_name, c.second_party_name, d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days,"
 					+ "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
 					+ "a.contract_price, a.deposit, a.paid_price, a.saler_name, a.contract_status,"
 					+ "DATE_FORMAT(a.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
@@ -59,12 +87,12 @@ module.exports = function(orm, db) {
 					+ "LEFT JOIN contract_region f ON b.region_id = f.id "
 					+ "LEFT JOIN area h ON b.province_id = h.id "
 					+ "LEFT JOIN area i ON b.city_id = i.id "
-					+ strWhere
-					+ "GROUP BY a.contract_number LIMIT ?,?";
+					+ strCondition + " GROUP BY a.contract_number LIMIT ?,?";
 
-				db.driver.execQuery(sql, [(pageNo - 1) * prePageNum, prePageNum], function(err, resultData) {
+				db.driver.execQuery(sql, arrArgs, function(err, resultData) {
 					container.list = resultData;
 					container.pagination = utils.paginationMath(pageNo, container.totalPageNum);
+                    container.totalPageNum = Math.ceil(listCount / prePageNum);
 					//container.pagination = utils.paginationMath(2,11);
 					callback(err, container);
 				});
