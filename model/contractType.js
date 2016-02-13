@@ -18,7 +18,7 @@ module.exports = function(orm, db) {
 	}
 
     /**
-     * 添加合同
+     * 添加合同类型
      * @param params(contract_type_name: 合同类型名称)
      * @param callback
      */

@@ -12,6 +12,8 @@ define(["jquery"], function($) {
             addSecondParty: "/dictionary/secondParty/add",
             queryContractType: "/dictionary/contractType/list",
             addContractType: "/dictionary/contractType/add",
+            queryContractBank: "/dictionary/contractBank/list",
+            addContractBank: "/dictionary/contractBank/add",
             getProvince: "/area/province",
             getCity: "/area/city"
         }
