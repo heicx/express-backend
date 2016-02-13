@@ -42,18 +42,18 @@ block content
                         option(value="#{type.id}") #{type.contract_type_name}
             div.field
                 label 大区
-                select.ui.dropdown#region
-                    option(value="") 请选择
+                select.ui.dropdown#regionDropdown
+                    option(value="") 请选择大区
                     each region, i in contract.region
                         option(value="#{region.id}") #{region.region_name}
             div.field
                 label 省
-                select.ui.dropdown#privince
-                    option(value="") 请选择
+                select.ui.dropdown#provinceDropdown
+                    option(value="") 请选择省
             div.field
                 label 市
-                select.ui.dropdown#city
-                    option(value="") 请选择
+                select.ui.dropdown#cityDropdown
+                    option(value="") 请选择市
         div.fields
             div.field
                 button#queryBtn.ui.primary.button 查询

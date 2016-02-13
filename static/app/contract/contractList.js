@@ -2,7 +2,7 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
 	$(function() {
         var render = {
             contractList: function(res, cb) {
-                var i = 0, j = 0, strJoin = "", contractStatus = "";
+                var i = 0, strJoin = "", contractStatus = "";
                 var list = res.data.list;
 
                 if(list) {
@@ -47,11 +47,15 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
                 }
             }
         }
+
 		$("#effectiveTime, #endTime").datepicker({
 			showButtonPanel: true,
 			dateFormat: "yy-mm-dd"
 		});
 
+        /**
+         * 条件查询
+         */
 		$("#queryBtn").on("click", function() {
 			var params = {
 				contract_number: $("#contractNumber").val(),
@@ -62,9 +66,9 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
 				saler_name: $("#salerName").val(),
 				contract_status: $("#contractStatus").val(),
 				contract_type: $("#contractType").val(),
-				region_id: $("#region").val(),
-				privince_id: $("#privince").val(),
-				city_id: $("#city").val()
+				region_id: $("#regionDropdown").val(),
+				privince_id: $("#provinceDropdown").val(),
+				city_id: $("#cityDropdown").val()
 			}
 
 			$("#listLoader").addClass("active");
@@ -75,5 +79,54 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
                 });
 			}, function(err) {})
 		});
+
+        /**
+         * 选择大区
+         */
+        $("#regionDropdown").change(function() {
+            var params = {
+                region_id: $(this).val()
+            }
+
+            $('#provinceDropdown').dropdown('set text', "请选择省");
+            $('#cityDropdown').dropdown('set text', "请选择市");
+
+            base.common.getData(base.api.getProvince, params, false, function(resultData) {
+                var i = 0;
+                var oProvince = resultData.province;
+                var strOptions = "<option value=''>请选择省</option>";
+
+
+                for(; i < oProvince.length; i++) {
+                    strOptions += "<option value='" + oProvince[i].area_id + "'>" + oProvince[i].province_name + "</option>";
+                }
+
+                $("#provinceDropdown").html(strOptions);
+            }, function(err) {});
+        });
+
+        /**
+         * 选择省份
+         */
+        $("#provinceDropdown").change(function() {
+            var params = {
+                area_id: $(this).val()
+            }
+
+            $('#cityDropdown').dropdown('set text', "请选择市");
+
+            base.common.getData(base.api.getCity, params, false, function(resultData) {
+                var i = 0;
+                var oProvince = resultData.city;
+                var strOptions = "<option value=''>请选择市</option>";
+
+
+                for(; i < oProvince.length; i++) {
+                    strOptions += "<option value='" + oProvince[i].id + "'>" + oProvince[i].city_name + "</option>";
+                }
+
+                $("#cityDropdown").html(strOptions);
+            }, function(err) {});
+        });
 	});
 });
