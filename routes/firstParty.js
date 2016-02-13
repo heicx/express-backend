@@ -13,7 +13,7 @@ var fetchFirstPartyList = function (req, res) {
             if(async) {
                 res.json({status: true, data: firstParty});
             }else {
-                regionModel.getAllRegion(null, function(err, region) {
+                regionModel.getAllRegion({}, function(err, region) {
                     if(!err) {
                         res.render("dictionary/firstPartyList", {firstPartyList: firstParty, regionlist: region, userinfo: JSON.parse(req.session.user)});
                     }

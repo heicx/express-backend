@@ -7,10 +7,10 @@ block content
             div.active.section 地区管理
     div.ui.grid.aligned.segment
         div.ten.wide.column.centered
-            table.ui.grey.compact.selectable.celled.striped.table
+            table.ui.grey.compact.selectable.celled.striped.table.sortable
                 thead
                     tr.center.aligned
-                        th 大区名称
+                        th.sorted.ascending 大区名称
                         th 对应省份
                         th 操作
                 tbody#regionList
@@ -21,7 +21,7 @@ block content
                             each name, j in list.area_name
                                 - strAreaJoint += name + ",";
                             td #{strAreaJoint.substring(0, strAreaJoint.length-1)}
-                            td
+                            td.collapsing
                                 button.ui.primary.aligned.button.region-edit(data-region="#{list.region_id}") 编辑
                 tfoot
                     tr
@@ -38,10 +38,10 @@ block content
                                 input(type="text", id="regionName", placeholder="大区名称")
                             div.ui.horizontal.divider 请选择大区内包含的省份
                             div.ui.four.column.left.aligned.stackable.grid.segment#regionItems
-                            div.ui.field.segment.basic.center.aligned
-                                div.ui.floating.hidden.message#modalMsg
+                            div.field
+                                button.ui.fluid.primary.button#confirmRegionBtn 确定
+                                div.ui.floating.hidden.segment.center.aligned.message#modalMsg
                                     p
-                                button.ui.primary.button#confirmRegionBtn 确定
     script.
         require(["/app/config.js"], function () {
             require(["/app/dictionary/region.js"]);

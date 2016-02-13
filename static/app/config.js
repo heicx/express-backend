@@ -6,6 +6,7 @@ require.config({
     paths: {
         "jquery": "assets/libs/jquery/jquery.min",
         "jquery-ui": "assets/libs/jquery-plugins/jquery-ui/jquery-ui",
+        "sortable": "assets/libs/jquery-plugins/jquery-tablesort/jquery.tablesort.min",
         "semantic": "assets/libs/semantic/semantic.min",
         "transition": "assets/css/components/transition",
         "dropdown": "assets/css/components/dropdown",
@@ -32,6 +33,9 @@ require.config({
             deps: ["jquery"]
         },
         "dimmer": {
+            deps: ["jquery"]
+        },
+        "sortable": {
             deps: ["jquery"]
         }
     }

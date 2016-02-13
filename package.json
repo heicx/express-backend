@@ -37,6 +37,7 @@
     "gulp-util": "~3.0.7",
     "gulp-watch": "~4.3.5",
     "jade": "~1.11.0",
+    "jquery-tablesort": "0.0.7",
     "jquery-ui": "^1.10.5",
     "map-stream": "~0.0.6",
     "md5": "~2.0.0",

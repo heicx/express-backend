@@ -1,6 +1,5 @@
 define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($, base) {
     $(function() {
-
         /**
          * 渲染模块
          */
@@ -70,7 +69,7 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
             var params = {};
             var firstPartyName = $("#firstPartyName").val();
 
-            params["firstPartyName"] = firstPartyName;
+            params["first_party_name"] = firstPartyName;
             base.common.getData(base.api.queryFirstParty, params, false, function(resultData) {
                 if(resultData.status) {
                     render.firstPartyList(resultData, function(str) {

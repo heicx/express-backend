@@ -8,17 +8,15 @@ block content
             div.active.section 甲方管理
     div.ui.segment.grid.aligned.small.form
         div.ten.wide.column.centered
-            div.inline.fields
-                div.sixteen.wide.field
-                    input(type="text", id="firstPartyName", placeholder="甲方名称")
-                div.two.wide.field
-                    button.ui.primary.button#queryBtn 查询
+            div.ui.fluid.action.input
+                input(type="text", id="firstPartyName", placeholder="甲方名称")
+                button.ui.primary.button#queryBtn 查询
     div.ui.grid.aligned.segment
         div.ten.wide.column.centered
-            table.ui.grey.compact.selectable.celled.striped.table
+            table.ui.grey.compact.selectable.celled.striped.table.sortable
                 thead
                     tr.center.aligned
-                        th 甲方名称
+                        th.sorted.ascending 甲方名称
                         th 地区
                 tbody#firstPartyList
                     each list, i in firstPartyList
@@ -52,11 +50,10 @@ block content
                                     div.field
                                         select.ui.dropdown#cityDropdown
                                             option(value="") 请选择市
-                            div.ui.field.segment.basic.center.aligned
-                                div.ui.floating.hidden.message#modalMsg
+                            div.field
+                                button.ui.fluid.primary.button#confirmFirstPartyBtn 确定
+                                div.ui.floating.hidden.segment.center.aligned.message#modalMsg
                                     p
-                                button.ui.primary.button#confirmFirstPartyBtn 确定
-
     script.
         require(["/app/config.js"], function () {
             require(["/app/dictionary/firstPartyList.js"]);

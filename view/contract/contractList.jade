@@ -60,7 +60,7 @@ block content
             div.field
                 button.ui.primary.button 新建
     div.ui.stacked.segment
-        table.ui.celled.selectable.striped.grey.table
+        table.ui.celled.selectable.striped.grey.table.sortable
             thead
                 tr.ui.center.aligned.segment
                     th 合同号
@@ -68,18 +68,18 @@ block content
                     th 甲方地区
                     th 乙方
                     th 合同类型
-                    th 生效时间
-                    th 结束时间
-                    th 合同金额
-                    th 保证金
-                    th 应付总额
-                    th 已付金额
-                    th 已开票数量
-                    th 已开票金额
+                    th.sorted.ascending 生效时间
+                    th.sorted.ascending 结束时间
+                    th.sorted.ascending 合同金额
+                    th.sorted.ascending 保证金
+                    th.sorted.ascending 应付总额
+                    th.sorted.ascending 已付金额
+                    th.sorted.ascending 已开票数量
+                    th.sorted.ascending 已开票金额
                     th 对应销售
-                    th 合同状态
+                    th.sorted.ascending 合同状态
                     th 逾期天数
-                    th 录入时间
+                    th.sorted.ascending 录入时间
                     th 操作
             tbody#contractList
                 each list, i in contract.data.list
@@ -110,7 +110,7 @@ block content
                                     逾期
                         td #{list.overdue_days > -1 ? list.overdue_days : "--"}
                         td #{list.create_time || "--"}
-                        td
+                        td.collapsing
                             button.ui.primary.aligned.button 详情
             tfoot
                 tr

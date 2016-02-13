@@ -8,17 +8,15 @@ block content
             div.active.section 乙方管理
     div.ui.segment.grid.aligned.small.form
         div.ten.wide.column.centered
-            div.inline.fields
-                div.sixteen.wide.field
-                    input(type="text", id="secondPartyName", placeholder="乙方名称")
-                div.two.wide.field
-                    button.ui.primary.button#queryBtn 查询
+            div.ui.fluid.action.input
+                input(type="text", id="secondPartyName", placeholder="乙方名称")
+                button.ui.primary.button#queryBtn 查询
     div.ui.grid.aligned.segment
         div.ten.wide.column.centered
-            table.ui.grey.compact.selectable.celled.striped.table
+            table.ui.grey.compact.selectable.celled.striped.table.sortable
                 thead
                     tr.center.aligned
-                        th 乙方名称
+                        th.sorted.ascending 乙方名称
                 tbody#secondPartyList
                     each list, i in secondPartyList
                         tr.center.aligned
@@ -35,11 +33,11 @@ block content
                         div.ui.segment.small.form
                             div.field
                                 label 乙方名称
-                                input(type="text", id="secondPartyFullName", placeholder="乙方名称")
-                            div.ui.field.segment.basic.center.aligned
-                                div.ui.floating.hidden.message#modalMsg
+                                div.ui.fluid.action.input
+                                    input(type="text", id="secondPartyFullName", placeholder="乙方名称")
+                                    button.ui.primary.button#confirmSecondPartyBtn 确定
+                                div.ui.floating.hidden.segment.center.aligned.message#modalMsg
                                     p
-                                button.ui.primary.button#confirmSecondPartyBtn 确定
     script.
         require(["/app/config.js"], function() {
             require(["/app/dictionary/secondPartyList.js"]);

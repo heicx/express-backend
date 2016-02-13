@@ -1,13 +1,15 @@
-require(["jquery", "dropdown", "transition"], function($) {
+require(["jquery", "dropdown", "transition", "sortable"], function($) {
 	$(function() {
-		$('.ui.menu .ui.dropdown').dropdown({
-            on: 'click'
+		$(".ui.menu .ui.dropdown").dropdown({
+            on: "click"
         });
         
-        $('.ui.menu a.item').on('click', function() {
-            $(this).addClass('active').siblings().removeClass('active');
+        $(".ui.menu a.item").on("click", function() {
+            $(this).addClass("active").siblings().removeClass("active");
         });
 
-        $('select.dropdown').dropdown();
+        $("select.dropdown").dropdown();
+
+        $('table.sortable').tablesort();
 	})
 })
