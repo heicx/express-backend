@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var login = require("./login");
 
+// 获取乙方数据
 var fetchSecondPartyList = function (req, res) {
 	var secondPartyModel = req.models.contract_second_party;
 	var async = req.query.async || false;
@@ -16,6 +17,7 @@ var fetchSecondPartyList = function (req, res) {
 	});
 }
 
+// 添加乙方
 var addSecondParty = function(req, res) {
     var secondPartyModel = req.models.contract_second_party;
     var params = {

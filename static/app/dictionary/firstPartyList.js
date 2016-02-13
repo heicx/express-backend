@@ -120,7 +120,6 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
                                             + "-" + res.data[i].city_name + "</td></tr>";
                         }
 
-                        console.log(123123);
                         $('#firstPartyModal').modal("setting", "transition", "fade down").modal("hide");
                         $("#firstPartyList").append(firstPartyItem);
                     }else {

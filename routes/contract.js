@@ -17,12 +17,12 @@ var fetchContractList = function (req, res, next) {
 			res.json(contract);
 		}else {
             // 获取所有合同类型
-            contractTypeModel.getContractTypeList(null, function(err, contractType) {
+            contractTypeModel.getContractTypeList({}, function(err, contractType) {
                 if(!err) {
                     contract.type = contractType
 
                     // 获取所有大区
-                    regionModel.getAllRegion(null, function(err, region) {
+                    regionModel.getAllRegion({}, function(err, region) {
                         if(!err) {
                             contract.region = region;
                             res.render("contract/contractList", {contract: contract, userinfo: JSON.parse(req.session.user)});

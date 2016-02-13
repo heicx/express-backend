@@ -6,6 +6,11 @@ module.exports = function(orm, db) {
 		second_party_name: String
 	});
 
+    /**
+     * 获取乙方数据
+     * @param params(second_party_name: 乙方名称)
+     * @param callback
+     */
 	secondParty.getSecondPartyList = function(params, callback) {
         var sql, strCondition;
         var arrOutput = {
@@ -27,6 +32,11 @@ module.exports = function(orm, db) {
         });
 	}
 
+    /**
+     * 添加乙方
+     * @param params(second_party_name: 乙方名称)
+     * @param callback
+     */
     secondParty.addSecondParty = function(params, callback) {
         // 乙方名称查重
         secondParty.find(params, function(err, item) {
