@@ -1,4 +1,4 @@
-define(["jquery", "jquery-ui", "base"], function($, ui, base) {
+define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"], function($, ui, base) {
 	$(function() {
         var render = {
             contractList: function(res, cb) {
@@ -45,10 +45,34 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
 
                     cb(strJoin);
                 }
+            },
+            parties: function() {
+                base.common.getData(base.api.parties, {}, false, function(parties) {
+                    var firstParties, secondParties;
+                    var strTemp = "<option value=''>请选择</option>";
+                    var strFirstParties = strTemp, strSecondParties = strTemp, i = 0, j = 0;
+
+                    if(parties.status) {
+                        firstParties = parties.data.firstParties;
+                        secondParties = parties.data.secondParties;
+
+                        for(; i < firstParties.length; i++) {
+                            strFirstParties += "<option value='" + firstParties[i].id + "'>" + firstParties[i].first_party_name + "</option>";
+                        }
+
+                        for(; j < secondParties.length; j++) {
+                            strSecondParties += "<option value='" + secondParties[j].id + "'>" + secondParties[j].second_party_name + "</option>";
+                        }
+
+                        $("#nFirstPartyDropdown").html(strFirstParties);
+                        $("#nSecondPartyDropdown").html(strSecondParties);
+                    }
+                    //
+                });
             }
         }
 
-		$("#effectiveTime, #endTime").datepicker({
+		$("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime").datepicker({
 			showButtonPanel: true,
 			dateFormat: "yy-mm-dd"
 		});
@@ -67,7 +91,7 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
 				contract_status: $("#contractStatus").val(),
 				contract_type: $("#contractType").val(),
 				region_id: $("#regionDropdown").val(),
-				privince_id: $("#provinceDropdown").val(),
+				province_id: $("#provinceDropdown").val(),
 				city_id: $("#cityDropdown").val()
 			}
 
@@ -79,6 +103,33 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
                 });
 			}, function(err) {})
 		});
+
+        /**
+         * 打开新建合同窗口
+         */
+        $("#createBtn").on("click", function() {
+            $("#contractModal").modal("setting", "transition", "fade down").modal("show");
+        });
+
+        /**
+         * 新建合同
+         */
+        $("#confirmContractBtn").on("click", function() {
+            var params = {
+                contractNumber: $("#nContractNumber").val(),
+                firstPartyId: $("#nFirstPartyDropdown option:selected").val(),
+                secondPartyId: $("#nSecondPartyDropdown option:selected").val(),
+                contractType: $("#nContractTypeDropdown option:selected").val(),
+                effectiveTime: $("#nEffectiveTime").val(),
+                endTime: $("#nEndTime").val(),
+                contractPrice: $("#nPrice").val(),
+                deposit: $("#nDeposit").val()
+            };
+
+            base.common.postData(base.api.addContract, params, false, function(ret) {
+                console.log(ret);
+            }, function() {});
+        });
 
         /**
          * 选择大区
@@ -128,5 +179,7 @@ define(["jquery", "jquery-ui", "base"], function($, ui, base) {
                 $("#cityDropdown").html(strOptions);
             }, function(err) {});
         });
+
+        render.parties();
 	});
 });

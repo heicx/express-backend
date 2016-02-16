@@ -23,7 +23,7 @@ module.exports = function(orm, db) {
         utils.ormFilter(params, arrOutput, function(str, arr) {
             strCondition = str ? " where " + str : "";
 
-            sql = "select second_party_name from contract_second_party"
+            sql = "select id, second_party_name from contract_second_party";
                 + strCondition;
 
             db.driver.execQuery(sql, arr, function(err, resultData) {

@@ -28,7 +28,7 @@ module.exports = function(orm, db) {
         utils.ormFilter(params, arrOutput, function(str, arr) {
             strCondition = str ? " where " + str : "";
 
-            sql = "select a.first_party_name, b.region_name, d.area_name, e.area_name as city_name from contract_first_party a "
+            sql = "select a.id, a.first_party_name, b.region_name, d.area_name, e.area_name as city_name from contract_first_party a "
                 + "left join contract_region b on b.id = a.region_id "
                 + "left join area d on d.id = a.province_id "
                 + "left join area e on a.city_id = e.id "

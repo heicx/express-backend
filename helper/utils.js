@@ -70,7 +70,7 @@ exports.arrToJSON = function(arr) {
  * arrVal: ["robin", 30, 80]
  */
 exports.ormFilter = function(origin, basic, cb) {
-    var prefix, i = 0, j = 0, arrCondition = [], arrArgs = [], strL, strR;
+    var prefix, i, j, arrCondition = [], arrArgs = [], strL, strR;
     var keywords = [">", "<", "in", "like"];
 
 

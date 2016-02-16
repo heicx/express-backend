@@ -17,26 +17,13 @@ require.config({
         "base": "config/base"
     },
     shim: {
-        "jquery-ui": {
-            deps: ["jquery"]
-        },
-        "semantic": {
-            deps: ["jquery"]
-        },
-        "transition": {
-            deps: ["jquery"]
-        },
-        "dropdown": {
-            deps: ["jquery"]
-        },
-        "modal": {
-            deps: ["jquery"]
-        },
-        "dimmer": {
-            deps: ["jquery"]
-        },
-        "sortable": {
-            deps: ["jquery"]
-        }
+        "jquery-ui": ["jquery"],
+        "semantic": ["jquery"],
+        "transition": ["jquery"],
+        "dropdown": ["jquery"],
+        "modal": ["jquery"],
+        "dimmer": ["jquery"],
+        "sortable": ["jquery"],
+        "popup": ["jquery"]
     }
 });

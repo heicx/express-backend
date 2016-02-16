@@ -131,7 +131,7 @@ var addRegion = function(req, res) {
                 if(err) console.log(err);
 
                 if(regionArea.data.length > 0) {
-                    var _params = {
+                        var _params = {
                         region_id: regionArea.data[0].region_id
                     }
 

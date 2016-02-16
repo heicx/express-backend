@@ -37,7 +37,7 @@ block content
             div.field
                 label 合同类型
                 select.ui.dropdown#contractType
-                    option(value="") 请选择
+                    option(value="") 请选择合同类型
                     each type, i in contract.type
                         option(value="#{type.id}") #{type.contract_type_name}
             div.field
@@ -58,8 +58,9 @@ block content
             div.field
                 button#queryBtn.ui.primary.button 查询
             div.field
-                button.ui.primary.button 新建
-    div.ui.stacked.segment
+                button#createBtn.ui.primary.button 新建
+    div.ui.segment
+        a.ui.blue.tag.label 逾期合同共有 #{contract.overdue_count} 份
         table.ui.celled.selectable.striped.grey.table.sortable
             thead
                 tr.ui.center.aligned.segment
@@ -127,6 +128,47 @@ block content
                                 i.right.chevron.icon(data-disable="#{contract.data.pagination.isLast}")
             div.ui.inverted.dimmer(id="listLoader")
                 div.ui.loader
+            div#contractModal.ui.modal
+                div.header 新建合同
+                i.close.icon
+                div.content
+                    div.ui.segment.attached.small.form
+                        div.field
+                            label 合同编号
+                            input(type="text", id="nContractNumber", placeholder="合同编号")
+                        div.three.fields
+                            div.field
+                                label 甲方名称
+                                select.ui.dropdown.search#nFirstPartyDropdown
+                                    option(value="") 请选择甲方
+                            div.field
+                                label 乙方名称
+                                select.ui.dropdown.search#nSecondPartyDropdown
+                                    option(value="") 请选择乙方
+                            div.field
+                                label 合同类型
+                                select.ui.dropdown#nContractTypeDropdown
+                                    option(value="") 请选择合同类型
+                                    each type, i in contract.type
+                                        option(value="#{type.id}") #{type.contract_type_name}
+                        div.two.fields
+                            div.field
+                                label 生效时间
+                                    input(type="text", id="nEffectiveTime", placeholder="生效时间", readonly="readonly")
+                            div.field
+                                label 结束时间
+                                    input(type="text", id="nEndTime", placeholder="结束时间", readonly="readonly")
+                        div.two.fields
+                            div.field
+                                label 合同金额
+                                    input(type="text", id="nPrice", placeholder="合同金额")
+                            div.field
+                                label 保证金
+                                    input(type="text", id="nDeposit", placeholder="保证金")
+                        div.field
+                            button.ui.fluid.primary.button#confirmContractBtn 确定
+                    div.ui.bottom.attached.hidden.warning.message#modalMsg
+                        i.icon.help
             script.
                 require(["/app/config.js"], function () {
                     require(["/app/contract/contractList.js"]);
