@@ -10,7 +10,7 @@ var fetchSecondPartyList = function (req, res) {
 
 	secondPartyModel.getSecondPartyList(params, function(err, secondParty) {
 		if(async) {
-			res.json({status: true, data: secondParty});
+			res.json(secondParty);
 		}else{
 			res.render("dictionary/secondPartyList", {secondPartyList: secondParty, userinfo: JSON.parse(req.session.user)});
 		}

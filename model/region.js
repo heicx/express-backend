@@ -1,3 +1,5 @@
+var when = require("when");
+
 module.exports = function(orm, db) {
 	var region = db.define("contract_region", {
 		id: {type: "serial", key: true},
@@ -10,10 +12,18 @@ module.exports = function(orm, db) {
      * @param params
      * @param callback
      */
-    region.getAllRegion = function(params, callback) {
+    region.getAllRegion = function() {
+        var def = when.defer();
+
         region.find(function(err, region) {
-            callback(err, region);
+            if(!err) {
+                def.resolve(region);
+            }else {
+                def.reject("获取所有大区失败");
+            }
         });
+
+        return def.promise;
     }
 
     /**

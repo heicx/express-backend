@@ -1,4 +1,5 @@
 var utils = require("../helper/utils");
+var when = require("when");
 
 module.exports = function(orm, db) {
 	var Contract = db.define("contract_info", {
@@ -18,7 +19,8 @@ module.exports = function(orm, db) {
 		contract_status: {type: "integer", defaultValue: 0}
 	});
 
-	Contract.getContractInfo = function (params, callback) {
+	Contract.getContractInfo = function (params) {
+        var def = when.defer();
 		var pageNo = params.pageNo || 1;
 		var prePageNum = 20;
 		var container = {
@@ -63,7 +65,7 @@ module.exports = function(orm, db) {
 			if(listCount == 0) {
 				container.totalPageNum = 0;
 
-				callback(null, container);
+                def.resolve(container);
 			}else {
                 var strCondition = "", arrArgs = [];
                 var arrLimit = [(pageNo - 1) * prePageNum, prePageNum];
@@ -90,14 +92,20 @@ module.exports = function(orm, db) {
 					+ strCondition + " GROUP BY a.contract_number LIMIT ?,?";
 
 				db.driver.execQuery(sql, arrArgs, function(err, resultData) {
-					container.list = resultData;
-					container.pagination = utils.paginationMath(pageNo, container.totalPageNum);
-                    container.totalPageNum = Math.ceil(listCount / prePageNum);
-					//container.pagination = utils.paginationMath(2,11);
-					callback(err, container);
+                    if(!err) {
+                        container.list = resultData;
+                        container.pagination = utils.paginationMath(pageNo, container.totalPageNum);
+                        container.totalPageNum = Math.ceil(listCount / prePageNum);
+                        //container.pagination = utils.paginationMath(2,11);
+
+                        def.resolve(container);
+                    }else
+                        def.reject(err);
 				});
 			}
 		});
+
+        return def.promise;
 	}
 
     /**
@@ -105,14 +113,19 @@ module.exports = function(orm, db) {
      * @param params
      * @param callback
      */
-    Contract.getOverdueDaysCount = function(params, callback) {
-        var sql;
+    Contract.getOverdueDaysCount = function (params) {
+        var sql, def = when.defer();
 
         sql = "select count(*) as overdue_count from contract_info where TIMESTAMPDIFF(DAY, DATE_FORMAT(end_time, '%Y-%m-%d'),NOW()) > 0";
 
         db.driver.execQuery(sql, function(err, resultData) {
-            callback(err, resultData[0].overdue_count);
+            if(!err)
+                def.resolve(resultData[0].overdue_count);
+            else
+                def.reject("查询逾期合同数量失败");
         });
+
+        return def.promise;
     }
 
     /**

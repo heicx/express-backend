@@ -1,20 +1,15 @@
 define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($, base) {
     $(function() {
-
         /**
          * 渲染模块
          */
         var render = {
             secondPartyList: function(res, cb) {     /** 渲染乙方列表 **/
-                var strJoint = "";
+                var strJoint = "", i = 0;
 
-                if(res.status) {
-                    var i = 0;
-
-                    for(; i < res.data.length; i++) {
-                        strJoint += "<tr class='center aligned'><td>" + res.data[i].second_party_name
-                                  + "</td></tr>";
-                    }
+                for(; i < res.length; i++) {
+                    strJoint += "<tr class='center aligned'><td>" + res[i].second_party_name
+                              + "</td></tr>";
                 }
 
                 cb(strJoint);
@@ -53,11 +48,9 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
 
             params["second_party_name"] = secondPartyName;
             base.common.getData(base.api.querySecondParty, params, false, function(resultData) {
-                if(resultData.status) {
-                    render.secondPartyList(resultData, function(str) {
-                        $("#secondPartyList").html(str);
-                    });
-                }
+                render.secondPartyList(resultData, function(str) {
+                    $("#secondPartyList").html(str);
+                });
             }, function(err) {});
         });
 

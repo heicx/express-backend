@@ -1,4 +1,5 @@
 var utils = require("../helper/utils");
+var when = require("when");
 
 module.exports = function(orm, db) {
 	var firstParty = db.define("contract_first_party", {
@@ -15,7 +16,8 @@ module.exports = function(orm, db) {
      * @param params
      * @param callback
      */
-	firstParty.getFirstPartyList = function(params, callback) {
+	firstParty.getFirstPartyList = function(params) {
+        var def = when.defer();
         var sql, strCondition;
         var arrOutput = {
             first_party_name: {
@@ -35,46 +37,62 @@ module.exports = function(orm, db) {
                 + strCondition;
 
             db.driver.execQuery(sql, arr, function(err, resultData) {
-                callback(err, resultData);
+                if(!err)
+                    def.resolve(resultData);
+                else
+                    def.reject("根据甲方名称获取甲方列表信息失败");
             });
         });
+
+        return def.promise;
 	}
 
-    /**
-     * 添加甲方
-     * @param params
-     * @param callback
-     */
-    firstParty.addFirstParty = function(params, callback) {
-        var _params = {
-            first_party_name: params.first_party_name,
-            region_id: params.region_id,
-            province_id: params.province_id,
-            city_id: params.city_id
-        }
+    // 甲方名称查重
+    firstParty.findFirstPartyNameIsExists = function(params) {
+        var def = when.defer();
 
-        // 甲方名称查重
-        firstParty.find({first_party_name: _params.first_party_name}, function(err, item) {
+        firstParty.find({first_party_name: params.first_party_name}, function(err, item) {
             if(!err) {
-                if(item.length > 0) {
-                    callback(err, {status: false, message: "甲方名称已存在"});
-                }else {
-                    // 添加甲方
-                    firstParty.create(_params, function(err, items) {
-                        if(items) {
-                            // 获取新增甲方的信息
-                            firstParty.getFirstPartyList({first_party_name: items.first_party_name}, function(err, newItem) {
-                                callback(err, {status: true, data: newItem});
-                            });
-                        }else {
-                            callback(err, {status: false, message: "添加失败"})
-                        }
-                    });
-                }
+                if(item.length > 0)
+                    def.reject("甲方名称已存在");
+                else
+                    def.resolve(item);
             }else {
-                callback(err, {status: false, message: "甲方名称查重失败"});
+                def.reject("甲方名称查重失败");
             }
         });
 
+        return def.promise;
+    }
+
+    // 添加甲方
+    firstParty.createFirstParty = function(params) {
+        var def = when.defer();
+
+        firstParty.create(params, function(err, items) {
+            if(!err) {
+                if(items)
+                    def.resolve(items);
+                else
+                    def.reject("添加甲方失败");
+            }else {
+                def.reject("添加甲方失败");
+            }
+        });
+
+        return def.promise;
+    }
+
+    // 获取新增甲方的信息
+    firstParty.getFirstPartyByName = function(items) {
+        var def = when.defer();
+
+        firstParty.getFirstPartyList({first_party_name: items.first_party_name}).then(function(newItem) {
+            def.resolve(newItem);
+        }).catch(function() {
+            def.reject("获取新增甲方的信息失败");
+        });
+
+        return def.promise;
     }
 }

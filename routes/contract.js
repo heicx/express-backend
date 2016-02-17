@@ -1,45 +1,23 @@
 var express = require("express");
 var router = express.Router();
 var login = require("./login");
-var utils = require("../helper/utils");
+var when = require("when");
 var contractModel, contractTypeModel, regionModel, firstPartyModel, secondPartyModel;
 
 // 获取合同列表及相关查询数据
-var fetchContractList = function (req, res) {
-	var async = req.query.async || false;
-	var params = req.query;
+var fetchContractInfo = function* (req) {
+    var params = req.query;
 
     contractModel = contractModel || req.models.contract_info;
     contractTypeModel = contractTypeModel || req.models.contract_type;
     regionModel = regionModel || req.models.contract_region;
-	contractModel.getContractInfo(params, function(err, contractList) {
-        var contract = {data: contractList};
 
-        // 获取逾期合同数量
-        contractModel.getOverdueDaysCount({}, function(err, count) {
-            contract.overdue_count = count;
-
-            if(async) {
-                res.json(contract);
-            }else {
-                // 获取所有合同类型
-                contractTypeModel.getContractTypeList({}, function(err, contractType) {
-                    if(!err) {
-                        contract.type = contractType;
-
-                        // 获取所有大区
-                        regionModel.getAllRegion({}, function(err, region) {
-                            if(!err) {
-                                contract.region = region;
-                                res.render("contract/contractList", {contract: contract, userinfo: JSON.parse(req.session.user)});
-                            }
-                        });
-                    }
-                });
-            }
-        });
-	});
+    yield contractModel.getContractInfo(params);
+    yield contractModel.getOverdueDaysCount({});
+    yield contractTypeModel.getContractTypeList({});
+    yield regionModel.getAllRegion({});
 }
+
 
 // 获取甲方乙方列表
 var fetchBothPartiesList = function(req, res) {
@@ -78,9 +56,32 @@ var addContract = function(req, res) {
     });
 }
 
+// 拼装合同预加载数据
+var packContractBasicData = function(req, res) {
+    var async = req.query.async || false;
+    var contract = {}, arrPromise = [];
+    var itrContractInfo = fetchContractInfo(req);
+
+    for(var i of itrContractInfo) {
+        arrPromise.push(i);
+    }
+
+    when.all(arrPromise).then(function(result) {
+        contract = result[0];
+        contract.overdue_count = result[1];
+        contract.type = result[2];
+        contract.region = result[3];
+
+        if(async)
+            res.json(contract);
+        else
+            res.render("contract/contractList", {contract: contract, userinfo: JSON.parse(req.session.user)});
+    });
+}
+
 router.use(login.islogin);
 
-router.get("/list", fetchContractList);
+router.get("/list", packContractBasicData);
 router.get("/parties", fetchBothPartiesList);
 router.post("/add", addContract);
 

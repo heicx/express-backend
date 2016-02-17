@@ -3,7 +3,11 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
         var render = {
             contractList: function(res, cb) {
                 var i = 0, strJoin = "", contractStatus = "";
-                var list = res.data.list;
+                var list = res.list || res;
+
+                if(typeof(list) === "object" && Object.prototype.toString.call(list).toLowerCase() == "[object object]") {
+                    list = [list];
+                }
 
                 if(list) {
                     for(; i < list.length; i++) {
@@ -67,8 +71,18 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
                         $("#nFirstPartyDropdown").html(strFirstParties);
                         $("#nSecondPartyDropdown").html(strSecondParties);
                     }
-                    //
                 });
+            },
+            modalMsg: function(msg) {       /** 控制弹出层的提示信息的显示与隐藏 **/
+                var _msg = msg || "";
+
+                $("#modalMsg p").html(_msg);
+
+                if(_msg === "") {
+                    $("#modalMsg").removeClass("hidden").transition("fade");
+                }else {
+                    $("#modalMsg").closest(".hidden").transition("fade");
+                }
             }
         }
 
@@ -128,6 +142,11 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 
             base.common.postData(base.api.addContract, params, false, function(ret) {
                 console.log(ret);
+                if(ret.status) {
+                    render.contractList(ret.data, function() {
+
+                    });
+                }
             }, function() {});
         });
 

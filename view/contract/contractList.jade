@@ -83,7 +83,7 @@ block content
                     th.sorted.ascending 录入时间
                     th 操作
             tbody#contractList
-                each list, i in contract.data.list
+                each list, i in contract.list
                     tr.ui.center.aligned.segment
                         td #{list.contract_number}
                         td #{list.first_party_name}
@@ -118,14 +118,14 @@ block content
                     th(colspan="18")
                         div.ui.right.floated.pagination.menu
                             a.icon.item
-                                i.left.chevron.icon(data-disable="#{contract.data.pagination.isFirst}")
-                            each num, i in contract.data.pagination.count
-                                if contract.data.pagination.pageNo == num
+                                i.left.chevron.icon(data-disable="#{contract.pagination.isFirst}")
+                            each num, i in contract.pagination.count
+                                if contract.pagination.pageNo == num
                                     a.item.active #{num}
                                 else
                                     a.item #{num}
                             a.icon.item
-                                i.right.chevron.icon(data-disable="#{contract.data.pagination.isLast}")
+                                i.right.chevron.icon(data-disable="#{contract.pagination.isLast}")
             div.ui.inverted.dimmer(id="listLoader")
                 div.ui.loader
             div#contractModal.ui.modal
