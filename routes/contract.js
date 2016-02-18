@@ -24,13 +24,11 @@ var fetchBothPartiesList = function(req, res) {
     firstPartyModel = firstPartyModel || req.models.contract_first_party;
     secondPartyModel = secondPartyModel || req.models.contract_second_party;
 
-    firstPartyModel.getFirstPartyList({}, function(err, firstParties) {
-        if(!err) {
-            secondPartyModel.getSecondPartyList({}, function(err, secondParties) {
-                if(!err)
-                    res.json({status: true, data: {firstParties: firstParties, secondParties: secondParties}});
-            })
-        }
+    firstPartyModel.getFirstPartyList({}).then(function(firstParties) {
+        secondPartyModel.getSecondPartyList({}, function(err, secondParties) {
+            if(!err)
+                res.json({status: true, data: {firstParties: firstParties, secondParties: secondParties}});
+        });
     });
 }
 
@@ -50,15 +48,21 @@ var addContract = function(req, res) {
 
     contractModel = contractModel || req.models.contract_info;
 
-    params.saler_name = JSON.parse(req.session.user).user_name;
-    contractModel.addContract(params, function(err, contract) {
-        res.json(contract);
+    // 验证合同是否已存在
+    contractModel.findContractIsExist(params).then(function() {
+        params.saler_name = JSON.parse(req.session.user).user_name;
+        contractModel.addContract(params, function(err, contract) {
+            res.json(contract);
+        });
+    }).catch(function(errMsg) {
+        res.json({status: false, message: errMsg});
     });
 }
 
 // 拼装合同预加载数据
 var packContractBasicData = function(req, res) {
-    var async = req.query.async || false;
+    var params = req.query;
+    var async = params.async || false;
     var contract = {}, arrPromise = [];
     var itrContractInfo = fetchContractInfo(req);
 
@@ -76,6 +80,11 @@ var packContractBasicData = function(req, res) {
             res.json(contract);
         else
             res.render("contract/contractList", {contract: contract, userinfo: JSON.parse(req.session.user)});
+    }).catch (function(errMsg) {
+        if(async)
+            res.json({status: false, message: errMsg});
+        else
+            res.status(500).send(errMsg);
     });
 }
 
