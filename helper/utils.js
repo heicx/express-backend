@@ -113,8 +113,21 @@ exports.ormFilter = function(origin, basic, cb) {
     return cb(arrCondition.join(" and "), arrArgs);
 }
 
+exports.paramsFilter = function(arrBasic, params) {
+    var outputParams = {};
 
-exports.paginationMath = function(curPageNo, totalPageNo) {
+    for(var name in arrBasic) {
+        if(params[name] !== undefined) {
+            outputParams[name] = params[name];
+        }
+    }
+
+    return outputParams;
+}
+
+exports.paginationMath = function(pageNo, count) {
+    var curPageNo = parseInt(pageNo);
+    var totalPageNo = parseInt(count);
     var oPagination = {
         isFirst: curPageNo == 1 ? true : false,
         isLast: curPageNo == totalPageNo ? true : false
