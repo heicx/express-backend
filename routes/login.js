@@ -26,7 +26,11 @@ var isLogin = function(req, res, next) {
  * @param res
  */
 var userIsLogin = function(req, res) {
-    res.redirect("/contract/list");
+    if(!req.session || !req.session.user) {
+        res.render("login");
+    }else {
+        res.redirect("/contract/list");
+    }
 }
 
 /**
@@ -53,9 +57,7 @@ var userLogin = function(req, res) {
     });
 }
 
-router.use(isLogin);
-
-router.get("/", userIsLogin);
+router.get("/", isLogin, userIsLogin);
 router.get("/login", userIsLogin);
 router.post("/login", userLogin);
 
