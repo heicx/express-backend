@@ -12,6 +12,7 @@ var setup = function(db, cb) {
     require("./region")(orm, db);
     require("./area")(orm, db);
     require("./regionArea")(orm, db);
+    require("./contractPayment")(orm, db);
 
     return cb(null, db);
 }
