@@ -72,5 +72,5 @@ app.use("/area", area);
 app.get("*", function(req, res, next) {
     res.status(404).end("404");
 });
-
+console.log(133);
 app.listen(port);
