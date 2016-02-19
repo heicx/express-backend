@@ -22,7 +22,7 @@ client.on("error", function(err) {
     console.log("Error" + err);
 });
 
-app.set("views", "./view/");
+app.set("views", path.join(__dirname, 'view'));
 app.set("view engine", "jade");
 app.use(express.static(path.join(__dirname, "static")));
 app.use(favicon(__dirname + "/static/assets/images/favicon.ico"));
@@ -51,7 +51,7 @@ app.use(function(req, res, next) {
  * 路由扩展
  */
 var login = require("./routes/login");
-//var user = require("./routes/user");
+var user = require("./routes/user");
 var contract = require("./routes/contract");
 var firstParty = require("./routes/firstParty");
 var secondParty = require("./routes/secondParty");
@@ -61,6 +61,7 @@ var region = require("./routes/region");
 var area = require("./routes/area")
 
 app.use("/", login.routes);
+app.use("/user", user);
 app.use("/contract", contract);
 app.use("/dictionary/firstParty", firstParty);
 app.use("/dictionary/secondParty", secondParty);
