@@ -1,12 +1,18 @@
 var express = require("express");
 var router = express.Router();
 
+/**
+ * 用户登陆
+ * @param req
+ * @param res
+ * @param next
+ */
 var isLogin = function(req, res, next) {
     var async = req.query.async || false;
 
 	if(!req.session || !req.session.user) {
         if(async)
-            res.json({message: "未登录"});
+            res.json({status: false, message: "未登录"});
         else
             res.redirect("/login");
     }else {
@@ -14,33 +20,44 @@ var isLogin = function(req, res, next) {
     }
 }
 
-router.get("/", isLogin, function(req, res, next) {
+/**
+ * 验证用户是否已经登陆
+ * @param req
+ * @param res
+ */
+var userIsLogin = function(req, res) {
     res.redirect("/contract/list");
-});
-router.get("/login", function(req, res, next) {
-    if(!req.session || !req.session.user) {
-        res.render("login");
-    }else {
-        res.redirect("/contract/list");
-    }
-});
-router.post("/login", function(req, res, next) {
+}
+
+/**
+ * 用户登陆
+ * @param req
+ * @param res
+ */
+var userLogin = function(req, res) {
     var params = {
         name: req.body.username,
         password: req.body.password
     }
     var userModel = req.models.contract_user;
 
-    // 验证登陆用户
-    userModel.getUser(params, function(err, user) {
+    userModel.getUserByParams(params).then(function(user) {
         if(user.length > 0) {
             req.session.user = JSON.stringify(user[0]);
             res.redirect("/contract/list");
         }else {
             res.redirect("/login");
         }
+    }).catch(function(errMsg) {
+        res.status(500).send(errMsg);
     });
-});
+}
+
+router.use(isLogin);
+
+router.get("/", userIsLogin);
+router.get("/login", userIsLogin);
+router.post("/login", userLogin);
 
 exports.routes = router;
 exports.islogin = isLogin;

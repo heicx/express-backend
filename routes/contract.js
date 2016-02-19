@@ -1,11 +1,22 @@
 var express = require("express");
 var router = express.Router();
-var login = require("./login");
 var when = require("when");
+
+var login = require("./login");
 var contractModel, contractTypeModel, regionModel, firstPartyModel, secondPartyModel;
 
-// 获取合同列表及相关查询数据
-var fetchContractInfo = function* (req) {
+/**
+ * 生成器
+ * 获取合同列表所需的基础信息
+ *
+ * 步骤:
+ * 1. 获取合同列表
+ * 2. 获取逾期合同数量
+ * 3. 获取合同类型列表
+ * 4. 获取所有大区
+ * @param params
+ */
+var genFetchContractInfo = function* (req) {
     var params = req.query;
 
     contractModel = contractModel || req.models.contract_info;
@@ -19,7 +30,13 @@ var fetchContractInfo = function* (req) {
 }
 
 
-// 获取甲方乙方列表
+/**
+ * 异步接口
+ *
+ * 获取甲方乙方列表
+ * @param req
+ * @param res
+ */
 var fetchBothPartiesList = function(req, res) {
     firstPartyModel = firstPartyModel || req.models.contract_first_party;
     secondPartyModel = secondPartyModel || req.models.contract_second_party;
@@ -32,7 +49,31 @@ var fetchBothPartiesList = function(req, res) {
     });
 }
 
-// 添加合同
+/**
+ * 生成器
+ * 添加合同
+ *
+ * 步骤:
+ * 1. 合同查重
+ * 2. 添加合同
+ * 3. 查询合同详细信息
+ * @param params
+ */
+var genAddContract = function* (params) {
+    contractModel = contractModel || req.models.contract_info;
+
+    yield contractModel.findContractIsExist(params);
+    yield contractModel.addContract(params);
+    yield contractModel.getContractInfo({contract_number: params.contract_number});
+}
+
+/**
+ * 数据迭代拼装处理
+ *
+ * 添加合同
+ * @param req
+ * @param res
+ */
 var addContract = function(req, res) {
     var params = {
         contract_number: req.body.contractNumber,
@@ -43,30 +84,39 @@ var addContract = function(req, res) {
         end_time: req.body.endTime,
         create_time: new Date(),
         deposit: req.body.deposit,
-        contract_price: req.body.contractPrice
+        contract_price: req.body.contractPrice,
+        saler_name: JSON.parse(req.session.user).user_name
     };
+    var arrPromise = [];
+    var genContract = genAddContract(params);
 
     contractModel = contractModel || req.models.contract_info;
 
-    // 验证合同是否已存在
-    contractModel.findContractIsExist(params).then(function() {
-        params.saler_name = JSON.parse(req.session.user).user_name;
-        contractModel.addContract(params, function(err, contract) {
-            res.json(contract);
-        });
-    }).catch(function(errMsg) {
+    for(var i of genContract) {
+        arrPromise.push(i);
+    }
+
+    when.all(arrPromise).then(function(result) {
+        res.json({status: true, data: result[2]});
+    }).catch (function(errMsg) {
         res.json({status: false, message: errMsg});
     });
 }
 
-// 拼装合同预加载数据
+/**
+ * 数据迭代拼装处理
+ *
+ * 获取合同列表所需的基础信息
+ * @param req
+ * @param res
+ */
 var packContractBasicData = function(req, res) {
     var params = req.query;
     var async = params.async || false;
     var contract = {}, arrPromise = [];
-    var itrContractInfo = fetchContractInfo(req);
+    var genContractInfo = genFetchContractInfo(req);
 
-    for(var i of itrContractInfo) {
+    for(var i of genContractInfo) {
         arrPromise.push(i);
     }
 
@@ -83,8 +133,9 @@ var packContractBasicData = function(req, res) {
     }).catch (function(errMsg) {
         if(async)
             res.json({status: false, message: errMsg});
-        else
+        else {
             res.status(500).send(errMsg);
+        }
     });
 }
 
