@@ -70,8 +70,8 @@ app.use("/dictionary/contractBank", contractBank);
 app.use("/dictionary/region", region);
 app.use("/area", area);
 
-app.get("*", function(req, res, next) {
+app.get("*", function(req, res) {
     res.status(404).end("404");
 });
-console.log(133);
+
 app.listen(port);

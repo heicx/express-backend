@@ -1,58 +1,66 @@
 extends ../frame
 
 block content
-	div.html.ui.top.aligned.segment
-		div.ui.breadcrumb
-			a.section 用户管理
-			i.right.chevron.icon.divider
-			div.active.section 用户列表
-	div.ui.grid.aligned.segment
-		div.ten.wide.column.centered
-			table.ui.grey.compact.celled.striped.selectable.yellow.table.attached
-				thead
-					tr.center.aligned
-						th 用户名
-						th 用户类型
-						th 邮箱
-						th 创建时间
-				tbody
-					each user, i in users
-						tr.center.aligned
-							td #{user.username}
-							if user.roleid == "1"
-								td 管理员
-							else if user.roleid == "2"
-								td 大客户
-							else
-								td 渠道
-							td #{user.email || "暂无"}
-							td #{user.createTime || "暂无"}
-				tfoot
-					tr
-						th(colspan="4")
-							div#addUserBtn.ui.right.floated.small.primary.labeled.icon.button 添加用户
-								i.user.icon
-							//div.ui.right.floated.small.primary.labeled.icon.button 重置密码
-							//	i.warning.circle.icon
-				div#regUserModal.ui.modal
-					div.header 添加用户
-					i.close.icon
-					div.content
-						div.ui.segment.small.form
-							div.field
-								label 用户名称
-								input(type="text", placeholder="用户名称")
-							div.field
-								label 邮箱
-								input(type="text", placeholder="xxxx@email.com")
-							div.field
-								label 密码
-								input(type="text", placeholder="请输入6位以上密码")
-							div.field
-								button.ui.primary.button 确定
-			//div.ui.bottom.attached.warning.message
-			//	i.circle.icon
-	script.
-		require(["/app/config.js"], function() {
-			require(["/app/user/userList.js"]);
-		});
+    div.html.ui.top.aligned.segment
+        div.ui.breadcrumb
+            a.section 用户管理
+            i.right.chevron.icon.divider
+            div.active.section 用户列表
+    div.ui.segment.grid.aligned.small.form
+        div.ten.wide.column.centered
+            div.ui.fluid.action.input
+                input(type="text", id="userName", placeholder="用户名称")
+                button.ui.primary.button#queryBtn 查询
+    div.ui.grid.aligned.segment
+        div.ten.wide.column.centered
+            table.ui.grey.compact.celled.striped.selectable.yellow.table.attached
+                thead
+                    tr.center.aligned
+                        th 用户名
+                        th 用户类型
+                        th 邮箱
+                        th 创建时间
+                tbody
+                    each user, i in users
+                        tr.center.aligned
+                            td #{user.user_name}
+                            if user.user_type == "1"
+                                td 管理员
+                            else if user.user_type == "2"
+                                td 大客户
+                            else
+                                td 渠道
+                            td #{user.user_email || "暂无"}
+                            td #{user.create_time || "暂无"}
+                tfoot
+                    tr
+                        th(colspan="4")
+                            div#addUserBtn.ui.right.floated.small.primary.labeled.icon.button 添加用户
+                                i.user.icon
+                            //div.ui.right.floated.small.primary.labeled.icon.button 重置密码
+                            //	i.warning.circle.icon
+                div#regUserModal.ui.modal
+                    div.header 添加用户
+                    i.close.icon
+                    div.content
+                        div.ui.segment.small.attached.form
+                            div.field
+                                label 用户名称
+                                input(type="text", id="userFullName", placeholder="用户名称")
+                            div.field
+                                label 邮箱
+                                input(type="text", id="userEMail", placeholder="xxxx@email.com")
+                            div.field
+                                label 密码
+                                input(type="text", id="userPassword", placeholder="请输入6位以上密码")
+                            div.field
+                                button.ui.fluid.primary.button 确定
+                        div.ui.bottom.attached.hidden.warning.message#modalMsg
+                            i.icon.help
+                            span#modalMsgTips 123
+            //div.ui.bottom.attached.warning.message
+            //	i.circle.icon
+    script.
+        require(["/app/config.js"], function () {
+            require(["/app/user/userList.js"]);
+        });
