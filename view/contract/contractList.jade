@@ -113,19 +113,19 @@ block content
                         td #{list.create_time || "--"}
                         td.collapsing
                             button.ui.primary.aligned.button 详情
-            tfoot
+            tfoot#paginationFooter
                 tr
                     th(colspan="18")
-                        div.ui.right.floated.pagination.menu
-                            a.icon.item
-                                i.left.chevron.icon(data-disable="#{contract.pagination.isFirst}")
+                        div.ui.left.floated.pagination.menu#paginationBtn
+                            a.icon.item(data-disable="#{contract.pagination.isFirst}", data-type="prev", data-curr="#{contract.pagination.pageNo}")
+                                i.left.chevron.icon
                             each num, i in contract.pagination.count
                                 if contract.pagination.pageNo == num
                                     a.item.active #{num}
                                 else
                                     a.item #{num}
-                            a.icon.item
-                                i.right.chevron.icon(data-disable="#{contract.pagination.isLast}")
+                            a.icon.item(data-disable="#{contract.pagination.isLast}", data-type="next", data-curr="#{contract.pagination.pageNo}")
+                                i.right.chevron.icon
             div.ui.inverted.dimmer(id="listLoader")
                 div.ui.loader
             div#contractModal.ui.modal
@@ -161,14 +161,15 @@ block content
                         div.two.fields
                             div.field
                                 label 合同金额
-                                    input(type="text", id="nPrice", placeholder="合同金额")
+                                    input(type="number", id="nPrice", placeholder="合同金额")
                             div.field
                                 label 保证金
-                                    input(type="text", id="nDeposit", placeholder="保证金")
+                                    input(type="number", id="nDeposit", placeholder="保证金")
                         div.field
                             button.ui.fluid.primary.button#confirmContractBtn 确定
                     div.ui.bottom.attached.hidden.warning.message#modalMsg
                         i.icon.help
+                        span#modalMsgTips
             script.
                 require(["/app/config.js"], function () {
                     require(["/app/contract/contractList.js"]);
