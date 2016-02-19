@@ -1,13 +1,8 @@
 define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"], function($, ui, base) {
 	$(function() {
         var render = {
-            contractList: function(res, cb) {
+            contractList: function(list, cb) {
                 var i = 0, strJoin = "", contractStatus = "";
-                var list = res.list || res;
-
-                if(typeof(list) === "object" && Object.prototype.toString.call(list).toLowerCase() == "[object object]") {
-                    list = [list];
-                }
 
                 if(list) {
                     for(; i < list.length; i++) {
@@ -46,9 +41,29 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
                                  + "<td>" + (list[i].create_time || "--") + "</td>"
                                  + "<td><button data-id='" + list[i].contract_number + "' class='ui primary aligned button'>详情</button></td></tr>";
                     }
-
-                    cb(strJoin);
                 }
+
+                cb(strJoin);
+            },
+            footerPagination: function(paganition, cb) {
+                var strJoin = "", className;
+
+                strJoin = "<a data-disable='" + paganition.isFirst + "' data-type='prev' data-curr='" + paganition.pageNo + "' class='icon item'>"
+                        + "<i class='left chevron icon'></i></a>";
+
+                paganition.count.forEach(function(index) {
+                    if(paganition.pageNo == index)
+                        className = "active";
+                    else
+                        className = "";
+
+                    strJoin += "<a class='item " + className + "'>" + index + "</a>";
+                });
+
+                strJoin += "<a data-disable='" + paganition.isLast + "' data-type='next' data-curr='" + paganition.pageNo + "' class='icon item'>"
+                         + "<i class='right chevron icon'></i></a>";
+
+                cb(strJoin);
             },
             parties: function() {
                 base.common.getData(base.api.parties, {}, false, function(parties) {
@@ -76,13 +91,64 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
             modalMsg: function(msg) {       /** 控制弹出层的提示信息的显示与隐藏 **/
                 var _msg = msg || "";
 
-                $("#modalMsg p").html(_msg);
+                $("#modalMsgTips").html(_msg);
 
                 if(_msg === "") {
                     $("#modalMsg").removeClass("hidden").transition("fade");
                 }else {
                     $("#modalMsg").closest(".hidden").transition("fade");
                 }
+            }
+        }
+
+        var validate = {
+            contractNumber: function(contractNumber) {
+                if(contractNumber === "")
+                    return {status: false, message: "请输入完整的合同编号"};
+                else
+                    return {status: true};
+            },
+            firstPartyId: function(firstPartyId) {
+                if(firstPartyId === "")
+                    return {status: false, message: "请选择甲方"};
+                else
+                    return {status: true};
+            },
+            secondPartyId: function(secondPartyId) {
+                if(secondPartyId === "")
+                    return {status: false, message: "请选择乙方"};
+                else
+                    return {status: true};
+            },
+            contractType: function(contractType) {
+                if(contractType === "")
+                    return {status: false, message: "请选择合同类型"};
+                else
+                    return {status: true};
+            },
+            contractTime: function(effectiveTime, endTime) {
+                var _effectiveTime = new Date(effectiveTime).getTime();
+                var _endTime = new Date(endTime).getTime();
+
+                if(_effectiveTime.toString() === "NaN" || _endTime.toString() === "NaN")
+                    return {status: false, message: "请选择合同生效截止日期"};
+                else if(_effectiveTime > _endTime) {
+                    return {status: false, message: "合同生效日期应小于截止日期"};
+                }else {
+                    return {status: true};
+                }
+            },
+            contractPrice: function(contractPrice) {
+                if(contractPrice === "" || contractPrice.toString().match(/^\d+(\.\d+)?$/g) === null)
+                    return {status: false, message: "请输入正确的合同金额"};
+                else
+                    return {status: true};
+            },
+            deposit: function(deposit) {
+                if(deposit === "" || deposit.toString().match(/^\d+(\.\d+)?$/g) === null)
+                    return {status: false, message: "请输入正确的保证金金额"};
+                else
+                    return {status: true};
             }
         }
 
@@ -94,7 +160,10 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
         /**
          * 条件查询
          */
-		$("#queryBtn").on("click", function() {
+		$("#queryBtn").on("click", function(evt, isPagination, that) {
+            var isPagination = isPagination || null;
+            var $that = $(that) || $(this);
+            var currPageNo = null;
 			var params = {
 				contract_number: $("#contractNumber").val(),
 				first_party_name: $("#firstPartyName").val(),
@@ -109,14 +178,49 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 				city_id: $("#cityDropdown").val()
 			}
 
+            if(isPagination) {
+                currPageNo = parseInt($that.parent().find("a").eq(0).attr("data-curr")) || 1;
+
+                if($that.attr("data-type") === "prev") {
+                    if($that.attr("data-disable") === "false")
+                        params.pageNo = currPageNo - 1;
+                    else
+                        return false;
+                }else if($that.attr("data-type") === "next") {
+                    if($that.attr("data-disable") === "false")
+                        params.pageNo = currPageNo + 1;
+                    else
+                        return false;
+                }else {
+                    var _no = parseInt($that.html());
+
+                    if(currPageNo !== _no)
+                        params.pageNo = _no;
+                    else
+                        return false;
+                }
+            }
+
 			$("#listLoader").addClass("active");
 			base.common.getData(base.api.contractList, params, false, function(resultData) {
-                render.contractList(resultData, function(str) {
+                render.contractList(resultData.list, function(str) {
                     $("#contractList").html(str);
-                    $("#listLoader").removeClass("active");
                 });
+
+                render.footerPagination(resultData.pagination, function(str) {
+                    $("#paginationBtn").html(str);
+                });
+
+                $("#listLoader").removeClass("active");
 			}, function(err) {})
 		});
+
+        /**
+         * 翻页
+         */
+        $("#paginationBtn").on("click", "a", function() {
+            $("#queryBtn").trigger("click", [true, this]);
+        });
 
         /**
          * 打开新建合同窗口
@@ -129,6 +233,8 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
          * 新建合同
          */
         $("#confirmContractBtn").on("click", function() {
+            var errMsg = "";
+            var arrValidateItem = [];
             var params = {
                 contractNumber: $("#nContractNumber").val(),
                 firstPartyId: $("#nFirstPartyDropdown option:selected").val(),
@@ -140,14 +246,39 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
                 deposit: $("#nDeposit").val()
             };
 
-            base.common.postData(base.api.addContract, params, false, function(ret) {
-                console.log(ret);
-                if(ret.status) {
-                    render.contractList(ret.data, function() {
+            arrValidateItem.push(validate.contractNumber(params.contractNumber));
+            arrValidateItem.push(validate.firstPartyId(params.firstPartyId));
+            arrValidateItem.push(validate.secondPartyId(params.secondPartyId));
+            arrValidateItem.push(validate.contractType(params.contractType));
+            arrValidateItem.push(validate.contractTime(params.effectiveTime, params.endTime));
+            arrValidateItem.push(validate.contractPrice(params.contractPrice));
+            arrValidateItem.push(validate.contractNumber(params.contractNumber));
+            arrValidateItem.push(validate.deposit(params.deposit));
 
-                    });
+            for(var i in arrValidateItem){
+                if(arrValidateItem[i].status === false) {
+                    errMsg = arrValidateItem[i].message;
+                    break;
                 }
-            }, function() {});
+            }
+
+            if(errMsg === "") {
+                $("#listLoader").addClass("active");
+                base.common.postData(base.api.addContract, params, false, function(ret) {
+                    if(ret.status) {
+                        render.contractList(ret.data.list, function(str) {
+                            $("#contractList").prepend(str);
+                            $('#contractModal').modal("setting", "transition", "fade down").modal("hide");
+                        });
+                    }else {
+                        render.modalMsg(ret.message);
+                    }
+
+                    $("#listLoader").removeClass("active");
+                }, function() {});
+            }else {
+                render.modalMsg(errMsg);
+            }
         });
 
         /**
@@ -197,6 +328,13 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 
                 $("#cityDropdown").html(strOptions);
             }, function(err) {});
+        });
+
+        /**
+         * 监听弹出层的关闭事件
+         */
+        $('#contractModal').modal("setting", "onHide", function() {
+            render.modalMsg();
         });
 
         render.parties();
