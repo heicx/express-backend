@@ -20,7 +20,7 @@ block content
                         th 用户类型
                         th 邮箱
                         th 创建时间
-                tbody
+                tbody#userList
                     each user, i in users
                         tr.center.aligned
                             td #{user.user_name}
@@ -39,6 +39,8 @@ block content
                                 i.user.icon
                             //div.ui.right.floated.small.primary.labeled.icon.button 重置密码
                             //	i.warning.circle.icon
+                div.ui.inverted.dimmer(id="listLoader")
+                    div.ui.loader
                 div#regUserModal.ui.modal
                     div.header 添加用户
                     i.close.icon
@@ -52,9 +54,20 @@ block content
                                 input(type="text", id="userEMail", placeholder="xxxx@email.com")
                             div.field
                                 label 密码
-                                input(type="text", id="userPassword", placeholder="请输入6位以上密码")
+                                input(type="password", id="userPassword", placeholder="请输入6位以上密码")
                             div.field
-                                button.ui.fluid.primary.button 确定
+                                label 用户类型
+                                div.inline.fields#membersType
+                                    div.field
+                                        div.ui.radio.checkbox
+                                            input(type="radio", name="member", checked="checked", value="2")
+                                            label 大客户
+                                    div.field
+                                        div.ui.radio.checkbox
+                                            input(type="radio", name="member", value="3")
+                                            label 渠道
+                            div.field
+                                button.ui.fluid.primary.button#confirmUserBtn 确定
                         div.ui.bottom.attached.hidden.warning.message#modalMsg
                             i.icon.help
                             span#modalMsgTips 123
