@@ -71,7 +71,7 @@ exports.arrToJSON = function(arr) {
  */
 exports.ormFilter = function(origin, basic, cb) {
     var prefix, i, j, arrCondition = [], arrArgs = [], strL, strR;
-    var keywords = [">", "<", "in", "like"];
+    var keywords = [">", "<", "<>", "in", "like"];
 
 
     for (i in basic) {
