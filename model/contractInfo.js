@@ -83,12 +83,12 @@ module.exports = function(orm, db) {
         var arrLimit = [(pageNo - 1) * prePageNum, prePageNum];
         var sql;
 
-        // 默认合同状态为0待生效
+        // 默认合同状态为0等待生效
         if(!params.contract_status) {
             params.contract_status = 0;
         }
 
-        // 过滤并获取查询字段,产出关联条件语句以及实参
+        // 过滤查询字段,产出关联条件语句及实参数据
         utils.ormFilter(params, arrOutput, function(str, arr) {
             strCondition = str ? " where " + str : "";
             arrArgs = arr;
@@ -140,7 +140,7 @@ module.exports = function(orm, db) {
      * 查询逾期合同数量
      * @param params
      */
-    Contract.getOverdueDaysCount = function () {
+    Contract.getOverdueDaysCount = function (params) {
         var sql, def = when.defer();
 
         sql = "select count(*) as overdue_count from contract_info where TIMESTAMPDIFF(DAY, DATE_FORMAT(end_time, '%Y-%m-%d'),NOW()) > 0";
