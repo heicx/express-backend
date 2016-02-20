@@ -39,8 +39,8 @@ app.use(session({
 app.use(function(req, res, next) {
     models(function(err, db) {
         if(err) return next(err);
-
         req.models = db.models;
+
         req.db = db;
 
         return next();
@@ -58,7 +58,8 @@ var secondParty = require("./routes/secondParty");
 var contractType = require("./routes/contractType");
 var contractBank = require("./routes/contractBank");
 var region = require("./routes/region");
-var area = require("./routes/area")
+var area = require("./routes/area");
+var contractPayment = require("./routes/contractPayment")
 
 app.use("/", login.routes);
 app.use("/user", user);
@@ -69,6 +70,7 @@ app.use("/dictionary/contractType", contractType);
 app.use("/dictionary/contractBank", contractBank);
 app.use("/dictionary/region", region);
 app.use("/area", area);
+app.use("/payment", contractPayment);
 
 app.get("*", function(req, res) {
     res.status(404).end("404");
