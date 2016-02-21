@@ -62,7 +62,6 @@ var fetchBothPartiesList = function(req, res) {
 var genAddContract = function* (params) {
     contractModel = contractModel || req.models.contract_info;
 
-    yield contractModel.findContractIsExist(params);
     yield contractModel.addContract(params);
     yield contractModel.getContractInfo({contract_number: params.contract_number});
 }
@@ -92,13 +91,19 @@ var addContract = function(req, res) {
 
     contractModel = contractModel || req.models.contract_info;
 
-    for(var i of genContract) {
-        arrPromise.push(i);
-    }
+    // 检查合同是否已经存在
+    contractModel.findContractIsExist(params).then(function() {
+        for(var i of genContract) {
+            arrPromise.push(i);
+        }
 
-    when.all(arrPromise).then(function(result) {
-        res.json({status: true, data: result[2]});
-    }).catch (function(errMsg) {
+        // 添加合同并获取合同信息
+        when.all(arrPromise).then(function(result) {
+            res.json({status: true, data: result[1]});
+        }).catch (function(errMsg) {
+            res.json({status: false, message: errMsg});
+        });
+    }).catch(function(errMsg) {
         res.json({status: false, message: errMsg});
     });
 }
