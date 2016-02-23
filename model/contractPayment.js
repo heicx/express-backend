@@ -79,7 +79,7 @@ module.exports = function(orm, db) {
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
                     + "a.contract_price, a.deposit, a.paid_price, a.saler_name, a.contract_status,"
                     + "DATE_FORMAT(a.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
-                    + "p.id, j.bank_name, p.payment, p.payment_time, k.user_name "
+                    + "p.id, j.bank_name, p.payment, date_format(p.payment_time, '%Y-%m-%d') as payment_time, k.user_name "
                     + "FROM contract_info a "
                     + "right JOIN contract_payment p ON p.id = a.contract_number "
                     + "JOIN contract_first_party b ON a.first_party_id = b.id "
@@ -90,7 +90,7 @@ module.exports = function(orm, db) {
                     + "LEFT JOIN area i ON b.city_id = i.id "
                     + "left JOIN contract_bank j ON j.id = p.bank_id "
                     + "left JOIN contract_user k ON k.id = p.user_id "
-                    + strCondition + " GROUP BY a.contract_number LIMIT ?,?";
+                    + strCondition + "  LIMIT ?,?";
                 db.driver.execQuery(sql, arrArgs.concat(arrLimit), function (err, list) {
                     if(!err) {
                         console.log(list.length);
