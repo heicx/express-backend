@@ -149,5 +149,6 @@ router.use(login.islogin);
 router.get("/list", packContractBasicData);
 router.get("/parties", fetchBothPartiesList);
 router.post("/add", addContract);
+router.get("/detail", addContract);
 
 module.exports = router;

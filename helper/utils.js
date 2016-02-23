@@ -84,7 +84,11 @@ exports.ormFilter = function(origin, basic, cb) {
                     if(typeof basic[i] === "string") {
                         prefix = basic[i] ? (basic[i] + "." + i) : i;
                     }else {
-                        prefix =  basic[i].prefix ? (basic[i].prefix + "." + i) : i;
+                        if(basic[i].mapsTo) {
+                            prefix =  basic[i].prefix ? (basic[i].prefix + "." + basic[i].mapsTo) : basic[i].mapsTo;
+                        }else {
+                            prefix =  basic[i].prefix ? (basic[i].prefix + "." + i) : i;
+                        }
                     }
 
                     // 拼装orm查询需要的字段值的通配符

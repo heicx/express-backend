@@ -1,113 +1,109 @@
 extends ../frame
 
 block content
-	div.ui.aligned.segment
-		div.ui.breadcrumb
-			a.section 合同管理
-			i.right.chevron.icon.divider
-			div.active.section 开票列表
-	div.ui.segment.small.form
-		div.equal.width.fields
-			div.field
-				label 合同编号
-				input(type="text", placeholder="合同编号")
-			div.field
-				label 甲方名称
-				input(type="text", placeholder="甲方名称")
-			div.field
-				label 乙方名称
-				input(type="text", placeholder="乙方名称")
-			div.field
-				label 生效时间
-				input(type="text", placeholder="生效时间")
-			div.field
-				label 结束时间
-				input(type="text", placeholder="结束时间")
-			div.field
-				label 销售名称
-				input(type="text", placeholder="销售名称")
-		div.equal.width.fields
-			div.field
-				label 发票号
-				input(type="text", placeholder="发票号")
-			div.field
-				label 开票起始
-				input(type="text", placeholder="开票起始时间")
-			div.field
-				label 开票结束
-				input(type="text", placeholder="开票起始时间")
-			div.field
-				label 记录起始
-				input(type="text", placeholder="记录起始时间")
-			div.field
-				label 记录结束
-				input(type="text", placeholder="记录结束时间")
-		div.fields
-			div.field
-				button.ui.primary.button 查询
-			div.field
-				button.ui.primary.button 导出
-	div.ui.stacked.segment
-		table.ui.celled.selectable.striped.grey.table
-			thead
-				tr
-					th 合同号
-					th 甲方
-					th 甲方地区
-					th 乙方
-					th 合同类型
-					th 生效时间
-					th 结束时间
-					th 合同金额
-					th 应付总额
-					th 回款金额
-					th 回款时间
-					th 入账银行
-					th 销售名称
-					th 记录人
-					th 记录时间
-			tbody
-				tr
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-				tr
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-			tfoot
-				tr
-					th(colspan="18")
-						div.ui.right.floated.pagination.menu
-							a.icon.item
-								i.left.chevron.icon
-							a.item.active 1
-							a.item 2
-							a.item 3
-							a.item 4
-							a.icon.item
-								i.right.chevron.icon
+    div.ui.aligned.segment
+        div.ui.breadcrumb
+            a.section 合同管理
+            i.right.chevron.icon.divider
+            div.active.section 开票列表
+    div.ui.segment.small.form
+        div.equal.width.fields
+            div.field
+                label 合同编号
+                input(type="text", id="contractNumber", placeholder="合同编号")
+            div.field
+                label 甲方名称
+                input(type="text", id="firstPartyName", placeholder="甲方名称")
+            div.field
+                label 乙方名称
+                input(type="text", id="secondPartyName", placeholder="乙方名称")
+            div.field
+                label 合同类型
+                select.ui.dropdown#contractType
+                    option(value="") 请选择合同类型
+                    each type, i in invoice.type
+                        option(value="#{type.id}") #{type.contract_type_name}
+            div.field
+                label 生效时间
+                input(type="text", id="effectiveTime", placeholder="生效时间")
+            div.field
+                label 结束时间
+                input(type="text", id="endTime", placeholder="结束时间")
+            div.field
+                label 销售名称
+                input(type="text", id="salerName", placeholder="销售名称")
+        div.equal.width.fields
+            div.field
+                label 发票号
+                input(type="text", id="invoiceNumber", placeholder="发票号")
+            div.field
+                label 开票起始
+                input(type="text",id="invoiceStartTime", placeholder="开票起始时间")
+            div.field
+                label 开票结束
+                input(type="text",id="invoiceEndTime", placeholder="开票起始时间")
+            div.field
+                label 创建起始
+                input(type="text",id="createStartTime", placeholder="创建起始时间")
+            div.field
+                label 创建结束
+                input(type="text",id="createEndTime", placeholder="创建结束时间")
+        div.fields
+            div.field
+                button#queryBtn.ui.primary.button 查询
+            div.field
+                button.ui.primary.button 导出
+    div.ui.stacked.segment
+        table.ui.celled.selectable.striped.grey.table.sortable
+            thead
+                tr.ui.center.aligned.segment
+                    th.sorted.ascending 发票编号
+                    th.sorted.ascending 发票金额
+                    th.sorted.ascending 发票日期
+                    th 合同编号
+                    th 甲方
+                    th 甲方地区
+                    th 乙方
+                    th 合同类型
+                    th.sorted.ascending 生效时间
+                    th.sorted.ascending 结束时间
+                    th.sorted.ascending 合同金额
+                    th.sorted.ascending 保证金
+                    th.sorted.ascending 应付总额
+                    th 销售名称
+                    th 记录时间
+            tbody#invoiceList
+                each list, i in invoice.list
+                    tr.ui.center.aligned.segment
+                        td #{list.invoice_number}
+                        td #{list.invoice_price}
+                        td #{list.invoice_time || '--'}
+                        td #{list.contract_number}
+                        td #{list.first_party_name}
+                        td #{list.region_name + "-" + list.province_name + "-" + list.city_name}
+                        td #{list.second_party_name}
+                        td #{list.contract_type_name}
+                        td #{list.effective_time}
+                        td #{list.end_time}
+                        td #{list.contract_price}
+                        td #{list.deposit}
+                        td #{list.contract_price + list.deposit}
+                        td #{list.saler_name}
+                        td #{list.create_time || '--'}
+            tfoot#paginationFooter
+                tr
+                    th(colspan="18")
+                        div.ui.left.floated.pagination.menu#paginationBtn
+                            a.icon.item(data-disable="#{invoice.pagination.isFirst}", data-type="prev", data-curr="#{invoice.pagination.pageNo}")
+                                i.left.chevron.icon
+                            each num, i in invoice.pagination.count
+                                if invoice.pagination.pageNo == num
+                                    a.item.active #{num}
+                                else
+                                    a.item #{num}
+                            a.icon.item(data-disable="#{invoice.pagination.isLast}", data-type="next", data-curr="#{invoice.pagination.pageNo}")
+                                i.right.chevron.icon
+    script.
+        require(["/app/config.js"], function () {
+            require(["/app/contract/invoiceList.js"]);
+        });

@@ -180,7 +180,6 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 
             if(isPagination) {
                 currPageNo = parseInt($that.parent().find("a").eq(0).attr("data-curr")) || 1;
-
                 if($that.attr("data-type") === "prev") {
                     if($that.attr("data-disable") === "false")
                         params.pageNo = currPageNo - 1;

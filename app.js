@@ -53,6 +53,7 @@ app.use(function(req, res, next) {
 var login = require("./routes/login");
 var user = require("./routes/user");
 var contract = require("./routes/contract");
+var invoice = require("./routes/invoice");
 var firstParty = require("./routes/firstParty");
 var secondParty = require("./routes/secondParty");
 var contractType = require("./routes/contractType");
@@ -64,6 +65,7 @@ var contractPayment = require("./routes/contractPayment")
 app.use("/", login.routes);
 app.use("/user", user);
 app.use("/contract", contract);
+app.use("/invoice", invoice);
 app.use("/dictionary/firstParty", firstParty);
 app.use("/dictionary/secondParty", secondParty);
 app.use("/dictionary/contractType", contractType);

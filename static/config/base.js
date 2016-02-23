@@ -17,7 +17,10 @@ define(["jquery"], function($) {
             queryContractBank: "/dictionary/contractBank/list",
             addContractBank: "/dictionary/contractBank/add",
             getProvince: "/area/province",
-            getCity: "/area/city"
+            getCity: "/area/city",
+            userList: "/user/list",
+            addUser: "/user/add",
+            invoiceList: "/invoice/list"
         }
     }
 

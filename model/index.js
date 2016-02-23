@@ -5,6 +5,8 @@ var connection = null;
 var setup = function(db, cb) {
     require("./user")(orm, db);
     require("./contractInfo")(orm, db);
+    require("./contractInvoice")(orm, db);
+    require("./contractPayment")(orm, db);
     require("./firstParty")(orm, db);
     require("./secondParty")(orm, db);
     require("./contractType")(orm, db);
@@ -12,7 +14,6 @@ var setup = function(db, cb) {
     require("./region")(orm, db);
     require("./area")(orm, db);
     require("./regionArea")(orm, db);
-    require("./contractPayment")(orm, db);
 
     return cb(null, db);
 }
