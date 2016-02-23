@@ -1,3 +1,4 @@
+var when = require("when");
 module.exports = function(orm, db) {
 	var contractBank = db.define("contract_bank", {
 		id: {type: "serial", key: true},
@@ -9,12 +10,16 @@ module.exports = function(orm, db) {
      * @param params(contractBankName: 入账银行名称)
      * @param callback
      */
-    contractBank.getContractBankList = function(params, callback) {
+    contractBank.getContractBankList = function(params) {
         var contractBankName = params.contractBankName || "";
-
+        var def = when.defer();
         contractBank.find().where("bank_name like ?", ["%" + contractBankName +"%"]).all(function(err, resultData) {
-            callback(err, resultData);
+            if (err)
+                def.reject(err);
+            else
+                def.resolve(resultData);
         });
+        return def.promise;
 	}
 
     /**
