@@ -5,6 +5,7 @@ define(["jquery"], function($) {
             contractList: "/contract/list?method=search",
             addContract: "/contract/add",
             parties: "/contract/parties",
+            paymentList: "/payment/list",
             allArea: "/dictionary/region/list",
             addRegion: "/dictionary/region/add",
             editRegion: "/dictionary/region/edit",

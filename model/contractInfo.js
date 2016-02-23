@@ -121,6 +121,7 @@ module.exports = function(orm, db) {
                 // 查询合同详细信息
                 db.driver.execQuery(sql, arrArgs.concat(arrLimit), function(err, resultData) {
                     if(!err) {
+                        console.log(resultData);
                         container.list = resultData;
                         container.totalPageNum = Math.ceil(container.count / prePageNum);
                         container.pagination = utils.paginationMath(pageNo, container.totalPageNum);
