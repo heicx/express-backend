@@ -10,7 +10,7 @@ block content
 		div.equal.width.fields
 			div.field
 				label 合同编号
-				input(type="text", placeholder="合同编号")
+				input(type="text", id="contractNumber", placeholder="合同编号")
 			div.field
 				label 甲方名称
 				input(type="text", placeholder="甲方名称")
@@ -30,8 +30,9 @@ block content
 			div.field
 				label 入账银行
 				select.ui.dropdown
-					option(value="") 东亚
-					option(value="1") 招行
+					option(value="0") 入账银行
+					each item in contract.bank
+						option(value="#{item.id}") #{item.bank_name}
 			div.field
 				label 回款起始
 				input(type="text", placeholder="回款起始时间")
@@ -46,7 +47,7 @@ block content
 				input(type="text", placeholder="记录结束时间")
 		div.fields
 			div.field
-				button.ui.primary.button 查询
+				button#queryBtn.ui.primary.button 查询
 			div.field
 				button.ui.primary.button 导出
 	div.ui.stacked.segment
@@ -54,62 +55,57 @@ block content
 			thead
 				tr
 					th 合同号
+					th 回款金额
+					th 合同金额
+					th 保证金
+					th 应付总额
 					th 甲方
 					th 甲方地区
 					th 乙方
 					th 合同类型
 					th 生效时间
 					th 结束时间
-					th 合同金额
-					th 应付总额
-					th 回款金额
 					th 回款时间
 					th 入账银行
 					th 销售名称
 					th 记录人
 					th 记录时间
-			tbody
-				tr
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-				tr
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
-					td Cell
+					th 操作
+			tbody#paymentList
+				each item in contract.payment.list
+					tr
+						td #{item.contract_number}
+						td #{item.payment}
+						td #{item.contract_price}
+						td #{item.deposit}
+						td #{item.contract_price + item.deposit}
+						td #{item.first_party_name}
+						td #{item.region_name + '-' + item.province_name + '-' + item.city_name}
+						td #{item.second_party_name}
+						td #{item.contract_type_name}
+						td #{item.effective_time}
+						td #{item.end_time}
+						td #{item.payment_time}
+						td #{item.bank_name}
+						td #{item.saler_name}
+						td #{item.user_name}
+						td #{item.create_time}
+						td.collapsing
+							button.ui.primary.aligned.button 详情
 			tfoot
 				tr
 					th(colspan="18")
-						div.ui.right.floated.pagination.menu
-							a.icon.item
+						div.ui.right.floated.pagination.menu#paginationBtn
+							a.icon.item(data-disable="#{contract.payment.pagination.isFirst}", data-type="prev", data-curr="#{contract.payment.pagination.pageNo}")
 								i.left.chevron.icon
-							a.item.active 1
-							a.item 2
-							a.item 3
-							a.item 4
-							a.icon.item
+							each page in contract.payment.pagination.count
+								if contract.payment.pageIndex == page
+									a.item.active #{page}
+								else
+									a.item #{page}
+							a.icon.item(data-disable="#{contract.payment.pagination.isLast}", data-type="prev", data-curr="#{contract.payment.pagination.pageNo}")
 								i.right.chevron.icon
+			script.
+				require(["/app/config.js"], function () {
+					require(["/app/contract/paymentList.js"]);
+				});

@@ -6,6 +6,7 @@ define(["jquery"], function($) {
             addContract: "/contract/add",
             modifyContract: "/contract/modify",
             parties: "/contract/parties",
+            paymentList: "/payment/list",
             allArea: "/dictionary/region/list",
             addRegion: "/dictionary/region/add",
             editRegion: "/dictionary/region/edit",
