@@ -39,7 +39,7 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
                                  + "<td>" + contractStatus + "</td>"
                                  + "<td>" + (list[i].overdue_days > -1 ? list[i].overdue_days : "--") + "</td>"
                                  + "<td>" + (list[i].create_time || "--") + "</td>"
-                                 + "<td><button data-id='" + list[i].contract_number + "' class='ui primary aligned button'>详情</button></td></tr>";
+                                 + "<td><a href='/contract/detail/" + list[i].contract_number + "'><button data-id='" + list[i].contract_number + "' class='ui primary aligned button'>详情</button></a></td></tr>";
                     }
                 }
 

@@ -4,6 +4,7 @@ define(["jquery"], function($) {
         address: {
             contractList: "/contract/list?method=search",
             addContract: "/contract/add",
+            modifyContract: "/contract/modify",
             parties: "/contract/parties",
             allArea: "/dictionary/region/list",
             addRegion: "/dictionary/region/add",

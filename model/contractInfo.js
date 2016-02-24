@@ -1,5 +1,6 @@
 var utils = require("../helper/utils");
 var when = require("when");
+var moment = require("moment");
 
 module.exports = function(orm, db) {
 	var Contract = db.define("contract_info", {
@@ -19,6 +20,10 @@ module.exports = function(orm, db) {
 		contract_status: {type: "integer", defaultValue: 0}
 	});
 
+    /**
+     * 查询合同是否存在
+     * @param params
+     */
     Contract.findContractIsExist = function(params) {
         var def = when.defer();
 
@@ -36,6 +41,10 @@ module.exports = function(orm, db) {
         return def.promise;
     }
 
+    /**
+     * 查询合同信息
+     * @param params
+     */
 	Contract.getContractInfo = function (params) {
         var def = when.defer();
 		var pageNo = params.pageNo || 1;
@@ -44,11 +53,6 @@ module.exports = function(orm, db) {
 			pageIndex: pageNo
 		}
         var arrOutput = {
-            contract_number: {
-                keyword: "like",
-                sign: ["%", "%"],
-                prefix: "a"
-            },
             first_party_name: {
                 keyword: "like",
                 sign: ["%", "%"],
@@ -83,9 +87,30 @@ module.exports = function(orm, db) {
         var arrLimit = [(pageNo - 1) * prePageNum, prePageNum];
         var sql;
 
-        // 默认合同状态为0等待生效
-        if(!params.contract_status) {
-            params.contract_status = 0;
+        // 合同状态为-1表示全部, 4表示已删除
+        if(params.contract_status == -1) {
+            params.contract_status = 4;
+            arrOutput.contract_status = {
+                prefix: "a",
+                keyword: "<>"
+            }
+        }
+
+        // 合同类型为-1表示全部
+        if(params.contract_type == -1) {
+            delete params.contract_type;
+        }else if(params.contract_type == 3) {
+
+        }
+
+        if(params.fuzzy === false) {
+            arrOutput.contract_number = "a";
+        }else {
+            arrOutput.contract_number = {
+                keyword: "like",
+                sign: ["%", "%"],
+                prefix: "a"
+            }
         }
 
         // 过滤查询字段,产出关联条件语句及实参数据
@@ -106,7 +131,7 @@ module.exports = function(orm, db) {
 
                 sql = "SELECT a.contract_number, b.first_party_name, c.second_party_name, d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days,"
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
-                    + "a.contract_price, a.deposit, a.paid_price, a.saler_name, a.contract_status,"
+                    + "a.contract_price, a.deposit, a.paid_price, a.saler_name, a.contract_status, a.first_party_id, a.second_party_id, a.contract_type,"
                     + "DATE_FORMAT(a.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
                     + "COUNT(e.id) AS invoice_count, SUM(e.price) AS invoice_price FROM contract_info a "
                     + "LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
@@ -140,7 +165,7 @@ module.exports = function(orm, db) {
      * 查询逾期合同数量
      * @param params
      */
-    Contract.getOverdueDaysCount = function (params) {
+    Contract.getOverdueDaysCount = function () {
         var sql, def = when.defer();
 
         sql = "select count(*) as overdue_count from contract_info where TIMESTAMPDIFF(DAY, DATE_FORMAT(end_time, '%Y-%m-%d'),NOW()) > 0";
@@ -167,6 +192,37 @@ module.exports = function(orm, db) {
                 def.resolve(items);
             else
                 def.reject("合同添加失败");
+        });
+
+        return def.promise;
+    }
+
+    /**
+     * 修改合同
+     */
+    Contract.modifyContract = function(params) {
+        var def = when.defer();
+
+        Contract.find({contract_number: params.contract_number}, function(err, contract) {
+            if(!err) {
+                contract[0].first_party_id = params.first_party_id;
+                contract[0].second_party_id = params.second_party_id;
+                contract[0].contract_type = params.contract_type;
+                contract[0].effective_time = params.effective_time;
+                contract[0].end_time = params.end_time;
+                contract[0].deposit = params.deposit;
+                contract[0].contract_price = params.contract_price;
+                contract[0].contract_status = params.contract_status;
+
+                contract[0].save(function(err) {
+                    if(!err)
+                        def.resolve();
+                    else
+                        def.reject("修改合同失败");
+                });
+            }else {
+                def.reject("合同不存在");
+            }
         });
 
         return def.promise;

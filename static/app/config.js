@@ -13,6 +13,7 @@ require.config({
         "modal": "assets/css/components/modal.min",
         "dimmer": "assets/css/components/dimmer.min",
         "popup": "assets/css/components/popup.min",
+        "tab": "assets/css/components/tab.min",
         "ui-events": "app/public/ui-events",
         "base": "config/base"
     },
@@ -24,6 +25,7 @@ require.config({
         "modal": ["jquery"],
         "dimmer": ["jquery"],
         "sortable": ["jquery"],
-        "popup": ["jquery"]
+        "popup": ["jquery"],
+        "tab": ["jquery"]
     }
 });

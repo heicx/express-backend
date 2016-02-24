@@ -1,0 +1,173 @@
+extends ../frame
+
+block content
+    div.ui.aligned.segment
+        div.ui.breadcrumb
+            a.section 合同管理
+            i.right.chevron.icon.divider
+            div.active.section 合同详情
+    div.ui.grid.aligned.segment
+        div.ten.wide.column.centered
+            div.ui.top.attached.tabular.menu
+                a.active.item(data-tab="detail") 合同详情
+                a.item(data-tab="payment") 汇款记录
+                a.item(data-tab="invoice") 开票记录
+                a.item(data-tab="deposit") 保证金记录
+            div.ui.bottom.attached.active.tab.segment#contractDetailTab(data-tab="detail")
+                - var contractItems = contract.list[0] || {defaultVal: "暂无"};
+                table.ui.grey.compact.selectable.celled.striped.table
+                    thead
+                        tr
+                            th(colspan="2")
+                    tbody
+                        tr
+                            td.collapsing
+                                | 合同编号:
+                                span #{contractItems.contract_number || contractItems.defaultVal}
+                            td.collapsing
+                                | 合同金额:
+                                span #{contractItems.contract_price || contractItems.defaultVal}
+                        tr
+                            td.collapsing
+                                | 甲方名称:
+                                span #{contractItems.first_party_name || contractItems.defaultVal}
+                            td.collapsing
+                                | 保证金:
+                                span #{contractItems.deposit ? contractItems.deposit + " 元" : contractItems.defaultVal}
+                        tr
+                            td.collapsing
+                                | 甲方地区:
+                                span #{contractItems.region_name + "-" + contractItems.province_name + "-" + contractItems.city_name}
+                            td.collapsing
+                                | 应付总额:
+                                span #{contractItems.contract_price + contractItems.deposit + " 元"}
+                        tr
+                            td.collapsing
+                                | 乙方名称:
+                                span #{contractItems.second_party_name || contractItems.defaultVal}
+                            td.collapsing
+                                | 已付金额:
+                                span #{contractItems.paid_price + " 元"}
+                        tr
+                            td.collapsing
+                                | 合同类型:
+                                sapn #{contractItems.contract_type_name}
+                            td.collapsing
+                                | 待付金额:
+                                span #{contractItems.contract_price + contractItems.deposit - contractItems.paid_price + " 元"}
+                        tr
+                            td.collapsing
+                                | 生效时间:
+                                span #{contractItems.effective_time || contractItems.defaultVal}
+                            td.collapsing
+                                | 已开票金额:
+                                span #{contractItems.invoice_price ? contractItems.invoice_price  + "元" : "0 元"}
+                        tr
+                            td.collapsing
+                                | 结束时间:
+                                span #{contractItems.end_time || contractItems.defaultVal}
+                            td.collapsing
+                                - var contractStatus = "";
+                                    case contractItems.contract_status
+                                        when 0
+                                            - contractStatus = "待生效";
+                                        when 1
+                                            - contractStatus = "执行中";
+                                        when 2
+                                            - contractStatus = "完结";
+                                        when 3
+                                            - contractStatus = "逾期";
+                                    | 合同状态: #{contractStatus}
+                        tr
+                            td.collapsing
+                                | 对应销售:
+                                span #{contractItems.saler_name || contractItems.defaultVal}
+                            td.collapsing
+                div.ui.horizontal.header.divider
+                    i.warning.circle.icon.blue
+                    | 请慎重做以下操作
+                div.ui.three.column.grid
+                    div.wide.column
+                        button.ui.fluid.primary.aligned.button#modifyBtn 修改合同
+                    div.wide.column
+                        button.ui.fluid.primary.aligned.button 删除合同
+                    div.wide.column
+                        if contractItems.contract_status == 0
+                            button.ui.fluid.primary.aligned.button 审核通过
+                        else
+                            button.ui.fluid.primary.aligned.button.disabled 审核通过
+            div#contractModal.ui.modal
+                div.header 修改合同
+                i.close.icon
+                div.content
+                    div.ui.segment.attached.small.form
+                        div.field
+                            label 合同编号
+                            input(type="text", id="nContractNumber", disabled="true", placeholder="合同编号", value="#{contractItems.contract_number || contractItems.defaultVal}")
+                        div.three.fields
+                            div.field
+                                label 甲方名称
+                                select.ui.dropdown.search#nFirstPartyDropdown(data-origin-name="#{contractItems.first_party_id || contractItems.defaultVal}")
+                                    option(value="") 请选择甲方
+                            div.field
+                                label 乙方名称
+                                select.ui.dropdown.search#nSecondPartyDropdown(data-origin-name="#{contractItems.second_party_id || contractItems.defaultVal}")
+                                    option(value="") 请选择乙方
+                            div.field
+                                label 合同类型
+                                select.ui.dropdown#nContractTypeDropdown(data-origin-name="#{contractItems.contract_type || contractItems.defaultVal}")
+                                    option(value="") 请选择合同类型
+                                    each type, i in contract.type
+                                        option(value="#{type.id}") #{type.contract_type_name}
+                        div.two.fields
+                            div.field
+                                label 生效时间
+                                    input(type="text", id="nEffectiveTime", placeholder="生效时间", readonly="readonly", value="#{contractItems.effective_time || contractItems.defaultVal}")
+                            div.field
+                                label 结束时间
+                                    input(type="text", id="nEndTime", placeholder="结束时间", readonly="readonly", value="#{contractItems.end_time || contractItems.defaultVal}")
+                        div.two.fields
+                            div.field
+                                label 合同金额
+                                    input(type="number", id="nPrice", placeholder="合同金额", value="#{contractItems.contract_price || contractItems.defaultVal}")
+                            div.field
+                                label 保证金
+                                    input(type="number", id="nDeposit", placeholder="保证金", value="#{contractItems.deposit ? contractItems.deposit : contractItems.defaultVal}")
+                        div.field
+                            button.ui.fluid.primary.button#confirmContractBtn 修改
+                    div.ui.bottom.attached.hidden.warning.message#contractModalMsg
+                        i.icon.help
+                        span
+            div.ui.bottom.attached.tab.segment#paymentTab(data-tab="payment")
+                | 123
+            div.ui.bottom.attached.tab.segment#invoiceTab(data-tab="invoice")
+                div.ten.wide.column.centered
+                    table.ui.grey.compact.selectable.celled.striped.table.sortable
+                        thead
+                            tr.center.aligned
+                                th.sorted.ascending 发票编号
+                        tbody#contractBankList
+                            tr.center.aligned
+                                td 123
+                        tfoot
+                            tr
+                                th(colspan="6")
+                                    div#addContractBankBtn.ui.right.floated.small.primary.labeled.icon.button 添加发票
+                                        i.plus.icon
+                        div#contractBankModal.ui.modal
+                            div.header 添加发票
+                            i.close.icon
+                            div.content
+                                div.ui.segment.small.form
+                                    div.field
+                                        label 发票编号
+                                        div.ui.fluid.action.input
+                                            input(type="text", id="contractBankFullName", placeholder="银行名称")
+                                            button.ui.primary.button#confirmContractBankBtn 确定
+                                        div.ui.floating.hidden.segment.center.aligned.message#modalMsg
+                                            p
+            div.ui.bottom.attached.tab.segment#depositTab(data-tab="deposit")
+    script.
+        require(["/app/config.js"], function () {
+            require(["/app/contract/contractDetail.js"]);
+        });

@@ -30,14 +30,15 @@ block content
             div.field
                 label 合同状态
                 select.ui.dropdown#contractStatus
+                    option(value="-1") 所有状态
                     option(value="0") 待生效
                     option(value="1") 执行中
-                    option(value="2") 逾期
-                    option(value="3") 执行完成
+                    option(value="2") 完结
+                    option(value="3") 逾期
             div.field
                 label 合同类型
                 select.ui.dropdown#contractType
-                    option(value="") 请选择合同类型
+                    option(value="-1") 所有类型
                     each type, i in contract.type
                         option(value="#{type.id}") #{type.contract_type_name}
             div.field
@@ -112,7 +113,8 @@ block content
                         td #{list.overdue_days > -1 ? list.overdue_days : "--"}
                         td #{list.create_time || "--"}
                         td.collapsing
-                            button.ui.primary.aligned.button 详情
+                            a(href="/contract/detail/#{list.contract_number}")
+                                button.ui.primary.aligned.button 详情
             tfoot#paginationFooter
                 tr
                     th(colspan="18")
