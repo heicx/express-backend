@@ -1,47 +1,9 @@
 define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup", "dropdown"], function($, ui, base) {
 	$(function() {
         var render = {
-            modifyDetail: function(arr, cb) {
-                var strJoint = "", contractStatus = "";
-
-                arr.forEach(function(data) {
-                    switch(data.contract_status) {
-                        case 0:
-                            contractStatus = "待生效";
-                            break;
-                        case 1:
-                            contractStatus = "执行中";
-                            break;
-                        case 2:
-                            contractStatus = "完结";
-                            break;
-                        case 3:
-                            contractStatus = "逾期";
-                            break;
-                    }
-
-                    strJoint += "<tr><td class='collapsing'>合同编号: <span>" + data.contract_number + "</span></td>"
-                              + "<td class='collapsing'>合同金额: <span> " + data.contract_price + "</span></td></tr>"
-                              + "<tr><td class='collapsing'>甲方名称: <span>" + data.first_party_name + "</span></td>"
-                              + "<td class='collapsing'>保证金: <span> " + (data.deposit ? data.deposit + " 元" : "暂无") + "</span></td></tr>"
-                              + "<tr><td class='collapsing'>甲方地区: <span>" + (data.region_name + "-" + data.province_name + "-" + data.city_name) + "</span></td>"
-                              + "<td class='collapsing'>应付总额: <span> " + data.contract_price + data.deposit + " 元" + "</span></td></tr>"
-                              + "<tr><td class='collapsing'>乙方名称: <span>" + data.second_party_name + "</span></td>"
-                              + "<td class='collapsing'>已付金额: <span> " + data.paid_price + "</span></td></tr>"
-                              + "<tr><td class='collapsing'>合同类型: <span>" + data.contract_type_name + "</span></td>"
-                              + "<td class='collapsing'>待付金额: <span> " + (data.contract_price + data.deposit - data.paid_price + " 元") + "</span></td></tr>"
-                              + "<tr><td class='collapsing'>生效时间: <span>" + data.effective_time + "</span></td>"
-                              + "<td class='collapsing'>已开票金额: <span> " + (data.invoice_price ? (data.invoice_price  + "元") : "0 元") + "</span></td></tr>"
-                              + "<tr><td class='collapsing'>结束时间: <span>" + data.end_time + "</span></td>"
-                              + "<td class='collapsing'>合同状态: <span> " + contractStatus + "</span></td></tr>"
-                              + "<tr><td class='collapsing'>对应销售: <span>" + data.saler_name + "</span></td><td class='collapsing'></td></tr>";
-                });
-
-                cb(strJoint);
-            },
             parties: function() {
                 base.common.getData(base.api.parties, {}, false, function(parties) {
-                    var firstParties, secondParties;
+                    var firstParties, secondParties, timer = null;
                     var strTemp = "<option value=''>请选择</option>";
                     var strFirstParties = strTemp, strSecondParties = strTemp, i = 0, j = 0;
 
@@ -61,10 +23,12 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
                         $("#nSecondPartyDropdown").html(strSecondParties);
 
                         // 设置初始值,用于合同修改
-                        setTimeout(function() {
+                        timer = setTimeout(function() {
                             $("#nFirstPartyDropdown").dropdown("set selected", $("#nFirstPartyDropdown").attr("data-origin-name"));
                             $("#nSecondPartyDropdown").dropdown("set selected", $("#nSecondPartyDropdown").attr("data-origin-name"));
                             $("#nContractTypeDropdown").dropdown("set selected", $("#nContractTypeDropdown").attr("data-origin-name"));
+
+                            clearTimeout(timer);
                         }, 0);
                     }
                 });
@@ -72,11 +36,14 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
             modalMsg: function(msg, selectorName) {       /** 控制弹出层的提示信息的显示与隐藏 **/
                 var _msg = msg || "";
 
-                $("#" + selectorName).find("span").html(_msg);
-
                 if(_msg === "") {
-                    $("#" + selectorName).removeClass("hidden").transition("fade");
+                    if(!$("#" + selectorName).hasClass("hidden")) {
+                        $("#" + selectorName).removeClass("hidden").transition("fade", function() {
+                            $("#" + selectorName).find("span").html(_msg);
+                        });
+                    }
                 }else {
+                    $("#" + selectorName).find("span").html(_msg);
                     $("#" + selectorName).closest(".hidden").transition("fade");
                 }
             }
@@ -181,10 +148,8 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
                 $("#listLoader").addClass("active");
                 base.common.postData(base.api.modifyContract, params, false, function(ret) {
                     if(ret.status) {
-                        render.modifyDetail(ret.data.list, function(str) {
-                            $("#contractDetailTab tbody").html(str);
-                            $('#contractModal').modal("setting", "transition", "fade down").modal("hide");
-                        });
+                        $('#contractModal').modal("setting", "transition", "fade down").modal("hide");
+                        window.location.reload();
                     }else {
                         render.modalMsg(ret.message, "contractModalMsg");
                     }
@@ -242,6 +207,24 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
                 }
 
                 $("#cityDropdown").html(strOptions);
+            }, function(err) {});
+        });
+
+        /**
+         * 审核合同
+         */
+        $("#verifyBtn").on("click", function() {
+            var params = {
+                contractNumber: $("#operationTab").attr("data-id")
+            }
+
+            base.common.postData(base.api.verifyContract, params, false, function(resultData) {
+                console.log(resultData);
+                if(resultData.status) {
+                    window.location.reload();
+                }else {
+                    // 提示
+                }
             }, function(err) {});
         });
 

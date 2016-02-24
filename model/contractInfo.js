@@ -64,11 +64,11 @@ module.exports = function(orm, db) {
                 prefix: "c"
             },
             effective_time: {
-                keyword: ">",
+                keyword: "<",
                 prefix: "a"
             },
             end_time: {
-                keyword: "<",
+                keyword: ">",
                 prefix: "a"
             },
             saler_name: {
@@ -92,20 +92,33 @@ module.exports = function(orm, db) {
         var arrLimit = [(pageNo - 1) * prePageNum, prePageNum];
         var sql;
 
-        // 合同状态为-1表示全部, 4表示已删除
+        /**
+         * 对合同状态进行判断
+         * 合同状态为-1表示查询非状态为4的已删除的所有合同, 4表示已删除
+         * 合同状态为3表示逾期状态, 只根据合同结束时间做判断
+         * 其他状态根据相应状态且合同结束时间做判断
+         */
         if(params.contract_status == -1) {
             params.contract_status = 4;
             arrOutput.contract_status = {
                 prefix: "a",
                 keyword: "<>"
             }
+        }else if(params.contract_status == 3) {
+            delete params.contract_status;
+            params.overdue_time = moment().format("YYYY-MM-DD");
+        }else {
+            params.overdue_time = moment().format("YYYY-MM-DD");
+            arrOutput.overdue_time = {
+                keyword: ">",
+                prefix: "a",
+                mapsTo: "end_time"
+            }
         }
 
         // 合同类型为-1表示全部
         if(params.contract_type == -1) {
             delete params.contract_type;
-        }else if(params.contract_type == 3) {
-            params.overdue_time = moment(new Date()).format();
         }
 
         if(params.fuzzy === false) {
@@ -129,6 +142,7 @@ module.exports = function(orm, db) {
             + "a.contract_type = d.id LEFT JOIN contract_invoice e ON a.contract_number = e.id LEFT JOIN contract_region f ON "
             + "b.region_id = f.id LEFT JOIN area h ON b.province_id = h.id LEFT JOIN area i ON b.city_id = i.id " + strCondition;
 
+        console.log(sql);
         // 根据当前参数查询合同数量
         db.driver.execQuery(sql, arrArgs, function(err, result) {
             if(!err) {
@@ -151,7 +165,6 @@ module.exports = function(orm, db) {
                 // 查询合同详细信息
                 db.driver.execQuery(sql, arrArgs.concat(arrLimit), function(err, resultData) {
                     if(!err) {
-                        console.log(resultData);
                         container.list = resultData;
                         container.totalPageNum = Math.ceil(container.count / prePageNum);
                         container.pagination = utils.paginationMath(pageNo, container.totalPageNum);
@@ -225,6 +238,29 @@ module.exports = function(orm, db) {
                         def.resolve();
                     else
                         def.reject("修改合同失败");
+                });
+            }else {
+                def.reject("合同不存在");
+            }
+        });
+
+        return def.promise;
+    }
+
+    /**
+     * 审核合同
+     */
+    Contract.verifyContract = function(params) {
+        var def = when.defer();
+
+        Contract.find({contract_number: params.contract_number}, function(err, contract) {
+            if(!err) {
+                contract[0].contract_status = 1;
+                contract[0].save(function(err) {
+                    if(!err)
+                        def.resolve();
+                    else
+                        def.reject("合同审核失败");
                 });
             }else {
                 def.reject("合同不存在");

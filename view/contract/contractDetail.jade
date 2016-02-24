@@ -86,14 +86,14 @@ block content
                 div.ui.horizontal.header.divider
                     i.warning.circle.icon.blue
                     | 请慎重做以下操作
-                div.ui.three.column.grid
+                div.ui.three.column.grid#operationTab(data-id="#{contractItems.contract_number}")
                     div.wide.column
                         button.ui.fluid.primary.aligned.button#modifyBtn 修改合同
                     div.wide.column
-                        button.ui.fluid.primary.aligned.button 删除合同
+                        button.ui.fluid.primary.aligned.button#removeBtn 删除合同
                     div.wide.column
                         if contractItems.contract_status == 0
-                            button.ui.fluid.primary.aligned.button 审核通过
+                            button.ui.fluid.primary.aligned.button#verifyBtn 审核通过
                         else
                             button.ui.fluid.primary.aligned.button.disabled 审核通过
             div#contractModal.ui.modal

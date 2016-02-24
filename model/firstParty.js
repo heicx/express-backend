@@ -84,7 +84,7 @@ module.exports = function(orm, db) {
     }
 
     // 获取新增甲方的信息
-    firstParty.getFirstPartyByName = function(items) {
+    firstParty.getFirstPartyListByName = function(items) {
         var def = when.defer();
 
         firstParty.getFirstPartyList({first_party_name: items.first_party_name}).then(function(newItem) {

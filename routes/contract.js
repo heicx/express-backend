@@ -72,7 +72,7 @@ var genAddContract = function* (params) {
  * 2. 查询合同详细信息
  * @param params
  */
-var genModifyContract = function* (params) {
+var genModifyContract = function* (req, params) {
     contractModel = contractModel || req.models.contract_info;
 
     yield contractModel.modifyContract(params);
@@ -138,7 +138,7 @@ var modifyContract = function(req, res) {
         contract_price: req.body.contractPrice,
         contract_status: 0
     };
-    var gen = genModifyContract(params);
+    var gen = genModifyContract(req, params);
     var arrPromise = [];
 
     for(var i of gen) {
@@ -159,6 +159,24 @@ var modifyContract = function(req, res) {
  */
 var removeContract = function(req, res) {
 
+}
+
+/**
+ * 审核合同
+ * @param req
+ * @param res
+ */
+var verifyContract = function(req, res) {
+    if(req.body.contractNumber) {
+        req.params.fuzzy = false;
+
+        contractModel = contractModel || req.models.contract_info;
+        contractModel.verifyContract({contract_number: req.body.contractNumber}).then(function() {
+            res.json({status: true, data: "合同审核通过"});
+        }).catch(function(errMsg) {
+            res.json({status: false, message: errMsg});
+        });
+    }
 }
 
 /**
@@ -227,7 +245,8 @@ router.use(login.islogin);
 
 router.get("/list", packContractBasicData);
 router.get("/parties", fetchBothPartiesList);
-router.get("/remove/:id", removeContract);
+router.post("/remove/", removeContract);
+router.post("/verify/", verifyContract);
 router.post("/add", addContract);
 router.post("/modify", modifyContract);
 router.get("/detail/:id", packContractDetailBasicData);
