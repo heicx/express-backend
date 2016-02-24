@@ -13,38 +13,38 @@ block content
 				input(type="text", id="contractNumber", placeholder="合同编号")
 			div.field
 				label 甲方名称
-				input(type="text", placeholder="甲方名称")
+				input(type="text", id="firstPartyName", placeholder="甲方名称")
 			div.field
 				label 乙方名称
-				input(type="text", placeholder="乙方名称")
+				input(type="text", id="secondPartyName", placeholder="乙方名称")
 			div.field
 				label 合同生效
-				input(type="text", placeholder="合同生效时间")
+				input(type="text", id="effectiveTime", placeholder="合同生效时间")
 			div.field
 				label 合同结束
-				input(type="text", placeholder="合同结束时间")
+				input(type="text", id="endTime", placeholder="合同结束时间")
 			div.field
 				label 销售名称
-				input(type="text", placeholder="销售名称")
+				input(type="text", id="salerName", placeholder="销售名称")
 		div.equal.width.fields
 			div.field
 				label 入账银行
-				select.ui.dropdown
-					option(value="0") 入账银行
+				select.ui.dropdown#paymentBank
+					option(value="-1") 所有银行
 					each item in contract.bank
 						option(value="#{item.id}") #{item.bank_name}
 			div.field
 				label 回款起始
-				input(type="text", placeholder="回款起始时间")
+				input(type="text", id = "paymentBeginTime", placeholder="回款起始时间")
 			div.field
 				label 回款结束
-				input(type="text", placeholder="回款结束时间")
+				input(type="text", id = "paymentEndTime", placeholder="回款结束时间")
 			div.field
 				label 记录起始
-				input(type="text", placeholder="记录起始时间")
+				input(type="text", id = "createBeginTime", placeholder="记录起始时间")
 			div.field
 				label 记录结束
-				input(type="text", placeholder="记录结束时间")
+				input(type="text", id = "createEndTime", placeholder="记录结束时间")
 		div.fields
 			div.field
 				button#queryBtn.ui.primary.button 查询
@@ -53,7 +53,7 @@ block content
 	div.ui.stacked.segment
 		table.ui.celled.selectable.striped.grey.table
 			thead
-				tr
+				tr.ui.center.aligned.segment
 					th 合同号
 					th 回款金额
 					th 合同金额
@@ -73,7 +73,7 @@ block content
 					th 操作
 			tbody#paymentList
 				each item in contract.payment.list
-					tr
+					tr.ui.center.aligned.segment
 						td #{item.contract_number}
 						td #{item.payment}
 						td #{item.contract_price}
