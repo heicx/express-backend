@@ -80,7 +80,12 @@ module.exports = function(orm, db) {
             contract_type: "a",
             region_id: "b",
             province_id: "b",
-            city_id: "b"
+            city_id: "b",
+            overdue_time: {
+                keyword: "<",
+                prefix: "a",
+                mapsTo: "end_time"
+            }
         }
 
         var strCondition = "", arrArgs = [];
@@ -100,7 +105,7 @@ module.exports = function(orm, db) {
         if(params.contract_type == -1) {
             delete params.contract_type;
         }else if(params.contract_type == 3) {
-
+            params.overdue_time = moment(new Date()).format();
         }
 
         if(params.fuzzy === false) {
