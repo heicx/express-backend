@@ -20,11 +20,10 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
                                  + "<td>" + list[i].end_time + "</td>"
                                  + "<td>" + list[i].payment_time + "</td>"
                                  + "<td>" + list[i].bank_name + "</td>"
-                                 + "<td>" + list[i].paid_price + "</td>"
-                                 + "<td>" + list[i].bank_name + "</td>"
                                  + "<td>" + list[i].saler_name + "</td>"
+                                 + "<td>" + list[i].user_name + "</td>"
                                  + "<td>" + (list[i].create_time || "--") + "</td>"
-                                 + "<td><button data-id='" + list[i].contract_number + "' class='ui primary aligned button'>详情</button></td></tr>";
+                                 + "<td class='collapsing'><button data-id='" + list[i].contract_number + "' class='ui primary aligned button'>详情</button></td></tr>";
                     }
                 }
                 cb(strJoin);
@@ -136,7 +135,7 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
             }
         }
 
-		$("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime").datepicker({
+		$("#effectiveTime, #endTime, #paymentBeginTime, #paymentEndTime, #createBeginTime, #createEndTime").datepicker({
 			showButtonPanel: true,
 			dateFormat: "yy-mm-dd"
 		});
@@ -155,11 +154,11 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 				effective_time: $("#effectiveTime").val(),
 				end_time: $("#endTime").val(),
 				saler_name: $("#salerName").val(),
-				contract_status: $("#contractStatus").val(),
-				contract_type: $("#contractType").val(),
-				region_id: $("#regionDropdown").val(),
-				province_id: $("#provinceDropdown").val(),
-				city_id: $("#cityDropdown").val()
+                bank_id: $("#paymentBank").val(),
+                payment_begin_time: $("#paymentBeginTime").val(),
+                payment_end_time: $("#paymentEndTime").val(),
+                create_end_time: $("#createEndTime").val(),
+                create_end_time: $("#createEndTime").val()
 			}
 
             if(isPagination) {
@@ -188,7 +187,6 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 			$("#listLoader").addClass("active");
 			base.common.getData(base.api.paymentList, params, false, function(resultData) {
                 render.paymentList(resultData.payment.list, function(str) {
-                    console.log(str);
                     $("#paymentList").html(str);
                 });
 

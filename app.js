@@ -8,7 +8,7 @@ var favicon = require("serve-favicon");
 var session = require('express-session');
 var RedisStore = require("connect-redis")(session);
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 4000;
 var app = express();
 var models = require('./model/index');
 
