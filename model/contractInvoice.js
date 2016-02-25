@@ -150,7 +150,7 @@ module.exports = function(orm, db) {
                     + "LEFT JOIN area i ON b.city_id = i.id "
                     + "INNER JOIN contract_user j ON j.id = e.user_id "
                     + strCondition + " ORDER BY e.invoice_number LIMIT ?,?";
-                console.log(sql);
+
                 // 查询发票数据
                 db.driver.execQuery(sql, arrArgs.concat(arrLimit), function(err, resultData) {
                     if(!err) {

@@ -70,7 +70,6 @@ block content
 					th 销售名称
 					th 记录人
 					th 记录时间
-					th 操作
 			tbody#paymentList
 				each item in contract.payment.list
 					tr.ui.center.aligned.segment
@@ -90,12 +89,10 @@ block content
 						td #{item.saler_name}
 						td #{item.user_name}
 						td #{item.create_time}
-						td.collapsing
-							button.ui.primary.aligned.button 详情
 			tfoot
 				tr
 					th(colspan="18")
-						div.ui.right.floated.pagination.menu#paginationBtn
+						div.ui.left.floated.pagination.menu#paginationBtn
 							a.icon.item(data-disable="#{contract.payment.pagination.isFirst}", data-type="prev", data-curr="#{contract.payment.pagination.pageNo}")
 								i.left.chevron.icon
 							each page in contract.payment.pagination.count

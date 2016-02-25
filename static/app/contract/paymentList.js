@@ -23,7 +23,7 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
                                  + "<td>" + list[i].saler_name + "</td>"
                                  + "<td>" + list[i].user_name + "</td>"
                                  + "<td>" + (list[i].create_time || "--") + "</td>"
-                                 + "<td class='collapsing'><button data-id='" + list[i].contract_number + "' class='ui primary aligned button'>详情</button></td></tr>";
+                                 + "</tr>";
                     }
                 }
                 cb(strJoin);

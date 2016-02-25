@@ -3,9 +3,8 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
         var render = {
             invoiceList: function(arr, cb) {
                 var strJoint = "";
-                console.log(arr);
-                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
 
+                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
                 arr.forEach(function(data) {
                     strJoint += "<tr class='center aligned'><td> " + data.invoice_number + "</td>"
                               + "<td>" + data.invoice_price + "</td>"

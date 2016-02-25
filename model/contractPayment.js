@@ -1,14 +1,15 @@
 var when = require("when");
 var utils = require("../helper/utils");
+var moment = require("moment");
 
 module.exports = function(orm, db) {
     var Payment = db.define("contract_payment", {
         id: {type: 'serial', key: true},
         bank_id: Number,
         payment: String,
-        payment_time: {type: 'date', defaultValue: new Date()},
+        payment_time: {type: 'date', defaultValue: moment().format("YYYY-MM-DD")},
         user_id: Number,
-        create_time: {type: 'date', defaultValue: new Date()}
+        create_time: {type: 'date', defaultValue: moment().format("YYYY-MM-DD")}
     });
 
     Payment.getList = function(params) {
