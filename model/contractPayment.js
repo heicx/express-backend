@@ -1,12 +1,14 @@
 var when = require("when");
 var utils = require("../helper/utils");
+
 module.exports = function(orm, db) {
     var Payment = db.define("contract_payment", {
         id: {type: 'serial', key: true},
         bank_id: Number,
         payment: String,
         payment_time: {type: 'date', defaultValue: new Date()},
-        user_id: Number
+        user_id: Number,
+        create_time: {type: 'date', defaultValue: new Date()}
     });
 
     Payment.getList = function(params) {
@@ -74,7 +76,7 @@ module.exports = function(orm, db) {
         }
         var strCondition = "", arrArgs = [];
         var arrLimit = [(pageNo - 1) * prePageNum, prePageNum];
-        // 默认合同状态为0待生效
+
         if(params.bank_id == -1) {
             delete params.bank_id;
         }
@@ -92,6 +94,7 @@ module.exports = function(orm, db) {
             + "left JOIN contract_bank j ON j.id = p.bank_id "
             + "left JOIN contract_user k ON k.id = p.user_id "
             + strCondition;
+
         db.driver.execQuery(sql, arrArgs, function (err, result) {
             if (!err) {
                 container.count = result[0].contractCount;
@@ -111,6 +114,8 @@ module.exports = function(orm, db) {
                     + "left JOIN contract_bank j ON j.id = p.bank_id "
                     + "left JOIN contract_user k ON k.id = p.user_id "
                     + strCondition + "  LIMIT ?,?";
+
+                console.log(sql)
                 db.driver.execQuery(sql, arrArgs.concat(arrLimit), function (err, list) {
                     if(!err) {
                         container.list = list;

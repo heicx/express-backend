@@ -1,20 +1,46 @@
 var utils = require("../helper/utils");
 var when = require("when");
+var moment = require("moment");
 
 module.exports = function(orm, db) {
 	var Invoice = db.define("contract_invoice", {
-		id: {type: "serial", key: true},
-		price: Number,
+		id: Number,
+		invoice_price: {type: "integer", mapsTo: "price"},
 		user_id: Number,
-		create_time: {type: "date", defaultValue: new Date()},
-        invoice_time: {type: "date", deafultValue: new Date()},
+		create_time: {type: "date", defaultValue: moment().format("YYYY-MM-DD")},
+        invoice_time: {type: "date", deafultValue: moment().format("YYYY-MM-DD")},
         invoice_number: {type: "integer", defaultValue: 0}
 	});
 
+    /**
+     * 发票查重
+     * @param params
+     */
+    Invoice.findInvoiceIsExist = function(params) {
+        var def = when.defer();
+
+        Invoice.find({invoice_number: params.invoice_number}, function(err, item) {
+            if(!err) {
+                if(item.length > 0)
+                    def.reject("发票已经存在");
+                else
+                    def.resolve(item);
+            }else {
+                def.reject("发票查重失败");
+            }
+        });
+
+        return def.promise;
+    }
+
+    /**
+     * 获取发票
+     * @param params
+     */
     Invoice.getInvoiceInfo = function (params) {
         var def = when.defer();
 		var pageNo = params.pageNo || 1;
-		var prePageNum = 1;
+		var prePageNum = 20;
 		var invoice = {
 			pageIndex: pageNo
 		}
@@ -73,7 +99,7 @@ module.exports = function(orm, db) {
                 keyword: "<",
                 prefix: "e",
                 mapsTo: "create_time"
-            },
+            }
         }
 
         var strCondition = "", arrArgs = [];
@@ -81,8 +107,12 @@ module.exports = function(orm, db) {
         var sql;
 
         // 1表示合同已审核通过,合同状态为执行中
-        if(!params.contract_status) {
-            params.contract_status = 1;
+        //if(!params.contract_status) {
+        //    params.contract_status = 1;
+        //}
+
+        if(params.fuzzy === "false") {
+            arrOutput.contract_number = "a";
         }
 
         // 过滤查询字段,产出关联条件语句及实参数据
@@ -95,7 +125,7 @@ module.exports = function(orm, db) {
             + "LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
             + "LEFT JOIN contract_second_party c ON a.second_party_id = c.id "
             + "LEFT JOIN contract_type d ON a.contract_type = d.id "
-            + "LEFT JOIN contract_invoice e ON a.contract_number = e.id "
+            + "INNER JOIN contract_invoice e ON a.contract_number = e.id "
             + "LEFT JOIN contract_region f ON b.region_id = f.id "
             + "LEFT JOIN area h ON b.province_id = h.id "
             + "LEFT JOIN area i ON b.city_id = i.id "
@@ -106,7 +136,7 @@ module.exports = function(orm, db) {
                 invoice.count = result[0].invoice_count;
 
                 sql = "SELECT e.invoice_number, e.price AS invoice_price, a.contract_number, b.first_party_name, c.second_party_name,"
-                    + "d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days,"
+                    + "d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days, j.user_name,"
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
                     + "a.contract_price, a.deposit, a.paid_price, a.saler_name, a.contract_status,"
                     + "DATE_FORMAT(e.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
@@ -114,13 +144,13 @@ module.exports = function(orm, db) {
                     + "LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
                     + "LEFT JOIN contract_second_party c ON a.second_party_id = c.id "
                     + "LEFT JOIN contract_type d ON a.contract_type = d.id "
-                    + "LEFT JOIN contract_invoice e ON a.contract_number = e.id "
+                    + "INNER JOIN contract_invoice e ON a.contract_number = e.id "
                     + "LEFT JOIN contract_region f ON b.region_id = f.id "
                     + "LEFT JOIN area h ON b.province_id = h.id "
                     + "LEFT JOIN area i ON b.city_id = i.id "
+                    + "INNER JOIN contract_user j ON j.id = e.user_id "
                     + strCondition + " ORDER BY e.invoice_number LIMIT ?,?";
-
-
+                console.log(sql);
                 // 查询发票数据
                 db.driver.execQuery(sql, arrArgs.concat(arrLimit), function(err, resultData) {
                     if(!err) {
@@ -131,8 +161,6 @@ module.exports = function(orm, db) {
                         def.resolve(invoice);
                     }else
                         def.reject(err);
-
-                    console.log(invoice);
                 });
             }else
                 def.reject(err);
@@ -145,7 +173,7 @@ module.exports = function(orm, db) {
      * 添加发票信息
      * @param params
      */
-    Invoice.addContract = function(params) {
+    Invoice.addInvoice = function(params) {
         var def = when.defer();
 
         Invoice.create(params, function(err, items) {

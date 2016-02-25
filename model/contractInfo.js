@@ -11,7 +11,7 @@ module.exports = function(orm, db) {
 		contract_type: {type: "integer", defaultValue: 0},
 		effective_time: Date,
 		end_time: Date,
-		create_time: {type: "date", defaultValue: new Date()},
+		create_time: {type: "date", defaultValue: moment().format("YYYY-MM-DD")},
 		paid_price: {type: "integer", defaultValue: 0},
 		deposit: {type: "integer", defaultValue: 0},
 		contract_price: Number,
@@ -99,15 +99,11 @@ module.exports = function(orm, db) {
          * 其他状态根据相应状态且合同结束时间做判断
          */
         if(params.contract_status == -1) {
-            params.contract_status = 4;
-            arrOutput.contract_status = {
-                prefix: "a",
-                keyword: "<>"
-            }
+            delete params.contract_status;
         }else if(params.contract_status == 3) {
             delete params.contract_status;
             params.overdue_time = moment().format("YYYY-MM-DD");
-        }else {
+        }else if(params.contract_status){
             params.overdue_time = moment().format("YYYY-MM-DD");
             arrOutput.overdue_time = {
                 keyword: ">",
@@ -121,7 +117,7 @@ module.exports = function(orm, db) {
             delete params.contract_type;
         }
 
-        if(params.fuzzy === false) {
+        if(params.fuzzy === "false") {
             arrOutput.contract_number = "a";
         }else {
             arrOutput.contract_number = {
@@ -142,7 +138,6 @@ module.exports = function(orm, db) {
             + "a.contract_type = d.id LEFT JOIN contract_invoice e ON a.contract_number = e.id LEFT JOIN contract_region f ON "
             + "b.region_id = f.id LEFT JOIN area h ON b.province_id = h.id LEFT JOIN area i ON b.city_id = i.id " + strCondition;
 
-        console.log(sql);
         // 根据当前参数查询合同数量
         db.driver.execQuery(sql, arrArgs, function(err, result) {
             if(!err) {

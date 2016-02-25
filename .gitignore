@@ -3,5 +3,5 @@ bower_components
 tmp
 .DS_Store
 .idea
-helper/config.js
 app.js
+helper/config.js

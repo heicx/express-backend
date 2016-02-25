@@ -11,7 +11,7 @@ var fetchContractPaymentData = function (req, res, next) {
     for (var i of genFetchContractPayment(req)) {
         arrPromise.push(i);
     }
-    
+
     when.all(arrPromise).then(function(result) {
         contract.payment = result[0];
         contract.type = result[1];

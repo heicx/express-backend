@@ -1,6 +1,22 @@
-define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup", "dropdown"], function($, ui, base) {
+define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup", "dropdown", "tab"], function($, ui, base) {
 	$(function() {
         var render = {
+            invoiceList: function(arr, cb) {
+                var strJoint = "";
+                console.log(arr);
+                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
+
+                arr.forEach(function(data) {
+                    strJoint += "<tr class='center aligned'><td> " + data.invoice_number + "</td>"
+                              + "<td>" + data.invoice_price + "</td>"
+                              + "<td>" + data.invoice_time + "</td>"
+                              + "<td>" + data.user_name + "</td>"
+                              + "<td>" + data.create_time + "</td>"
+                              + "</tr>";
+                })
+
+                cb(strJoint);
+            },
             parties: function() {
                 base.common.getData(base.api.parties, {}, false, function(parties) {
                     var firstParties, secondParties, timer = null;
@@ -97,10 +113,28 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
                     return {status: false, message: "请输入正确的保证金金额"};
                 else
                     return {status: true};
+            },
+            invoiceNumber: function(invoiceNumber) {
+                if(invoiceNumber === "")
+                    return {status: false, message: "请输入正确的发票编号"};
+                else
+                    return {status: true};
+            },
+            invoicePrice: function(invoicePrice) {
+                if(invoicePrice === "" || invoicePrice.toString().match(/^\d+(\.\d+)?$/g) === null)
+                    return {status: false, message: "请输入正确的发票金额"};
+                else
+                    return {status: true};
+            },
+            invoiceTime: function(invoiceTime) {
+                if(invoiceTime === "")
+                    return {status: false, message: "请选择开票时间"};
+                else
+                    return {status: true};
             }
         }
 
-		$("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime").datepicker({
+		$("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime, #nInvoiceTime, #nCreateTime").datepicker({
 			showButtonPanel: true,
 			dateFormat: "yy-mm-dd"
 		});
@@ -219,13 +253,93 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
             }
 
             base.common.postData(base.api.verifyContract, params, false, function(resultData) {
-                console.log(resultData);
                 if(resultData.status) {
                     window.location.reload();
                 }else {
                     // 提示
                 }
             }, function(err) {});
+        });
+
+        /**
+         * Tab标签切换
+         * 切换标签时获取新数据
+         */
+        $(".tabular a").on("click", function() {
+            var currTabName = $(this).attr("data-tab");
+
+            if($("#operationTab").attr("tab-name") !== currTabName) {
+                var params;
+
+                if(currTabName === "invoice") {
+                    params = {
+                        fuzzy: false,
+                        contract_number: $("#operationTab").attr("data-id")
+                    }
+
+                    $("#invoiceListLoader").addClass("active");
+                    base.common.getData(base.api.invoiceList, params, false, function(ret) {
+                        render.invoiceList(ret.list, function(str) {
+                            $("#invoiceList").html(str);
+                        });
+
+                        $("#invoiceListLoader").removeClass("active");
+                    }, function() {});
+                }
+
+                $("#operationTab").attr("tab-name", currTabName);
+            }
+        });
+
+        /**
+         * 打开添加发票弹窗
+         */
+        $("#addInvoiceBtn").on("click", function() {
+            $("#invoiceModal").modal("setting", "transition", "fade down").modal("show");
+        });
+
+        /**
+         * 添加开票
+         */
+        $("#confirmInvoiceBtn").on("click", function() {
+            var errMsg = "";
+            var arrValidateItem = [];
+            var params = {
+                contractNumber: $("#operationTab").attr("data-id"),
+                invoiceNumber: $("#nInvoiceNumber").val(),
+                invoicePrice: $("#nInvoicePrice").val(),
+                invoiceTime: $("#nInvoiceTime").val(),
+            };
+
+            arrValidateItem.push(validate.invoiceNumber(params.invoiceNumber));
+            arrValidateItem.push(validate.invoicePrice(params.invoicePrice));
+            arrValidateItem.push(validate.invoiceTime(params.invoiceTime));
+
+            for(var i in arrValidateItem){
+                if(arrValidateItem[i].status === false) {
+                    errMsg = arrValidateItem[i].message;
+                    break;
+                }
+            }
+
+            if(errMsg === "") {
+                $("#invoiceListLoader").addClass("active");
+                base.common.postData(base.api.addInvoice, params, false, function(ret) {
+                    if(ret.status) {
+                        render.invoiceList(ret.data, function(str) {
+                            $("#invoiceList").prepend(str);
+                        });
+
+                        $('#invoiceModal').modal("setting", "transition", "fade down").modal("hide");
+                    }else {
+                        render.modalMsg(ret.message, "invoiceModalMsg");
+                    }
+
+                    $("#invoiceListLoader").removeClass("active");
+                }, function() {});
+            }else {
+                render.modalMsg(errMsg, "invoiceModalMsg");
+            }
         });
 
         /**

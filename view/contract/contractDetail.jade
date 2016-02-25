@@ -7,7 +7,7 @@ block content
             i.right.chevron.icon.divider
             div.active.section 合同详情
     div.ui.grid.aligned.segment
-        div.ten.wide.column.centered
+        div.ten.wide.column.centered#tabsContainer
             div.ui.top.attached.tabular.menu
                 a.active.item(data-tab="detail") 合同详情
                 a.item(data-tab="payment") 汇款记录
@@ -142,30 +142,44 @@ block content
                 | 123
             div.ui.bottom.attached.tab.segment#invoiceTab(data-tab="invoice")
                 div.ten.wide.column.centered
-                    table.ui.grey.compact.selectable.celled.striped.table.sortable
+                    table.ui.grey.compact.selectable.celled.striped.table
                         thead
                             tr.center.aligned
-                                th.sorted.ascending 发票编号
-                        tbody#contractBankList
-                            tr.center.aligned
-                                td 123
+                                th 发票编号
+                                th 发票金额
+                                th 开票时间
+                                th 记录人
+                                th 记录时间
+                        tbody#invoiceList
                         tfoot
                             tr
                                 th(colspan="6")
-                                    div#addContractBankBtn.ui.right.floated.small.primary.labeled.icon.button 添加发票
+                                    div#addInvoiceBtn.ui.right.floated.small.primary.labeled.icon.button 添加发票
                                         i.plus.icon
-                        div#contractBankModal.ui.modal
+                        div.ui.inverted.dimmer(id="invoiceListLoader")
+                            div.ui.loader
+                        div#invoiceModal.ui.modal
                             div.header 添加发票
                             i.close.icon
                             div.content
-                                div.ui.segment.small.form
+                                div.ui.segment.small.form.attached
+                                    div.two.fields
+                                        div.field
+                                            label 发票编号
+                                            input(type="text", id="nInvoiceNumber", placeholder="发票编号")
+                                        div.field
+                                            label 发票金额
+                                            input(type="number", id="nInvoicePrice", placeholder="发票金额")
+                                    div.two.fields
+                                        div.field
+                                            label 开票时间
+                                            input(type="text", id="nInvoiceTime", placeholder="开票时间", readonly="true")
+                                        div.field
                                     div.field
-                                        label 发票编号
-                                        div.ui.fluid.action.input
-                                            input(type="text", id="contractBankFullName", placeholder="银行名称")
-                                            button.ui.primary.button#confirmContractBankBtn 确定
-                                        div.ui.floating.hidden.segment.center.aligned.message#modalMsg
-                                            p
+                                        button.ui.fluid.primary.button#confirmInvoiceBtn 确定
+                                div.ui.bottom.attached.hidden.warning.message#invoiceModalMsg
+                                    i.icon.help
+                                    span
             div.ui.bottom.attached.tab.segment#depositTab(data-tab="deposit")
     script.
         require(["/app/config.js"], function () {

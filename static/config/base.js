@@ -24,7 +24,8 @@ define(["jquery"], function($) {
             getCity: "/area/city",
             userList: "/user/list",
             addUser: "/user/add",
-            invoiceList: "/invoice/list"
+            invoiceList: "/invoice/list",
+            addInvoice: "/invoice/add"
         }
     }
 
