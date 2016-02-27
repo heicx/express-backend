@@ -264,4 +264,59 @@ module.exports = function(orm, db) {
 
         return def.promise;
     }
+
+    /**
+     * 更新合同金额
+     * @param params
+     */
+    Contract.updateContractPrice = function(params) {
+        var def = when.defer();
+
+        Contract.find({contract_number: params.contractNumber}, function(err, contract) {
+            if(!err) {
+                var totalPrice = contract[0].contract_price + contract[0].deposit;
+                var paidPrice = contract[0].paid_price;
+
+                if((totalPrice - paidPrice) >= params.payment) {
+                    contract[0].paid_price = parseFloat(params.payment) + parseFloat(contract[0].paid_price);
+
+                    if((totalPrice - paidPrice) == params.payment) {
+                        contract[0].contract_status = 2;
+                    }
+
+                    if(params.paymentType === "2") {
+                         if(params.payment <= contract[0].deposit_remaining) {
+                             contract[0].deposit_remaining = parseFloat(contract[0].deposit_remaining) - parseFloat(params.payment);
+
+                             contract[0].save(function(err) {
+                                 if(!err)
+                                     def.resolve("ok");
+                                 else
+                                     def.reject("回款添加失败");
+                             });
+                         }else {
+                            def.reject("剩余保证金 " + contract[0].deposit_remaining/10000 + "万元");
+                         }
+                    }else if(params.paymentType === "1") {
+                        var contractPriceRemaining = totalPrice - paidPrice - contract[0].deposit_remaining;
+
+                        if(contractPriceRemaining < params.payment) {
+                            def.reject("剩余合同金 " + contractPriceRemaining/10000 + "万元");
+                        }else {
+                            contract[0].save(function(err) {
+                                if(!err)
+                                    def.resolve("ok");
+                                else
+                                    def.reject("回款添加失败");
+                            });
+                        }
+                    }
+                }else {
+                    def.reject("回款金额大于剩余金额, 应付总额: " + totalPrice/10000 +"万元, 已付金额: " + paidPrice/10000 + "万元");
+                }
+            }
+        });
+
+        return def.promise;
+    }
 }
