@@ -328,4 +328,21 @@ module.exports = function(orm, db) {
 
         return def.promise;
     }
+
+    /**
+     * 删除合同
+     * @param params
+     */
+    Contract.removeContract = function(params) {
+        var def = when.defer();
+
+        Contract.find({contract_number: params.contractNumber}).remove(function(err) {
+            if(!err)
+                def.resolve();
+            else
+                def.reject("合同删除失败");
+        });
+
+        return def.promise;
+    }
 }
