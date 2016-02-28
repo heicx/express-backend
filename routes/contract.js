@@ -3,7 +3,7 @@ var router = express.Router();
 var when = require("when");
 
 var login = require("./login");
-var contractModel, contractTypeModel, regionModel, firstPartyModel, secondPartyModel;
+var contractModel, contractTypeModel, regionModel, firstPartyModel, secondPartyModel, contractInvoiceModel, contractPaymentModel;
 
 /**
  * 生成器
@@ -153,13 +153,35 @@ var modifyContract = function(req, res) {
     });
 }
 
+var genRemoveContract = function* (req) {
+    var params = req.body;
+
+    contractModel = contractModel || req.models.contract_info;
+    contractInvoiceModel = contractInvoiceModel || req.models.contract_invoice;
+    contractPaymentModel = contractPaymentModel || req.models.contract_payment;
+
+    yield contractModel.removeContract(params);
+    yield contractInvoiceModel.removeInvoiceByContractNumber(params);
+    yield contractPaymentModel.removePaymentRecord(params);
+}
 /**
  * 删除合同
  * @param req
  * @param res
  */
 var removeContract = function(req, res) {
+    var arrPromise = [];
+    var gen = genRemoveContract(req);
 
+    for(var i of gen) {
+        arrPromise.push(i);
+    }
+
+    when.all(arrPromise).then(function() {
+        res.json({status: true, data: "合同相关信息已删除"});
+    }).catch (function(errMsg) {
+        res.json({status: false, message: errMsg});
+    });
 }
 
 /**
