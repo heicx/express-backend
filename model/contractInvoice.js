@@ -106,11 +106,6 @@ module.exports = function(orm, db) {
         var arrLimit = [(pageNo - 1) * prePageNum, prePageNum];
         var sql;
 
-        // 1表示合同已审核通过,合同状态为执行中
-        //if(!params.contract_status) {
-        //    params.contract_status = 1;
-        //}
-
         if(params.fuzzy === "false") {
             arrOutput.contract_number = "a";
         }

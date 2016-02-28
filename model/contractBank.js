@@ -11,14 +11,16 @@ module.exports = function(orm, db) {
      * @param callback
      */
     contractBank.getContractBankList = function(params) {
-        var contractBankName = params.contractBankName || "";
         var def = when.defer();
+        var contractBankName = params.contractBankName || "";
+
         contractBank.find().where("bank_name like ?", ["%" + contractBankName +"%"]).all(function(err, resultData) {
             if (err)
                 def.reject(err);
             else
                 def.resolve(resultData);
         });
+
         return def.promise;
 	}
 
