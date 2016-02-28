@@ -166,4 +166,22 @@ module.exports = function(orm, db) {
 
         return def.promise;
     }
+
+    /**
+     * 删除合同相应的所有回款记录
+     * @param params
+     * @returns {Promise}
+     */
+    Payment.removePaymentRecord = function(params) {
+        var def = when.defer();
+
+        Payment.find({contract_number: params.contractNumber}).remove(function(err) {
+            if(!err)
+                def.resolve();
+            else
+                def.reject("回款删除失败");
+        });
+
+        return def.promise;
+    }
 };
