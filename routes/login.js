@@ -57,9 +57,15 @@ var userLogin = function(req, res) {
     });
 }
 
+var userLogout = function(req, res) {
+    req.session.destroy();
+    res.redirect("/");
+}
+
 router.get("/", isLogin, userIsLogin);
 router.get("/login", userIsLogin);
 router.post("/login", userLogin);
+router.get("/logout", userLogout);
 
 exports.routes = router;
 exports.islogin = isLogin;
