@@ -180,4 +180,22 @@ module.exports = function(orm, db) {
 
         return def.promise;
     }
+
+    /**
+     * 根据合同编号删除发票
+     * @param params
+     * @returns {Promise}
+     */
+    Invoice.removeInvoiceByContractNumber = function(params) {
+        var def = when.defer();
+
+        Invoice.find({id: params.contractNumber}).remove(function(err) {
+            if(!err)
+                def.resolve();
+            else
+                def.reject("发票删除失败");
+        });
+
+        return def.promise;
+    }
 }
