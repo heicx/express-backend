@@ -10,7 +10,8 @@ module.exports = function(orm, db) {
         payment_time: {type: 'date', defaultValue: moment().format("YYYY-MM-DD")},
         user_id: Number,
         create_time: {type: 'date', defaultValue: moment().format("YYYY-MM-DD")},
-        payment_type: {type: "integer", defaultValue: 1}
+        payment_type: {type: "integer", defaultValue: 1},
+        contract_number: String
     });
 
     /**
@@ -22,7 +23,7 @@ module.exports = function(orm, db) {
     Payment.getList = function(params) {
         var deferred = when.defer();
         var pageNo = params.pageNo || 1;
-        var prePageNum = 2;
+        var prePageNum = 20;
         var container = {
             pageIndex: pageNo
         }
@@ -98,7 +99,7 @@ module.exports = function(orm, db) {
             strCondition = str ? " where " + str : "";
             arrArgs = arr;
         });
-        var sql = "SELECT count(*) as contractCount FROM contract_info a right join contract_payment p on p.id = a.contract_number "
+        var sql = "SELECT count(*) as contractCount FROM contract_info a right join contract_payment p on p.contract_number = a.contract_number "
             + "JOIN contract_first_party b ON a.first_party_id = b.id "
             + "JOIN contract_second_party c ON a.second_party_id = c.id JOIN contract_type d ON "
             + "a.contract_type = d.id LEFT JOIN contract_invoice e ON a.contract_number = e.id LEFT JOIN contract_region f ON "
@@ -106,7 +107,7 @@ module.exports = function(orm, db) {
             + "left JOIN contract_bank j ON j.id = p.bank_id "
             + "left JOIN contract_user k ON k.id = p.user_id "
             + strCondition;
-        console.log(sql);
+
         db.driver.execQuery(sql, arrArgs, function (err, result) {
             if (!err) {
                 container.count = result[0].contractCount;
@@ -117,7 +118,7 @@ module.exports = function(orm, db) {
                     + "DATE_FORMAT(p.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
                     + "p.payment_type, j.bank_name, p.payment, date_format(p.payment_time, '%Y-%m-%d') as payment_time, k.user_name "
                     + "FROM contract_info a "
-                    + "right JOIN contract_payment p ON p.id = a.contract_number "
+                    + "right JOIN contract_payment p ON p.contract_number = a.contract_number "
                     + "JOIN contract_first_party b ON a.first_party_id = b.id "
                     + "JOIN contract_second_party c ON a.second_party_id = c.id "
                     + "JOIN contract_type d ON a.contract_type = d.id "
@@ -143,5 +144,26 @@ module.exports = function(orm, db) {
             }
         });
         return deferred.promise;
+    }
+
+    /**
+     * 添加回款信息
+     * @param params
+     */
+    Payment.addItem = function(params) {
+        var def = when.defer();
+
+        Payment.create(params, function(err, item) {
+            if(!err) {
+                if(item)
+                    def.resolve(item);
+                else
+                    def.reject("添加回款信息失败");
+            }else {
+                def.reject("添加回款信息失败");
+            }
+        });
+
+        return def.promise;
     }
 };

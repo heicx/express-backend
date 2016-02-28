@@ -274,45 +274,54 @@ module.exports = function(orm, db) {
 
         Contract.find({contract_number: params.contractNumber}, function(err, contract) {
             if(!err) {
-                var totalPrice = contract[0].contract_price + contract[0].deposit;
-                var paidPrice = contract[0].paid_price;
+                var totalPrice = (parseFloat(contract[0].contract_price)*1000 + parseFloat(contract[0].deposit)*1000)/1000;
+                var paidPrice = parseFloat(contract[0].paid_price);
 
-                if((totalPrice - paidPrice) >= params.payment) {
-                    contract[0].paid_price = parseFloat(params.payment) + parseFloat(contract[0].paid_price);
+                if(((totalPrice*1000 - paidPrice*1000)/1000) >= params.payment) {
+                    contract[0].paid_price = (parseFloat(params.payment)*1000 + parseFloat(contract[0].paid_price)*1000)/1000;
 
-                    if((totalPrice - paidPrice) == params.payment) {
+                    if(((totalPrice*1000 - paidPrice*1000)/1000) == params.payment) {
                         contract[0].contract_status = 2;
                     }
 
                     if(params.paymentType === "2") {
                          if(params.payment <= contract[0].deposit_remaining) {
-                             contract[0].deposit_remaining = parseFloat(contract[0].deposit_remaining) - parseFloat(params.payment);
+                             contract[0].deposit_remaining = (parseFloat(contract[0].deposit_remaining)*1000 - parseFloat(params.payment)*1000)/1000;
 
                              contract[0].save(function(err) {
                                  if(!err)
-                                     def.resolve("ok");
+                                     def.resolve();
                                  else
                                      def.reject("回款添加失败");
                              });
                          }else {
-                            def.reject("剩余保证金 " + contract[0].deposit_remaining/10000 + "万元");
+                             if(contract[0].deposit_remaining/10000 === 0)
+                                 def.reject("保证金回款已完成");
+                             else
+                                 def.reject("剩余保证金 " + contract[0].deposit_remaining/10000 + "万元");
                          }
                     }else if(params.paymentType === "1") {
-                        var contractPriceRemaining = totalPrice - paidPrice - contract[0].deposit_remaining;
+                        var contractPriceRemaining = (totalPrice*1000 - paidPrice*1000 - contract[0].deposit_remaining*1000)/1000;
 
                         if(contractPriceRemaining < params.payment) {
-                            def.reject("剩余合同金 " + contractPriceRemaining/10000 + "万元");
+                            if(contractPriceRemaining/10000 === 0)
+                                def.reject("合同回款已完成");
+                            else
+                                def.reject("剩余合同金 " + contractPriceRemaining/10000 + "万元");
                         }else {
                             contract[0].save(function(err) {
                                 if(!err)
-                                    def.resolve("ok");
+                                    def.resolve();
                                 else
                                     def.reject("回款添加失败");
                             });
                         }
                     }
                 }else {
-                    def.reject("回款金额大于剩余金额, 应付总额: " + totalPrice/10000 +"万元, 已付金额: " + paidPrice/10000 + "万元");
+                    if(paidPrice === totalPrice)
+                        def.reject("回款已完成");
+                    else
+                        def.reject("回款金额大于剩余金额, 应付总额: " + totalPrice/10000 +"万元, 已付金额: " + paidPrice/10000 + "万元");
                 }
             }
         });
