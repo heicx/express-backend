@@ -2,7 +2,8 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 	$(function() {
         var render = {
             paymentList: function(list, cb) {
-                var i = 0, strJoin = "", contractStatus = "";
+                var i = 0, strJoin = "";
+
                 if(list) {
                     for(; i < list.length; i++) {
 
@@ -319,7 +320,5 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
         $('#contractModal').modal("setting", "onHide", function() {
             render.modalMsg();
         });
-
-        //render.parties();
 	});
 });
