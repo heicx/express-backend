@@ -69,12 +69,27 @@ var genFetchContractPayment = function* (req) {
     yield regionModel.getAllRegion({});
 };
 
+/**
+ * 生成器
+ * 添加回款
+ *
+ * 1. 添加回款记录
+ * 2. 获取回款记录
+ * @param req
+ */
 var genAddPayment = function* (req) {
-    var params = req.body;
+    var params = {
+        contract_number: req.body.contractNumber,
+        bank_id: req.body.bankId,
+        payment: req.body.payment,
+        payment_time: req.body.paymentTime,
+        user_id: JSON.parse(req.session.user).id,
+        payment_type: req.body.paymentType
+    }
     contractPaymentModel = contractPaymentModel || req.models.contract_payment;
-    contractModel = contractModel || req.models.contract_info;
 
-    yield contractModel.updateContractPrice(params);
+    yield contractPaymentModel.addItem(params);
+    yield contractPaymentModel.getList({contract_number: params.contract_number, fuzzy: false});
 }
 
 /**
@@ -83,15 +98,23 @@ var genAddPayment = function* (req) {
  * @param res
  */
 var addPayment = function(req, res) {
-    var gen = genAddPayment(req);
-    contractPaymentModel = contractPaymentModel || req.models.contract_payment;
+    var params = req.body;
+    var arrPromise = [];
+    contractModel = contractModel || req.models.contract_info;
 
-    gen.next().value.then(function(ret) {
-        res.json({status: true, data: ret});
+    contractModel.updateContractPrice(params).then(function() {
+        for (var i of genAddPayment(req)) {
+            arrPromise.push(i);
+        }
+
+        when.all(arrPromise).then(function(result) {
+            res.json({status: true, data: result[1]});
+        }).catch (function(errMsg) {
+            res.json({status: false, message: errMsg});
+        });
     }).catch(function(errMsg) {
-        res.json(errMsg);
+        res.json({status: false, message: errMsg});
     });
-    //var gen = genAddPayment(req);
 }
 
 router.use(login.islogin);
