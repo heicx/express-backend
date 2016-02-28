@@ -16,7 +16,30 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
 
                 cb(strJoint);
             },
-            parties: function() {
+            paymentList: function(arr, cb) {
+                var strJoint = "", strPaymentType = "";
+
+                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
+                arr.forEach(function(data) {
+                    if(data.payment_type === 1) {
+                        strPaymentType = "合同金额";
+                    }else {
+                        strPaymentType = "保证金";
+                    }
+
+                    strJoint += "<tr class='center aligned'><td> " + strPaymentType + "</td>"
+                        + "<td>" + data.bank_name + "</td>"
+                        + "<td>" + data.payment + "</td>"
+                        + "<td>" + data.payment_time + "</td>"
+                        + "<td>" + data.user_name + "</td>"
+                        + "<td>" + data.create_time + "</td>"
+                        + "</tr>";
+                })
+
+                cb(strJoint);
+            },
+            asyncInjection: function() {
+                // 获取甲方,乙方列表数据
                 base.common.getData(base.api.parties, {}, false, function(parties) {
                     var firstParties, secondParties, timer = null;
                     var strTemp = "<option value=''>请选择</option>";
@@ -45,6 +68,22 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
 
                             clearTimeout(timer);
                         }, 0);
+                    }
+                });
+
+                // 获取银行列表数据
+                base.common.getData(base.api.queryContractBank, {}, false, function(ret) {
+                    var bank, i = 0;
+                    var strTemp = "<option value=''>请选择</option>";
+
+                    if(ret.status) {
+                        bank = ret.data;
+
+                        for(; i < bank.length; i++) {
+                            strTemp += "<option value='" + bank[i].id + "'>" + bank[i].bank_name + "</option>";
+                        }
+
+                        $("#nPaymentBankDropdown").html(strTemp);
                     }
                 });
             },
@@ -130,10 +169,31 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
                     return {status: false, message: "请选择开票时间"};
                 else
                     return {status: true};
+            },
+            paymentPrice: function(price) {
+                if(price === "")
+                    return {status: false, message: "请填写回款金额"};
+                else
+                    return {status: true};
+            },
+            paymentTime: function(time) {
+                if(time === "")
+                    return {status: false, message: "请填写回款时间"};
+                else
+                    return {status: true};
+            },
+            paymentBank: function(id) {
+                if(id === "")
+                    return {status: false, message: "请选择入账银行"};
+                else
+                    return {status: true};
             }
         }
 
-		$("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime, #nInvoiceTime, #nCreateTime").datepicker({
+        /**
+         * 下拉框组件的初始化
+         */
+        $("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime, #nInvoiceTime, #nCreateTime, #nPaymentTime").datepicker({
 			showButtonPanel: true,
 			dateFormat: "yy-mm-dd"
 		});
@@ -192,6 +252,21 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
             }else {
                 render.modalMsg(errMsg, "contractModalMsg");
             }
+        });
+
+        /**
+         * 删除合同
+         */
+        $("#removeBtn").on("click", function() {
+            var params = {
+                contractNumber: $("#operationTab").attr("data-id")
+            }
+
+            base.common.postData(base.api.removeContract, params, false, function(resultData) {
+                if(resultData.status) {
+                    window.location.href = "/contract/list";
+                }
+            }, function(err) {});
         });
 
         /**
@@ -254,8 +329,6 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
             base.common.postData(base.api.verifyContract, params, false, function(resultData) {
                 if(resultData.status) {
                     window.location.reload();
-                }else {
-                    // 提示
                 }
             }, function(err) {});
         });
@@ -284,6 +357,22 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
 
                         $("#invoiceListLoader").removeClass("active");
                     }, function() {});
+                }else if(currTabName === "payment") {
+                    params = {
+                        fuzzy: false,
+                        contract_number: $("#operationTab").attr("data-id")
+                    }
+
+                    $("#paymentListLoader").addClass("active");
+                    base.common.getData(base.api.paymentList, params, false, function(ret) {
+                        render.paymentList(ret.list, function(str) {
+                            $("#paymentList").html(str);
+                        });
+
+                        $("#paymentListLoader").removeClass("active");
+                    }, function() {});
+                }else if(currTabName === "detail") {
+                    window.location.reload();
                 }
 
                 $("#operationTab").attr("tab-name", currTabName);
@@ -295,6 +384,13 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
          */
         $("#addInvoiceBtn").on("click", function() {
             $("#invoiceModal").modal("setting", "transition", "fade down").modal("show");
+        });
+
+        /**
+         * 打开添加回款弹窗
+         */
+        $("#addPaymentBtn").on("click", function() {
+            $("#paymentModal").modal("setting", "transition", "fade down").modal("show");
         });
 
         /**
@@ -342,12 +438,57 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
         });
 
         /**
-         * 监听弹出层的关闭事件
+         * 添加回款
          */
-        $('#contractModal').modal("setting", "onHide", function() {
-            render.modalMsg(null, "contractModalMsg");
+        $("#confirmPaymentBtn").on("click", function() {
+            var errMsg = "";
+            var arrValidateItem = [];
+            var params = {
+                contractNumber: $("#operationTab").attr("data-id"),
+                payment: $("#nPaymentPrice").val(),
+                paymentTime: $("#nPaymentTime").val(),
+                bankId: $("#nPaymentBankDropdown").val(),
+                paymentType: $("#nPaymentTypeDropdown").val()
+            };
+
+            arrValidateItem.push(validate.paymentPrice(params.payment));
+            arrValidateItem.push(validate.paymentTime(params.paymentTime));
+            arrValidateItem.push(validate.paymentBank(params.bankId));
+
+            for(var i in arrValidateItem){
+                if(arrValidateItem[i].status === false) {
+                    errMsg = arrValidateItem[i].message;
+                    break;
+                }
+            }
+
+            if(errMsg === "") {
+                $("#paymentListLoader").addClass("active");
+                base.common.postData(base.api.addPayment, params, false, function(ret) {
+                    if(ret.status) {
+                        render.paymentList(ret.data.list, function(str) {
+                            $("#paymentList").html(str);
+                        });
+
+                        $('#paymentModal').modal("setting", "transition", "fade down").modal("hide");
+                    }else {
+                        render.modalMsg(ret.message, "paymentModalMsg");
+                    }
+
+                    $("#paymentListLoader").removeClass("active");
+                }, function() {});
+            }else {
+                render.modalMsg(errMsg, "paymentModalMsg");
+            }
         });
 
-        render.parties();
+        /**
+         * 监听弹出层的关闭事件
+         */
+        $('#contractModal, #invoiceModal, #paymentModal').modal("setting", "onHide", function() {
+            render.modalMsg(null,  $(this)[0].id + "Msg");
+        });
+
+        render.asyncInjection();
 	});
 });
