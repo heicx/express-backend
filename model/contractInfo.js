@@ -101,9 +101,16 @@ module.exports = function(orm, db) {
         if(params.contract_status == -1) {
             delete params.contract_status;
         }else if(params.contract_status == 3) {
-            delete params.contract_status;
+            params.contract_status = 2;
             params.overdue_time = moment().format("YYYY-MM-DD");
-        }else if(params.contract_status){
+
+            arrOutput.contract_status = {
+                keyword: "<>",
+                prefix: "a"
+            }
+        }else if(params.contract_status == 2){
+            delete arrOutput.overdue_time;
+        }else if(params.contract_status == 1 || params.contract_status == 0){
             params.overdue_time = moment().format("YYYY-MM-DD");
             arrOutput.overdue_time = {
                 keyword: ">",
@@ -135,8 +142,9 @@ module.exports = function(orm, db) {
 
         sql = "SELECT count(*) as contractCount FROM contract_info a LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
             + "LEFT JOIN contract_second_party c ON a.second_party_id = c.id LEFT JOIN contract_type d ON "
-            + "a.contract_type = d.id LEFT JOIN contract_invoice e ON a.contract_number = e.id LEFT JOIN contract_region f ON "
-            + "b.region_id = f.id LEFT JOIN area h ON b.province_id = h.id LEFT JOIN area i ON b.city_id = i.id " + strCondition;
+            + "a.contract_type = d.id LEFT JOIN contract_region f ON b.region_id = f.id LEFT JOIN area h ON b.province_id = h.id "
+            + "LEFT JOIN area i ON b.city_id = i.id " + strCondition;
+
 
         // 根据当前参数查询合同数量
         db.driver.execQuery(sql, arrArgs, function(err, result) {
