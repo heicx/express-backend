@@ -101,15 +101,16 @@ block content
                         td #{list.invoice_price || 0}
                         td #{list.saler_name}
                         td
-                            case list.contract_status
-                                when 0
-                                    待生效
-                                when 1
-                                    执行中
-                                when 2
-                                    完成
-                                when 3
-                                    逾期
+                            if(list.overdue_days > -1 && list.contract_status != 2)
+                                逾期
+                            else
+                                case list.contract_status
+                                    when 0
+                                        待生效
+                                    when 1
+                                        执行中
+                                    when 2
+                                        完成
                         td #{list.overdue_days > -1 ? list.overdue_days : "--"}
                         td #{list.create_time || "--"}
                         td.collapsing

@@ -6,6 +6,10 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 
                 if(list) {
                     for(; i < list.length; i++) {
+                        if(list[i].overdue_days > -1 && list[i].contract_status != 2) {
+                            list[i].contract_status = 3;
+                        }
+
                         switch (list[i].contract_status) {
                             case 0:
                                 contractStatus = "待生效";

@@ -25,7 +25,9 @@ define(["jquery"], function($) {
             userList: "/user/list",
             addUser: "/user/add",
             invoiceList: "/invoice/list",
-            addInvoice: "/invoice/add"
+            addInvoice: "/invoice/add",
+            addPayment: "/payment/add",
+            removeContract: "/contract/remove"
         }
     }
 

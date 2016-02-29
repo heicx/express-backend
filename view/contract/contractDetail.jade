@@ -10,7 +10,7 @@ block content
         div.ten.wide.column.centered#tabsContainer
             div.ui.top.attached.tabular.menu
                 a.active.item(data-tab="detail") 合同详情
-                a.item(data-tab="payment") 汇款记录
+                a.item(data-tab="payment") 回款记录
                 a.item(data-tab="invoice") 开票记录
                 a.item(data-tab="deposit") 保证金记录
             div.ui.bottom.attached.active.tab.segment#contractDetailTab(data-tab="detail")
@@ -54,7 +54,7 @@ block content
                                 sapn #{contractItems.contract_type_name}
                             td.collapsing
                                 | 待付金额:
-                                span #{contractItems.contract_price + contractItems.deposit - contractItems.paid_price + " 元"}
+                                span #{(contractItems.contract_price*1000 + contractItems.deposit*1000 - contractItems.paid_price*1000)/1000 + " 元"}
                         tr
                             td.collapsing
                                 | 生效时间:
@@ -139,7 +139,51 @@ block content
                         i.icon.help
                         span
             div.ui.bottom.attached.tab.segment#paymentTab(data-tab="payment")
-                | 123
+                div.ten.wide.column.centered
+                    table.ui.grey.compact.selectable.celled.striped.table
+                        thead
+                            tr.center.aligned
+                                th 回款类型
+                                th 入账银行
+                                th 回款金额
+                                th 回款时间
+                                th 记录人
+                                th 记录时间
+                        tbody#paymentList
+                        tfoot
+                            tr
+                                th(colspan="6")
+                                    div#addPaymentBtn.ui.right.floated.small.primary.labeled.icon.button 添加回款
+                                        i.plus.icon
+                        div.ui.inverted.dimmer(id="paymentListLoader")
+                            div.ui.loader
+                        div#paymentModal.ui.modal
+                            div.header 添加回款
+                            i.close.icon
+                            div.content
+                                div.ui.segment.small.form.attached
+                                    div.two.fields
+                                        div.field
+                                            label 回款金额
+                                            input(type="text", id="nPaymentPrice", placeholder="回款金额")
+                                        div.field
+                                            label 回款时间
+                                            input(type="text", id="nPaymentTime", placeholder="回款时间", readonly="true")
+                                    div.two.fields
+                                        div.field
+                                            label 入账银行
+                                            select.ui.dropdown#nPaymentBankDropdown
+                                                option(value="") 请选择
+                                        div.field
+                                            label 回款类型
+                                            select.ui.dropdown#nPaymentTypeDropdown
+                                                option(value="1") 合同金额
+                                                option(value="2") 保证金
+                                    div.field
+                                        button.ui.fluid.primary.button#confirmPaymentBtn 确定
+                                div.ui.bottom.attached.hidden.warning.message#paymentModalMsg
+                                    i.icon.help
+                                    span
             div.ui.bottom.attached.tab.segment#invoiceTab(data-tab="invoice")
                 div.ten.wide.column.centered
                     table.ui.grey.compact.selectable.celled.striped.table
