@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.10)
 # Database: contract_test
-# Generation Time: 2016-02-23 07:20:36 +0000
+# Generation Time: 2016-02-29 06:23:54 +0000
 # ************************************************************
 
 
@@ -3579,7 +3579,7 @@ CREATE TABLE `contract_info` (
   `contract_price` float DEFAULT '0' COMMENT '合同金额',
   `deposit_remaining` float DEFAULT '0' COMMENT '剩余保证金',
   `saler_name` varchar(50) DEFAULT '' COMMENT '销售名称',
-  `contract_status` int(11) DEFAULT '0' COMMENT '合同状态 0-待审核 1-完成 2-逾期',
+  `contract_status` int(11) DEFAULT '0' COMMENT '合同状态 0-待审核 1-执行中 2-完结 3-逾期 4-删除',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -3588,11 +3588,10 @@ LOCK TABLES `contract_info` WRITE;
 
 INSERT INTO `contract_info` (`id`, `contract_number`, `first_party_id`, `second_party_id`, `contract_type`, `effective_time`, `end_time`, `create_time`, `paid_price`, `deposit`, `contract_price`, `deposit_remaining`, `saler_name`, `contract_status`)
 VALUES
-	(1,'123',1,2,1,'2016-01-25 15:44:35','2016-01-30 15:44:37','2016-01-25 15:44:39',111,123,22,0,'test',1),
+	(1,'123',1,2,1,'2016-01-25 15:44:35','2016-01-30 15:44:37','2016-01-25 15:44:39',100,20,80,0,'test',2),
 	(2,'321',1,2,2,'2016-01-25 15:44:41','2016-01-26 15:44:42',NULL,222,12,1,0,'t1',0),
 	(3,'888',1,2,1,'2016-01-25 15:44:44','2016-03-26 17:30:36',NULL,11,321,1,0,'t3',0),
-	(6,'123123',1,2,1,'2016-02-16 00:00:00','2016-02-22 00:00:00','2016-02-16 23:56:58',0,22,111,0,'test',0),
-	(5,'777',2,6,3,'2016-02-16 00:00:00','2016-02-26 00:00:00','2016-02-16 23:50:37',0,1,99,0,'test',0),
+	(6,'123123',1,2,1,'2016-02-16 00:00:00','2016-02-22 00:00:00','2016-02-16 23:56:58',0,22,1112,0,'test',0),
 	(7,'44',1,2,1,'2016-02-17 00:00:00','2016-02-27 00:00:00','2016-02-18 11:29:57',0,22,22,0,'test',0),
 	(8,'3213',1,2,1,'2016-02-06 00:00:00','2016-02-01 00:00:00','2016-02-18 11:30:38',0,2,2,0,'test',0),
 	(9,'563',1,2,1,'2016-02-01 00:00:00','2016-02-01 00:00:00','2016-02-18 15:08:05',0,23,123.2,0,'test',0),
@@ -3605,12 +3604,13 @@ VALUES
 	(16,'123221e',6,6,4,'2016-02-19 00:00:00','2016-02-20 00:00:00','2016-02-18 23:41:00',0,123,123,0,'test',0),
 	(17,'123221ew',6,6,4,'2016-02-19 00:00:00','2016-02-20 00:00:00','2016-02-18 23:41:03',0,123,123,0,'test',0),
 	(18,'123221ewq',6,6,4,'2016-02-19 00:00:00','2016-02-20 00:00:00','2016-02-18 23:41:06',0,123,123,0,'test',0),
-	(19,'qwe123',6,6,4,'2016-02-19 00:00:00','2016-02-20 00:00:00','2016-02-18 23:41:11',0,123,123,0,'test',1),
+	(19,'qwe123',6,6,4,'2016-02-19 00:00:00','2016-02-20 00:00:00','2016-02-18 23:41:11',0,123,222,0,'test',0),
 	(20,'34534',1,2,2,'2016-02-07 00:00:00','2016-02-24 00:00:00','2016-02-19 00:38:45',0,123,123,0,'test',0),
 	(21,'123231q',3,6,4,'2016-02-04 00:00:00','2016-02-06 00:00:00','2016-02-19 14:49:05',0,2,1,0,'test',0),
 	(27,'qwe12366',2,2,1,'2016-02-18 00:00:00','2016-02-24 00:00:00','2016-02-21 10:00:52',0,2,123,0,'test',0),
 	(28,'qwe123662222',2,2,1,'2016-02-18 00:00:00','2016-02-24 00:00:00','2016-02-21 10:01:36',0,2,123,0,'test',0),
-	(29,'123123haha',4,6,5,'2016-02-25 00:00:00','2016-02-29 00:00:00','2016-02-21 10:03:00',0,2,11,0,'test',0);
+	(29,'123123haha',4,6,5,'2016-02-25 00:00:00','2016-02-29 00:00:00','2016-02-21 10:03:00',0,2,11,0,'test',0),
+	(31,'1231',2,2,15,'2016-02-26 00:00:00','2016-03-02 00:00:00','2016-02-24 15:51:33',0,22222,10000,0,'test',1);
 
 /*!40000 ALTER TABLE `contract_info` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3638,8 +3638,13 @@ VALUES
 	('123',1,1,'2016-02-22','123123123','2016-02-27'),
 	('qwe123',1000,1,'2016-02-22','123123qweqw','2016-02-28'),
 	('888',88,1,'2016-02-22','123qwe','2016-02-28'),
-	('1232',99,1,'2016-02-22','123qwe123','2016-02-28'),
-	('898998',0,NULL,'2016-02-22','555','2016-02-28');
+	('898998',0,NULL,'2016-02-22','555','2016-02-28'),
+	('123',1,1,'2016-05-05','1231','2016-02-02'),
+	('qwe123',11,1,'2016-01-01','54321qweqwe','2016-04-04'),
+	('1231',22,1,'2016-02-26','rrr','2016-02-06'),
+	('1231w',123,1,'2016-02-26','qq','2016-02-25'),
+	('qwe123',7,1,'2016-02-25','777','2016-02-07'),
+	('qwe123',1,1,'2016-02-25','666','2016-02-06');
 
 /*!40000 ALTER TABLE `contract_invoice` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3651,13 +3656,30 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `contract_payment`;
 
 CREATE TABLE `contract_payment` (
-  `id` varchar(50) NOT NULL COMMENT '合同编号',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `user_id` int(11) DEFAULT NULL COMMENT '用户id',
   `bank_id` int(11) DEFAULT NULL COMMENT '银行id',
-  `payment` float DEFAULT NULL COMMENT '回款金额',
+  `payment` varchar(50) DEFAULT NULL COMMENT '回款金额',
   `payment_time` date DEFAULT NULL COMMENT '回款时间',
-  `user_id` int(11) DEFAULT NULL COMMENT '用户id'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `create_time` date DEFAULT NULL COMMENT '创建时间',
+  `payment_type` int(11) DEFAULT NULL COMMENT '回款类型',
+  `contract_number` varchar(50) DEFAULT NULL COMMENT '合同编号',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+LOCK TABLES `contract_payment` WRITE;
+/*!40000 ALTER TABLE `contract_payment` DISABLE KEYS */;
+
+INSERT INTO `contract_payment` (`id`, `user_id`, `bank_id`, `payment`, `payment_time`, `create_time`, `payment_type`, `contract_number`)
+VALUES
+	(8,1,3,'71.32','2016-02-09','2016-02-28',1,'123'),
+	(9,1,4,'8.6','2016-02-27','2016-02-28',1,'123'),
+	(10,1,3,'0.08','2016-02-24','2016-02-28',1,'123'),
+	(11,1,4,'19.2','2016-02-25','2016-02-28',2,'123'),
+	(12,1,4,'0.8','2016-02-25','2016-02-28',2,'123');
+
+/*!40000 ALTER TABLE `contract_payment` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table contract_region
@@ -3802,7 +3824,8 @@ LOCK TABLES `contract_user` WRITE;
 INSERT INTO `contract_user` (`id`, `user_name`, `user_password`, `user_mobileNo`, `user_type`, `user_status`, `user_email`, `create_time`, `update_time`)
 VALUES
 	(1,'test','123456','13910789088',1,1,'123@mail.com',NULL,NULL),
-	(2,'test2','123456','13800138000',2,1,'1231@mail.com','2016-02-20 00:00:00',NULL);
+	(2,'test2','123456','13800138000',2,1,'1231@mail.com','2016-02-20 00:00:00',NULL),
+	(12,'heichenxuan','123123',NULL,2,1,'heicx_sudo@163.com','2016-02-29 00:52:39','2016-02-29 00:52:39');
 
 /*!40000 ALTER TABLE `contract_user` ENABLE KEYS */;
 UNLOCK TABLES;
