@@ -15,7 +15,10 @@ require.config({
         "popup": "assets/css/components/popup.min",
         "tab": "assets/css/components/tab.min",
         "ui-events": "app/public/ui-events",
-        "base": "config/base"
+        "base": "config/base",
+        "crypto": "assets/libs/crypto/crypto-js",
+        "md5": "assets/libs/crypto/md5",
+        "core": "assets/libs/crypto/core"
     },
     shim: {
         "jquery-ui": ["jquery"],

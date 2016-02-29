@@ -1,4 +1,4 @@
-define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"], function($, ui, base) {
+define(["jquery", "jquery-ui", "base", "md5", "transition", "dimmer", "modal", "popup"], function($, ui, base, md5) {
 	$(function() {
         render = {
             userList: function(list, cb) {
@@ -106,6 +106,7 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 
             if(errMsg === "") {
                 $("#listLoader").addClass("active");
+                params.user_password = md5(params.user_password).toString();
                 base.common.postData(base.api.addUser, params, false, function(ret) {
                     if(ret.status) {
                         render.userList(ret.data, function(str) {

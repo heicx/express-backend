@@ -1,4 +1,4 @@
-define(["jquery"], function ($) {
+define(["jquery", "md5"], function ($, md5) {
     $(function () {
         $("#loginBtn").on("click", function () {
             var name = $("#userName").val();
@@ -11,6 +11,7 @@ define(["jquery"], function ($) {
                 $("#formMsg .header").html("请输入您的密码");
                 $("#formMsg").removeClass("hidden").addClass("visible");
             }else {
+                $("#userPwd").val(md5(password).toString());
                 $(".login-form form").submit();
             }
         });
