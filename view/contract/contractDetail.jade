@@ -10,9 +10,10 @@ block content
         div.ten.wide.column.centered#tabsContainer
             div.ui.top.attached.tabular.menu
                 a.active.item(data-tab="detail") 合同详情
-                a.item(data-tab="payment") 回款记录
-                a.item(data-tab="invoice") 开票记录
-                a.item(data-tab="deposit") 保证金记录
+                if userinfo.user_type == "1"
+                    a.item(data-tab="payment") 回款记录
+                    a.item(data-tab="invoice") 开票记录
+                    a.item(data-tab="deposit") 保证金记录
             div.ui.bottom.attached.active.tab.segment#contractDetailTab(data-tab="detail")
                 - var contractItems = contract.list[0] || {defaultVal: "暂无"};
                 table.ui.grey.compact.selectable.celled.striped.table
@@ -40,14 +41,14 @@ block content
                                 span #{contractItems.region_name + "-" + contractItems.province_name + "-" + contractItems.city_name}
                             td.collapsing
                                 | 应付总额:
-                                span #{contractItems.contract_price + contractItems.deposit + " 元"}
+                                span #{(contractItems.contract_price*1000 + contractItems.deposit*1000)/1000 + " 元"}
                         tr
                             td.collapsing
                                 | 乙方名称:
                                 span #{contractItems.second_party_name || contractItems.defaultVal}
                             td.collapsing
                                 | 已付金额:
-                                span #{contractItems.paid_price + " 元"}
+                                span #{(contractItems.paid_price*10000)/10000 + " 元"}
                         tr
                             td.collapsing
                                 | 合同类型:
@@ -83,19 +84,20 @@ block content
                                 | 对应销售:
                                 span #{contractItems.saler_name || contractItems.defaultVal}
                             td.collapsing
-                div.ui.horizontal.header.divider
-                    i.warning.circle.icon.blue
-                    | 请慎重做以下操作
-                div.ui.three.column.grid#operationTab(data-id="#{contractItems.contract_number}")
-                    div.wide.column
-                        button.ui.fluid.primary.aligned.button#modifyBtn 修改合同
-                    div.wide.column
-                        button.ui.fluid.primary.aligned.button#removeBtn 删除合同
-                    div.wide.column
-                        if contractItems.contract_status == 0
-                            button.ui.fluid.primary.aligned.button#verifyBtn 审核通过
-                        else
-                            button.ui.fluid.primary.aligned.button.disabled 审核通过
+                if userinfo.user_type == "1"
+                    div.ui.horizontal.header.divider
+                        i.warning.circle.icon.blue
+                        | 请慎重做以下操作
+                    div.ui.three.column.grid#operationTab(data-id="#{contractItems.contract_number}")
+                        div.wide.column
+                            button.ui.fluid.primary.aligned.button#modifyBtn 修改合同
+                        div.wide.column
+                            button.ui.fluid.primary.aligned.button#removeBtn 删除合同
+                        div.wide.column
+                            if contractItems.contract_status == 0
+                                button.ui.fluid.primary.aligned.button#verifyBtn 审核通过
+                            else
+                                button.ui.fluid.primary.aligned.button.disabled 审核通过
             div#contractModal.ui.modal
                 div.header 修改合同
                 i.close.icon
