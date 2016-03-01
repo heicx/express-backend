@@ -17,7 +17,7 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
             modalMsg: function(msg) {       /** 控制弹出层的提示信息的显示与隐藏 **/
                 var _msg = msg || "";
 
-                $("#modalMsg p").html(_msg);
+                $("#modalMsgTips").html(_msg);
 
                 if(_msg === "") {
                     $("#modalMsg").removeClass("hidden").transition("fade");

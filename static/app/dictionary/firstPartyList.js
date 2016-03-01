@@ -4,25 +4,22 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
          * 渲染模块
          */
         var render = {
-            firstPartyList: function(res, cb) {     /** 渲染甲方列表 **/
+            firstPartyList: function(arr, cb) {     /** 渲染甲方列表 **/
                 var strJoint = "";
 
-                if(res.status) {
-                    var i = 0;
-
-                    for(; i < res.data.length; i++) {
-                        strJoint += "<tr class='center aligned'><td>" + res.data[i].first_party_name
-                                  + "</td><td>" + res.data[i].region_name + "-" + res.data[i].area_name
-                                  + "-" + res.data[i].city_name + "</td></tr>";
-                    }
-                }
+                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
+                arr.forEach(function(data) {
+                    strJoint += "<tr class='center aligned'><td>" + data.first_party_name
+                        + "</td><td>" + data.region_name + "-" + data.area_name
+                        + "-" + data.city_name + "</td></tr>";
+                });
 
                 cb(strJoint);
             },
             modalMsg: function(msg) {       /** 控制弹出层的提示信息的显示与隐藏 **/
                 var _msg = msg || "";
 
-                $("#modalMsg p").html(_msg);
+                $("#modalMsgTips").html(_msg);
 
                 if(_msg === "") {
                     $("#modalMsg").removeClass("hidden").transition("fade");
@@ -72,7 +69,7 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
             params["first_party_name"] = firstPartyName;
             base.common.getData(base.api.queryFirstParty, params, false, function(resultData) {
                 if(resultData.status) {
-                    render.firstPartyList(resultData, function(str) {
+                    render.firstPartyList(resultData.data, function(str) {
                         $("#firstPartyList").html(str);
                     });
                 }
@@ -111,16 +108,11 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
                 // 添加甲方
                 base.common.postData(base.api.addFirstParty, params, false, function(res) {
                     if(res.status) {
-                        var i = 0, firstPartyItem = "";
-
-                        for(; i < res.data.length; i++) {
-                            firstPartyItem += "<tr class='center aligned'><td>" + res.data[i].first_party_name
-                                            + "</td><td>" + res.data[i].region_name + "-" + res.data[i].area_name
-                                            + "-" + res.data[i].city_name + "</td></tr>";
-                        }
+                        render.firstPartyList(res.data, function(str) {
+                            $("#firstPartyList").prepend(str);
+                        });
 
                         $('#firstPartyModal').modal("setting", "transition", "fade down").modal("hide");
-                        $("#firstPartyList").append(firstPartyItem);
                     }else {
                         render.modalMsg(res.message);
                     }
