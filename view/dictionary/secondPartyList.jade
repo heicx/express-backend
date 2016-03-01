@@ -30,14 +30,15 @@ block content
                     div.header 添加乙方
                     i.close.icon
                     div.content
-                        div.ui.segment.small.form
+                        div.ui.segment.attached.small.form
                             div.field
                                 label 乙方名称
                                 div.ui.fluid.action.input
                                     input(type="text", id="secondPartyFullName", placeholder="乙方名称")
                                     button.ui.primary.button#confirmSecondPartyBtn 确定
-                                div.ui.floating.hidden.segment.center.aligned.message#modalMsg
-                                    p
+                        div.ui.bottom.attached.hidden.warning.message#modalMsg
+                            i.icon.help
+                            span#modalMsgTips
     script.
         require(["/app/config.js"], function() {
             require(["/app/dictionary/secondPartyList.js"]);

@@ -36,10 +36,9 @@ block content
                                 div.ui.fluid.action.input
                                     input(type="text", id="contractTypeFullName", placeholder="合同类型")
                                     button.ui.primary.button#confirmContractTypeBtn 确定
-                                div.ui.floating.hidden.segment.center.aligned.message#modalMsg
-                                    p
-
-
+                        div.ui.bottom.attached.hidden.warning.message#modalMsg
+                            i.icon.help
+                            span#modalMsgTips
     script.
         require(["/app/config.js"], function () {
             require(["/app/dictionary/contractTypeList.js"]);

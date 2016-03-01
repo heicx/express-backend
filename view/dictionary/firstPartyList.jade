@@ -32,7 +32,7 @@ block content
                     div.header 添加甲方
                     i.close.icon
                     div.content
-                        div.ui.segment.small.form
+                        div.ui.segment.attached.small.form
                             div.field
                                 label 甲方名称
                                 input(type="text", id="firstPartyFullName", placeholder="甲方名称")
@@ -52,8 +52,9 @@ block content
                                             option(value="") 请选择市
                             div.field
                                 button.ui.fluid.primary.button#confirmFirstPartyBtn 确定
-                                div.ui.floating.hidden.segment.center.aligned.message#modalMsg
-                                    p
+                        div.ui.bottom.attached.hidden.warning.message#modalMsg
+                            i.icon.help
+                            span#modalMsgTips
     script.
         require(["/app/config.js"], function () {
             require(["/app/dictionary/firstPartyList.js"]);
