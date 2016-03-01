@@ -17,12 +17,16 @@ var contractModel, contractTypeModel, regionModel, firstPartyModel, secondPartyM
  * @param params
  */
 var genFetchContractInfo = function* (req, params) {
+    var userInfo = JSON.parse(req.session.user);
     contractModel = contractModel || req.models.contract_info;
     contractTypeModel = contractTypeModel || req.models.contract_type;
     regionModel = regionModel || req.models.contract_region;
 
+    if(userInfo.user_type !== 1)
+        params.user_id = userInfo.id;
+
     yield contractModel.getContractInfo(params);
-    yield contractModel.getOverdueDaysCount({});
+    yield contractModel.getOverdueDaysCount(params);
     yield contractTypeModel.getContractTypeList({});
     yield regionModel.getAllRegion({});
 }
@@ -98,7 +102,7 @@ var addContract = function(req, res) {
         deposit: req.body.deposit,
         deposit_remaining: req.body.deposit,
         contract_price: req.body.contractPrice,
-        saler_name: JSON.parse(req.session.user).user_name
+        user_id: JSON.parse(req.session.user).id
     };
     var arrPromise = [];
     var gen = genAddContract(params);
@@ -153,14 +157,26 @@ var modifyContract = function(req, res) {
     });
 }
 
+/**
+ * 生成器
+ * 删除合同
+ *
+ * @param req
+ */
 var genRemoveContract = function* (req) {
-    var params = req.body;
+    var _params = params = {
+        contract_number: req.body.contractNumber
+    };
+    var userInfo = JSON.parse(req.session.user);
 
     contractModel = contractModel || req.models.contract_info;
     contractInvoiceModel = contractInvoiceModel || req.models.contract_invoice;
     contractPaymentModel = contractPaymentModel || req.models.contract_payment;
 
-    yield contractModel.removeContract(params);
+    if(userInfo.user_type !== 1)
+        _params.user_id = userInfo.id;
+
+    yield contractModel.removeContract(_params);
     yield contractInvoiceModel.removeInvoiceByContractNumber(params);
     yield contractPaymentModel.removePaymentRecord(params);
 }

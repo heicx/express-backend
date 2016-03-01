@@ -57,11 +57,15 @@ var fetchContractPaymentData = function (req, res) {
  */
 var genFetchContractPayment = function* (req) {
     var params = req.query;
+    var userInfo = JSON.parse(req.session.user);
 
     contractPaymentModel = contractPaymentModel || req.models.contract_payment;
     contractTypeModel = contractTypeModel || req.models.contract_type;
     regionModel = regionModel || req.models.contract_region;
     contractBankModel = contractBankModel || req.models.contract_bank;
+
+    if(userInfo.user_type !== 1)
+        params.user_id = userInfo.id;
 
     yield contractPaymentModel.getList(params);
     yield contractTypeModel.getContractTypeList({});

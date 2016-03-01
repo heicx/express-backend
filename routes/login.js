@@ -9,7 +9,7 @@ var router = express.Router();
  */
 var isLogin = function(req, res, next) {
     var async = req.query.async || false;
-    console.log(123);
+
 	if(!req.session || !req.session.user) {
         if(async)
             res.json({status: false, message: "未登录"});

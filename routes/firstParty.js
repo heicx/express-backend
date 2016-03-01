@@ -15,22 +15,27 @@ var fetchFirstPartyInfo = function* (req) {
     yield regionModel.getAllRegion({});
 }
 
-// 添加甲方
+/**
+ * 添加甲方
+ * @param req
+ * @param res
+ */
 var addFirstParty = function(req, res) {
-    firstPartyModel = firstPartyModel || req.models.contract_first_party;
     var params = {
         first_party_name: req.body.firstPartyName,
         region_id: req.body.regionId,
         province_id: req.body.provinceId,
         city_id: req.body.cityId
     };
-    var arrPromise = [firstPartyModel.findFirstPartyNameIsExists(params), firstPartyModel.createFirstParty(params)];
+    firstPartyModel = firstPartyModel || req.models.contract_first_party;
 
-    when.all(arrPromise).then(function(result) {
-        var firstPartyAdded = result[1];
-
-        firstPartyModel.getFirstPartyByName(firstPartyAdded).then(function(newItem) {
-            res.json({status: true, data: newItem});
+    firstPartyModel.findFirstPartyNameIsExists({first_party_name: req.body.firstPartyName}).then(function() {
+        firstPartyModel.createFirstParty(params).then(function() {
+            firstPartyModel.getFirstPartyList({fuzzy: false, first_party_name: params.first_party_name}).then(function(item) {
+                res.json({status: true, data: item});
+            }).catch(function(errMsg) {
+                res.json({status: false, message: errMsg});
+            })
         }).catch(function(errMsg) {
             res.json({status: false, message: errMsg});
         });
@@ -43,9 +48,9 @@ var addFirstParty = function(req, res) {
 var packFirstPartyBasicData = function(req, res) {
     var async = req.query.async || false;
     var arrPromise = [], item = null;
-    var itrFirstPartyInfo = fetchFirstPartyInfo(req);
+    var gen = fetchFirstPartyInfo(req);
 
-    for(item of itrFirstPartyInfo) {
+    for(item of gen) {
         arrPromise.push(item);
     }
 

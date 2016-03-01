@@ -7,9 +7,13 @@ var contractInvoiceModel, contractTypeModel;
 
 var genFetchInvoiceInfo = function* (req) {
     var params = req.query;
+    var userInfo = JSON.parse(req.session.user);
 
     contractInvoiceModel = contractInvoiceModel || req.models.contract_invoice;
     contractTypeModel = contractTypeModel || req.models.contract_type;
+
+    if(userInfo.user_type !== 1)
+        params.user_id = userInfo.id;
 
     yield contractInvoiceModel.getInvoiceInfo(params);
     yield contractTypeModel.getContractTypeList({});
