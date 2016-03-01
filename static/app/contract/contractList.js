@@ -174,7 +174,7 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 				second_party_name: $("#secondPartyName").val(),
 				effective_time: $("#effectiveTime").val(),
 				end_time: $("#endTime").val(),
-				saler_name: $("#salerName").val(),
+				user_name: $("#salerName").val(),
 				contract_status: $("#contractStatus").val(),
 				contract_type: $("#contractType").val(),
 				region_id: $("#regionDropdown").val(),
