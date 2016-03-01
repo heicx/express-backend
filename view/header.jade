@@ -1,23 +1,24 @@
 div.ui.inverted.vertical.segment
-	div.ui.inverted.secondary.menu
-		div.ui.dropdown.item 合同管理
-			i.dropdown.icon
-			div.menu.transition.hidden
-				a.item(href="/contract/list") 合同列表
-				a.item(href="/payment/list") 回款列表
-				a.item(href="/invoice/list") 开票列表
-		div.ui.dropdown.item 字典管理
-			i.dropdown.icon
-			div.menu.transition.hidden
-				a.item(href="/dictionary/firstParty/list") 甲方管理
-				a.item(href="/dictionary/secondParty/list") 乙方管理
-				a.item(href="/dictionary/contractType/list") 合同类型管理
-				a.item(href="/dictionary/region/list") 地区管理
-				a.item(href="/dictionary/contractBank/list") 入账银行管理
-		div.ui.dropdown.item.right #{userinfo.user_name}
-			i.dropdown.icon
-			div.menu.transition.hidden
-				a.item(href="/user/modify") 修改密码
-				if userinfo.user_type == "1"
-					a.item(href="/user/list") 用户管理
-				a.item(href="/logout") 退出
+    div.ui.inverted.secondary.menu
+        div.ui.dropdown.item 合同管理
+            i.dropdown.icon
+            div.menu.transition.hidden
+                a.item(href="/contract/list") 合同列表
+                a.item(href="/payment/list") 回款列表
+                a.item(href="/invoice/list") 开票列表
+        if userinfo.user_type == "1"
+            div.ui.dropdown.item 字典管理
+                i.dropdown.icon
+                div.menu.transition.hidden
+                    a.item(href="/dictionary/firstParty/list") 甲方管理
+                    a.item(href="/dictionary/secondParty/list") 乙方管理
+                    a.item(href="/dictionary/contractType/list") 合同类型管理
+                    a.item(href="/dictionary/region/list") 地区管理
+                    a.item(href="/dictionary/contractBank/list") 入账银行管理
+        div.ui.dropdown.item.right #{userinfo.user_name}
+            i.dropdown.icon
+            div.menu.transition.hidden
+                a.item(href="/user/modify") 修改密码
+                if userinfo.user_type == "1"
+                    a.item(href="/user/list") 用户管理
+                a.item(href="/logout") 退出
