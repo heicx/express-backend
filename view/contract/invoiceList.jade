@@ -87,7 +87,7 @@ block content
                         td #{list.end_time}
                         td #{list.contract_price}
                         td #{list.deposit}
-                        td #{list.contract_price + list.deposit}
+                        td #{Number(list.contract_price) + Number(list.deposit)}
                         td #{list.saler_name}
                         td #{list.create_time || '--'}
             tfoot#paginationFooter

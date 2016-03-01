@@ -77,7 +77,7 @@ block content
 						td #{item.payment}
 						td #{item.contract_price}
 						td #{item.deposit}
-						td #{item.contract_price + item.deposit}
+						td #{Number(item.contract_price) + Number(item.deposit)}
 						td #{item.first_party_name}
 						td #{item.region_name + '-' + item.province_name + '-' + item.city_name}
 						td #{item.second_party_name}
