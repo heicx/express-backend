@@ -5,7 +5,7 @@ var moment = require("moment");
 module.exports = function(orm, db) {
 	var Invoice = db.define("contract_invoice", {
 		id: Number,
-		invoice_price: {type: "integer", mapsTo: "price"},
+		invoice_price: {type: "text", mapsTo: "price"},
 		user_id: Number,
 		create_time: {type: "date", defaultValue: moment().format("YYYY-MM-DD")},
         invoice_time: {type: "date", deafultValue: moment().format("YYYY-MM-DD")},
@@ -68,11 +68,12 @@ module.exports = function(orm, db) {
                 keyword: "<",
                 prefix: "a"
             },
-            saler_name: {
+            user_name: {
                 keyword: "like",
                 sign: ["%", "%"],
-                prefix: "a"
+                prefix: "k"
             },
+            user_id: "a",
             contract_type: "a",
             contract_status: "a",
             invoice_number: {
@@ -133,7 +134,7 @@ module.exports = function(orm, db) {
                 sql = "SELECT e.invoice_number, e.price AS invoice_price, a.contract_number, b.first_party_name, c.second_party_name,"
                     + "d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days, j.user_name,"
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
-                    + "a.contract_price, a.deposit, a.paid_price, a.saler_name, a.contract_status,"
+                    + "a.contract_price, a.deposit, a.paid_price, k.user_name as saler_name, a.contract_status,"
                     + "DATE_FORMAT(e.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
                     + "DATE_FORMAT(e.invoice_time, '%Y-%m-%d') AS invoice_time FROM contract_info a "
                     + "LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
@@ -144,6 +145,7 @@ module.exports = function(orm, db) {
                     + "LEFT JOIN area h ON b.province_id = h.id "
                     + "LEFT JOIN area i ON b.city_id = i.id "
                     + "INNER JOIN contract_user j ON j.id = e.user_id "
+                    + "INNER JOIN contract_user k ON k.id = a.user_id "
                     + strCondition + " ORDER BY e.invoice_number LIMIT ?,?";
 
                 // 查询发票数据
@@ -189,7 +191,7 @@ module.exports = function(orm, db) {
     Invoice.removeInvoiceByContractNumber = function(params) {
         var def = when.defer();
 
-        Invoice.find({id: params.contractNumber}).remove(function(err) {
+        Invoice.find({id: params.contract_number}).remove(function(err) {
             if(!err)
                 def.resolve();
             else

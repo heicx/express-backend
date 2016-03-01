@@ -18,7 +18,7 @@ module.exports = function(orm, db) {
      */
 	firstParty.getFirstPartyList = function(params) {
         var def = when.defer();
-        var sql, strCondition;
+        var sql, strCondition = "", arrArgs = [];
         var arrOutput = {
             first_party_name: {
                 keyword: "like",
@@ -27,21 +27,25 @@ module.exports = function(orm, db) {
             }
         }
 
+        if(!params.fuzzy) {
+            arrOutput.first_party_name = "a";
+        }
+
         utils.ormFilter(params, arrOutput, function(str, arr) {
             strCondition = str ? " where " + str : "";
+            arrArgs = arr;
+        });
 
-            sql = "select a.id, a.first_party_name, b.region_name, d.area_name, e.area_name as city_name from contract_first_party a "
-                + "left join contract_region b on b.id = a.region_id "
-                + "left join area d on d.id = a.province_id "
-                + "left join area e on a.city_id = e.id "
-                + strCondition;
+        sql = "select a.id, a.first_party_name, b.region_name, d.area_name, e.area_name as city_name from contract_first_party a "
+            + "left join contract_region b on b.id = a.region_id "
+            + "left join area d on d.id = a.province_id "
+            + "left join area e on a.city_id = e.id " + strCondition;
 
-            db.driver.execQuery(sql, arr, function(err, resultData) {
-                if(!err)
-                    def.resolve(resultData);
-                else
-                    def.reject("根据甲方名称获取甲方列表信息失败");
-            });
+        db.driver.execQuery(sql, arrArgs, function(err, result) {
+            if(!err)
+                def.resolve(result);
+            else
+                def.reject("根据甲方名称获取甲方列表信息失败");
         });
 
         return def.promise;
@@ -84,10 +88,10 @@ module.exports = function(orm, db) {
     }
 
     // 获取新增甲方的信息
-    firstParty.getFirstPartyListByName = function(items) {
+    firstParty.getFirstPartyListByName = function(params) {
         var def = when.defer();
 
-        firstParty.getFirstPartyList({first_party_name: items.first_party_name}).then(function(newItem) {
+        firstParty.getFirstPartyList({first_party_name: params.first_party_name}).then(function(newItem) {
             def.resolve(newItem);
         }).catch(function() {
             def.reject("获取新增甲方的信息失败");

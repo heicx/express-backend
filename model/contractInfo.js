@@ -6,17 +6,17 @@ module.exports = function(orm, db) {
 	var Contract = db.define("contract_info", {
 		id: {type: "serial", key: true},
 		contract_number: String,
+        user_id: Number,
 		first_party_id: Number,
 		second_party_id: Number,
 		contract_type: {type: "integer", defaultValue: 0},
 		effective_time: Date,
 		end_time: Date,
 		create_time: {type: "date", defaultValue: moment().format("YYYY-MM-DD")},
-		paid_price: {type: "integer", defaultValue: 0},
-		deposit: {type: "integer", defaultValue: 0},
-		contract_price: Number,
-		deposit_remaining: {type: "integer", defaultValue: 0},
-		saler_name: String,
+		paid_price: {type: "text", defaultValue: 0},
+		deposit: {type: "text", defaultValue: 0},
+		contract_price: String,
+		deposit_remaining: {type: "text", defaultValue: 0},
 		contract_status: {type: "integer", defaultValue: 0}
 	});
 
@@ -71,11 +71,12 @@ module.exports = function(orm, db) {
                 keyword: ">",
                 prefix: "a"
             },
-            saler_name: {
+            user_name: {
                 keyword: "like",
                 sign: ["%", "%"],
-                prefix: "a"
+                prefix: "j"
             },
+            user_id: "a",
             contract_status: "a",
             contract_type: "a",
             region_id: "b",
@@ -143,7 +144,7 @@ module.exports = function(orm, db) {
         sql = "SELECT count(*) as contractCount FROM contract_info a LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
             + "LEFT JOIN contract_second_party c ON a.second_party_id = c.id LEFT JOIN contract_type d ON "
             + "a.contract_type = d.id LEFT JOIN contract_region f ON b.region_id = f.id LEFT JOIN area h ON b.province_id = h.id "
-            + "LEFT JOIN area i ON b.city_id = i.id " + strCondition;
+            + "LEFT JOIN area i ON b.city_id = i.id LEFT JOIN contract_user j ON j.id = a.user_id " + strCondition;
 
 
         // 根据当前参数查询合同数量
@@ -153,7 +154,7 @@ module.exports = function(orm, db) {
 
                 sql = "SELECT a.contract_number, b.first_party_name, c.second_party_name, d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days,"
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
-                    + "a.contract_price, a.deposit, a.paid_price, a.saler_name, a.contract_status, a.first_party_id, a.second_party_id, a.contract_type,"
+                    + "a.contract_price, a.deposit, a.paid_price, j.user_name as saler_name, a.contract_status, a.first_party_id, a.second_party_id, a.contract_type,"
                     + "DATE_FORMAT(a.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
                     + "COUNT(e.id) AS invoice_count, SUM(e.price) AS invoice_price FROM contract_info a "
                     + "LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
@@ -163,6 +164,7 @@ module.exports = function(orm, db) {
                     + "LEFT JOIN contract_region f ON b.region_id = f.id "
                     + "LEFT JOIN area h ON b.province_id = h.id "
                     + "LEFT JOIN area i ON b.city_id = i.id "
+                    + "LEFT JOIN contract_user j ON j.id = a.user_id "
                     + strCondition + " GROUP BY a.contract_number LIMIT ?,?";
 
                 // 查询合同详细信息
@@ -187,10 +189,14 @@ module.exports = function(orm, db) {
      * 查询逾期合同数量
      * @param params
      */
-    Contract.getOverdueDaysCount = function () {
-        var sql, def = when.defer();
+    Contract.getOverdueDaysCount = function (params) {
+        var sql, strTemp = "";
+        var def = when.defer();
 
-        sql = "select count(*) as overdue_count from contract_info where TIMESTAMPDIFF(DAY, DATE_FORMAT(end_time, '%Y-%m-%d'),NOW()) > 0";
+        if(params.user_id)
+            strTemp = "and user_id = " + params.user_id;
+
+        sql = "select count(*) as overdue_count from contract_info where TIMESTAMPDIFF(DAY, DATE_FORMAT(end_time, '%Y-%m-%d'),NOW()) > 0 and contract_status <> 2 " + strTemp;
 
         db.driver.execQuery(sql, function(err, resultData) {
             if(!err)
@@ -282,19 +288,19 @@ module.exports = function(orm, db) {
 
         Contract.find({contract_number: params.contractNumber}, function(err, contract) {
             if(!err) {
-                var totalPrice = (parseFloat(contract[0].contract_price)*1000 + parseFloat(contract[0].deposit)*1000)/1000;
-                var paidPrice = parseFloat(contract[0].paid_price);
+                var totalPrice = utils.Math.accAdd(contract[0].contract_price, contract[0].deposit);
+                var paidPrice = utils.Math.accAdd(contract[0].paid_price, 0);
 
-                if(((totalPrice*1000 - paidPrice*1000)/1000) >= params.payment) {
-                    contract[0].paid_price = (parseFloat(params.payment)*1000 + parseFloat(contract[0].paid_price)*1000)/1000;
+                if(utils.Math.accSub(totalPrice, paidPrice) >= params.payment) {
+                    contract[0].paid_price = utils.Math.accAdd(params.payment, contract[0].paid_price);
 
-                    if(((totalPrice*1000 - paidPrice*1000)/1000) == params.payment) {
+                    if(utils.Math.accSub(totalPrice, paidPrice) == params.payment) {
                         contract[0].contract_status = 2;
                     }
 
                     if(params.paymentType === "2") {
-                         if(params.payment <= contract[0].deposit_remaining) {
-                             contract[0].deposit_remaining = (parseFloat(contract[0].deposit_remaining)*1000 - parseFloat(params.payment)*1000)/1000;
+                         if(params.payment <= utils.Math.accAdd(contract[0].deposit_remaining, 0)) {
+                             contract[0].deposit_remaining = utils.Math.accSub(contract[0].deposit_remaining, params.payment);
 
                              contract[0].save(function(err) {
                                  if(!err)
@@ -303,19 +309,19 @@ module.exports = function(orm, db) {
                                      def.reject("回款添加失败");
                              });
                          }else {
-                             if(contract[0].deposit_remaining/10000 === 0)
+                             if(utils.Math.accDiv(contract[0].deposit_remaining, 10000) === 0)
                                  def.reject("保证金回款已完成");
                              else
-                                 def.reject("剩余保证金 " + contract[0].deposit_remaining/10000 + "万元");
+                                 def.reject("剩余保证金 " + utils.Math.accDiv(contract[0].deposit_remaining, 10000).toFixed(2) + "万元");
                          }
                     }else if(params.paymentType === "1") {
-                        var contractPriceRemaining = (totalPrice*1000 - paidPrice*1000 - contract[0].deposit_remaining*1000)/1000;
+                        var contractPriceRemaining = utils.Math.accSub(utils.Math.accSub(totalPrice, paidPrice), contract[0].deposit_remaining);
 
                         if(contractPriceRemaining < params.payment) {
-                            if(contractPriceRemaining/10000 === 0)
+                            if(utils.Math.accDiv(contractPriceRemaining, 10000) === 0)
                                 def.reject("合同回款已完成");
                             else
-                                def.reject("剩余合同金 " + contractPriceRemaining/10000 + "万元");
+                                def.reject("剩余合同金 " + utils.Math.accDiv(contractPriceRemaining, 10000).toFixed(2) + "万元");
                         }else {
                             contract[0].save(function(err) {
                                 if(!err)
@@ -329,7 +335,7 @@ module.exports = function(orm, db) {
                     if(paidPrice === totalPrice)
                         def.reject("回款已完成");
                     else
-                        def.reject("回款金额大于剩余金额, 应付总额: " + totalPrice/10000 +"万元, 已付金额: " + paidPrice/10000 + "万元");
+                        def.reject("回款金额大于剩余金额, 应付总额: " + utils.Math.accDiv(totalPrice, 10000).toFixed(2) +"万元, 已付金额: " + utils.Math.accDiv(paidPrice, 10000).toFixed(2) + "万元");
                 }
             }
         });
@@ -344,7 +350,7 @@ module.exports = function(orm, db) {
     Contract.removeContract = function(params) {
         var def = when.defer();
 
-        Contract.find({contract_number: params.contractNumber}).remove(function(err) {
+        Contract.find(params).remove(function(err) {
             if(!err)
                 def.resolve();
             else
