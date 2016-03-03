@@ -100,7 +100,6 @@ var addContract = function(req, res) {
         end_time: req.body.endTime,
         create_time: new Date(),
         deposit: req.body.deposit,
-        deposit_remaining: req.body.deposit,
         contract_price: req.body.contractPrice,
         user_id: JSON.parse(req.session.user).id
     };
