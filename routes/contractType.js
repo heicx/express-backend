@@ -31,12 +31,8 @@ var addContractType = function(req, res) {
         contract_type_name: req.body.contractTypeName
     };
 
-    var arrPromise = [contractTypeModel.findContractTypeIsExists(params), contractTypeModel.createContractType(params)];
-
-    when.all(arrPromise).then(function(result) {
-        var itemAdded = result[1];
-
-        contractTypeModel.getContractTypeByName(itemAdded).then(function(newItem) {
+    contractTypeModel.findContractTypeIsExists(params).then(function() {
+        contractTypeModel.createContractType(params).then(function(newItem) {
             res.json({status: true, data: newItem});
         }).catch(function(errMsg) {
             res.json({status: false, message: errMsg});
