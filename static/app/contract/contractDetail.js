@@ -38,6 +38,28 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
 
                 cb(strJoint);
             },
+            depositList: function(arr, cb) {
+                var strJoint = "", strDeductType = "";
+
+                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
+                arr.forEach(function(data) {
+                    if(data.deduct_type === 1) {
+                        strDeductType = "退还";
+                    }else {
+                        strDeductType = "扣除";
+                    }
+
+                    strJoint += "<tr class='center aligned'>"
+                        + "<td>" + data.contract_number + "</td>"
+                        + "<td>" + data.deduct_price + "</td>"
+                        + "<td>" + strDeductType + "</td>"
+                        + "<td>" + data.effective_time + "</td>"
+                        + "<td>" + data.create_time + "</td>"
+                        + "</tr>";
+                })
+
+                cb(strJoint);
+            },
             asyncInjection: function() {
                 // 获取甲方,乙方列表数据
                 base.common.getData(base.api.parties, {}, false, function(parties) {
@@ -187,13 +209,25 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
                     return {status: false, message: "请选择入账银行"};
                 else
                     return {status: true};
+            },
+            deductPrice: function(price) {
+                if(price === "")
+                    return {status: false, message: "请填写扣费金额"};
+                else
+                    return {status: true};
+            },
+            deductTime: function(deductTime) {
+                if(deductTime === "")
+                    return {status: false, message: "请选择扣费时间"};
+                else
+                    return {status: true};
             }
         }
 
         /**
          * 下拉框组件的初始化
          */
-        $("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime, #nInvoiceTime, #nCreateTime, #nPaymentTime").datepicker({
+        $("#effectiveTime, #endTime, #nEffectiveTime, #nEndTime, #nInvoiceTime, #nCreateTime, #nPaymentTime, #nDeductTime").datepicker({
 			showButtonPanel: true,
 			dateFormat: "yy-mm-dd"
 		});
@@ -371,6 +405,19 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
 
                         $("#paymentListLoader").removeClass("active");
                     }, function() {});
+                }else if(currTabName === "deposit") {
+                    params = {
+                        contractNumber: $("#operationTab").attr("data-id")
+                    }
+
+                    $("#depositListLoader").addClass("active");
+                    base.common.getData(base.api.depositList, params, false, function(ret) {
+                        render.depositList(ret.data, function(str) {
+                            $("#depositList").html(str);
+                        });
+
+                        $("#depositListLoader").removeClass("active");
+                    }, function() {});
                 }else if(currTabName === "detail") {
                     window.location.reload();
                 }
@@ -483,9 +530,59 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup",
         });
 
         /**
+         * 打开扣除保证金弹窗
+         */
+        $("#addDepositRecordBtn").on("click", function() {
+            $("#depositModal").modal("setting", "transition", "fade down").modal("show");
+        });
+
+        /**
+         * 扣除保证金
+         */
+        $("#confirmDepositBtn").on("click", function() {
+            var errMsg = "";
+            var arrValidateItem = [];
+            var params = {
+                contractNumber: $("#operationTab").attr("data-id"),
+                deductPrice: $("#nDeductPrice").val(),
+                effectiveTime: $("#nDeductTime").val(),
+                deductType: $("#nDeductTypeDropdown").val(),
+            };
+
+            arrValidateItem.push(validate.deductPrice(params.deductPrice));
+            arrValidateItem.push(validate.deductTime(params.effectiveTime));
+
+            for(var i in arrValidateItem){
+                if(arrValidateItem[i].status === false) {
+                    errMsg = arrValidateItem[i].message;
+                    break;
+                }
+            }
+
+            if(errMsg === "") {
+                $("#depositListLoader").addClass("active");
+                base.common.postData(base.api.deductDeposit, params, false, function(ret) {
+                    if(ret.status) {
+                        render.depositList(ret.data, function(str) {
+                            $("#depositList").prepend(str);
+                        });
+
+                        $('#depositModal').modal("setting", "transition", "fade down").modal("hide");
+                    }else {
+                        render.modalMsg(ret.message, "depositModalMsg");
+                    }
+
+                    $("#depositListLoader").removeClass("active");
+                }, function() {});
+            }else {
+                render.modalMsg(errMsg, "depositModalMsg");
+            }
+        });
+
+        /**
          * 监听弹出层的关闭事件
          */
-        $('#contractModal, #invoiceModal, #paymentModal').modal("setting", "onHide", function() {
+        $('#contractModal, #invoiceModal, #paymentModal, #depositModal').modal("setting", "onHide", function() {
             render.modalMsg(null,  $(this)[0].id + "Msg");
         });
 
