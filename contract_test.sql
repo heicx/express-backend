@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.10)
 # Database: contract_test
-# Generation Time: 2016-03-01 08:18:32 +0000
+# Generation Time: 2016-03-03 08:00:10 +0000
 # ************************************************************
 
 
@@ -3502,18 +3502,24 @@ CREATE TABLE `contract_bank` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `contract_bank` WRITE;
-/*!40000 ALTER TABLE `contract_bank` DISABLE KEYS */;
 
-INSERT INTO `contract_bank` (`id`, `bank_name`)
-VALUES
-	(1,'招行银行'),
-	(2,'建设银行'),
-	(3,'花旗'),
-	(4,'建设一行');
 
-/*!40000 ALTER TABLE `contract_bank` ENABLE KEYS */;
-UNLOCK TABLES;
+# Dump of table contract_deposit_deduct
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `contract_deposit_deduct`;
+
+CREATE TABLE `contract_deposit_deduct` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `deduct_type` int(11) DEFAULT NULL COMMENT '扣费方式 1-退还 2-违约扣除',
+  `create_time` date DEFAULT NULL COMMENT '创建时间',
+  `user_id` int(11) DEFAULT NULL COMMENT '用户id',
+  `effective_time` date DEFAULT NULL COMMENT '扣费时间',
+  `contract_number` varchar(50) DEFAULT NULL COMMENT '合同编号',
+  `deduct_price` varchar(50) DEFAULT NULL COMMENT '扣费金额',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 
 # Dump of table contract_first_party
@@ -3531,32 +3537,6 @@ CREATE TABLE `contract_first_party` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `contract_first_party` WRITE;
-/*!40000 ALTER TABLE `contract_first_party` DISABLE KEYS */;
-
-INSERT INTO `contract_first_party` (`id`, `first_party_name`, `region_id`, `province_id`, `city_id`, `district_id`)
-VALUES
-	(60,'keyi',1,9,203,NULL),
-	(59,'meiyoude',1,9,203,NULL),
-	(58,'00',1,9,203,NULL),
-	(57,'88',2,3,830,NULL),
-	(56,'77',1,9,203,NULL),
-	(55,'222',1,9,203,NULL),
-	(54,'666',1,9,362,NULL),
-	(53,'123123wqewq',1,9,203,NULL),
-	(52,'123123',1,9,203,NULL),
-	(1,'ww',1,9,203,NULL),
-	(2,'123wwqq',1,9,203,NULL),
-	(3,'123ww1',1,9,203,NULL),
-	(4,'123',1,9,203,NULL),
-	(5,'123qwe',1,9,203,NULL),
-	(6,'q1',1,9,203,NULL),
-	(7,'123wq',1,10,204,NULL),
-	(8,'2',1,9,203,NULL),
-	(9,'1',1,9,203,NULL);
-
-/*!40000 ALTER TABLE `contract_first_party` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table contract_info
@@ -3574,10 +3554,10 @@ CREATE TABLE `contract_info` (
   `effective_time` datetime DEFAULT NULL COMMENT '合同生效时间',
   `end_time` datetime DEFAULT NULL COMMENT '合同终止时间',
   `create_time` datetime DEFAULT NULL COMMENT '合同创建时间',
-  `paid_price` varchar(50) DEFAULT '0' COMMENT '已付金额',
+  `price_paid` varchar(50) DEFAULT '0' COMMENT '已付金额',
   `deposit` varchar(50) DEFAULT '0' COMMENT '保证金',
   `contract_price` varchar(50) DEFAULT '0' COMMENT '合同金额',
-  `deposit_remaining` varchar(50) DEFAULT '0' COMMENT '剩余保证金',
+  `deposit_paid` varchar(50) DEFAULT '0' COMMENT '已付保证金',
   `contract_status` int(11) DEFAULT '0' COMMENT '合同状态 0-待审核 1-执行中 2-完结 3-逾期 4-删除',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -3585,15 +3565,16 @@ CREATE TABLE `contract_info` (
 LOCK TABLES `contract_info` WRITE;
 /*!40000 ALTER TABLE `contract_info` DISABLE KEYS */;
 
-INSERT INTO `contract_info` (`id`, `contract_number`, `user_id`, `first_party_id`, `second_party_id`, `contract_type`, `effective_time`, `end_time`, `create_time`, `paid_price`, `deposit`, `contract_price`, `deposit_remaining`, `contract_status`)
+INSERT INTO `contract_info` (`id`, `contract_number`, `user_id`, `first_party_id`, `second_party_id`, `contract_type`, `effective_time`, `end_time`, `create_time`, `price_paid`, `deposit`, `contract_price`, `deposit_paid`, `contract_status`)
 VALUES
 	(1,'123',13,1,2,1,'2016-01-25 15:44:35','2016-01-30 15:44:37','2016-01-25 15:44:39','100','20','80','0',2),
 	(2,'321',13,1,2,2,'2016-01-25 15:44:41','2016-01-26 15:44:42',NULL,'222','12','1','0',0),
-	(3,'888',1,1,2,1,'2016-01-25 15:44:44','2016-03-26 17:30:36',NULL,'11','321','1','0',0),
+	(3,'888',1,1,2,1,'2016-01-25 15:44:44','2016-03-26 17:30:36',NULL,'11','321','1','0',1),
 	(6,'123123',1,1,2,1,'2016-02-16 00:00:00','2016-02-22 00:00:00','2016-02-16 23:56:58','0','22','1112','0',0),
 	(7,'44',1,1,2,1,'2016-02-17 00:00:00','2016-02-27 00:00:00','2016-02-18 11:29:57','0','22','22','0',0),
 	(8,'3213',1,1,2,1,'2016-02-06 00:00:00','2016-02-01 00:00:00','2016-02-18 11:30:38','0','2','2','0',0),
 	(9,'563',1,1,2,1,'2016-02-01 00:00:00','2016-02-01 00:00:00','2016-02-18 15:08:05','0','23','123.2','0',0),
+	(34,'0123',1,60,3,1,'2016-03-04 00:00:00','2016-04-09 00:00:00','2016-03-02 15:49:11','100','5','100','5',2),
 	(11,'444',1,1,2,2,'2016-02-18 00:00:00','2016-02-28 00:00:00','2016-02-18 21:07:06','0','2','2','0',0),
 	(12,'5552',1,2,5,4,'2016-02-04 00:00:00','2016-02-26 00:00:00','2016-02-18 21:08:56','0','32','2','0',0),
 	(13,'666',1,6,6,4,'2016-02-19 00:00:00','2016-02-20 00:00:00','2016-02-18 23:40:41','0','123','123','0',0),
@@ -3641,9 +3622,29 @@ VALUES
 	('123','1',1,'2016-05-05','1231','2016-02-02'),
 	('qwe123','11',1,'2016-01-01','54321qweqwe','2016-04-04'),
 	('1231','22',1,'2016-02-26','rrr','2016-02-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
 	('新建合同','100000',1,'2016-02-29','9999999','2016-02-03'),
 	('qwe123','7',1,'2016-02-25','777','2016-02-07'),
-	('qwe123','1',1,'2016-02-25','666','2016-02-06');
+	('qwe123','1',1,'2016-02-25','666','2016-02-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','1231','2016-03-06'),
+	('123','111',1,'2016-03-01','123123123','2016-03-06');
 
 /*!40000 ALTER TABLE `contract_invoice` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3666,25 +3667,6 @@ CREATE TABLE `contract_payment` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `contract_payment` WRITE;
-/*!40000 ALTER TABLE `contract_payment` DISABLE KEYS */;
-
-INSERT INTO `contract_payment` (`id`, `user_id`, `bank_id`, `payment`, `payment_time`, `create_time`, `payment_type`, `contract_number`)
-VALUES
-	(8,1,3,'71.32','2016-02-09','2016-02-28',1,'123'),
-	(9,1,4,'8.6','2016-02-27','2016-02-28',1,'123'),
-	(10,1,3,'0.08','2016-02-24','2016-02-28',1,'123'),
-	(11,1,4,'19.2','2016-02-25','2016-02-28',2,'123'),
-	(12,1,4,'0.8','2016-02-25','2016-02-28',2,'123'),
-	(18,1,4,'11','2016-01-01','2016-02-02',1,'888'),
-	(22,1,2,'200000','2016-02-26','2016-02-29',1,'新建合同'),
-	(23,1,2,'75000.5','2016-02-19','2016-02-29',2,'新建合同'),
-	(24,1,2,'15001.6','2016-02-13','2016-02-29',2,'新建合同'),
-	(25,1,1,'9997.8','2016-02-03','2016-02-29',2,'新建合同'),
-	(29,1,1,'0.1','2016-02-02','2016-02-29',2,'新建合同');
-
-/*!40000 ALTER TABLE `contract_payment` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table contract_region
@@ -3699,16 +3681,6 @@ CREATE TABLE `contract_region` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `contract_region` WRITE;
-/*!40000 ALTER TABLE `contract_region` DISABLE KEYS */;
-
-INSERT INTO `contract_region` (`id`, `region_name`, `region_status`)
-VALUES
-	(1,'东北',1),
-	(2,'新区',1);
-
-/*!40000 ALTER TABLE `contract_region` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table contract_region_area
@@ -3726,18 +3698,6 @@ CREATE TABLE `contract_region_area` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `contract_region_area` WRITE;
-/*!40000 ALTER TABLE `contract_region_area` DISABLE KEYS */;
-
-INSERT INTO `contract_region_area` (`id`, `region_id`, `area_id`, `create_time`, `update_time`, `status`)
-VALUES
-	(221,2,3,'2016-02-17 21:40:46','2016-02-17 21:41:59',1),
-	(220,2,1,'2016-02-17 21:40:46','2016-02-17 21:41:59',1),
-	(218,1,9,'2016-02-05 11:48:26','2016-02-05 13:58:07',1),
-	(219,1,10,'2016-02-05 11:48:26','2016-02-05 13:58:07',1);
-
-/*!40000 ALTER TABLE `contract_region_area` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table contract_second_party
@@ -3751,21 +3711,6 @@ CREATE TABLE `contract_second_party` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `contract_second_party` WRITE;
-/*!40000 ALTER TABLE `contract_second_party` DISABLE KEYS */;
-
-INSERT INTO `contract_second_party` (`id`, `second_party_name`)
-VALUES
-	(2,'123'),
-	(3,'333'),
-	(4,'23'),
-	(5,'444'),
-	(6,'haha'),
-	(7,'22222'),
-	(8,'666');
-
-/*!40000 ALTER TABLE `contract_second_party` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table contract_type
@@ -3779,30 +3724,6 @@ CREATE TABLE `contract_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `contract_type` WRITE;
-/*!40000 ALTER TABLE `contract_type` DISABLE KEYS */;
-
-INSERT INTO `contract_type` (`id`, `contract_type_name`)
-VALUES
-	(1,'广告合同'),
-	(2,'垃圾合同'),
-	(3,'大合同'),
-	(4,'哈哈1'),
-	(5,'111'),
-	(6,'1222'),
-	(7,'55'),
-	(8,'432'),
-	(9,'555'),
-	(10,'合同类型1'),
-	(11,'222'),
-	(12,'2222'),
-	(13,'22'),
-	(14,'22'),
-	(15,'1232'),
-	(16,'oooo');
-
-/*!40000 ALTER TABLE `contract_type` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table contract_user
@@ -3833,20 +3754,6 @@ VALUES
 
 /*!40000 ALTER TABLE `contract_user` ENABLE KEYS */;
 UNLOCK TABLES;
-
-
-# Dump of table contract_user_type
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `contract_user_type`;
-
-CREATE TABLE `contract_user_type` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_type` int(11) NOT NULL COMMENT '用户类型',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 
 
 
