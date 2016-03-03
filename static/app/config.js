@@ -1,7 +1,6 @@
 window.__DEBUG = true;
 
 require.config({
-    // baseUrl: window.location.host,
     baseUrl: "/",
     paths: {
         "jquery": "assets/libs/jquery/jquery.min",
