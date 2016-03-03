@@ -5,16 +5,13 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
          * 渲染模块
          */
         var render = {
-            contractBankList: function(res, cb) {     /** 渲染银行列表 **/
-                var strJoint = "";
+            contractBankList: function(arr, cb) {     /** 渲染银行列表 **/
+                var strJoint = "", i = 0;
 
-                if(res.status) {
-                    var i = 0;
-
-                    for(; i < res.data.length; i++) {
-                        strJoint += "<tr class='center aligned'><td>" + res.data[i].bank_name
-                                  + "</td></tr>";
-                    }
+                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
+                for(; i < arr.length; i++) {
+                    strJoint += "<tr class='center aligned'><td>" + arr[i].bank_name
+                              + "</td></tr>";
                 }
 
                 cb(strJoint);
@@ -54,7 +51,7 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
             params["contractBankName"] = contractBankName;
             base.common.getData(base.api.queryContractBank, params, false, function(resultData) {
                 if(resultData.status) {
-                    render.contractBankList(resultData, function(str) {
+                    render.contractBankList(resultData.data, function(str) {
                         $("#contractBankList").html(str);
                     });
                 }
@@ -84,15 +81,11 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
                 // 添加入账银行
                 base.common.postData(base.api.addContractBank, params, false, function(res) {
                     if(res.status) {
-                        var i = 0, contractBankItem = "";
-
-                        for(; i < res.data.length; i++) {
-                            contractBankItem += "<tr class='center aligned'><td>" + res.data[i].bank_name
-                                            + "</td></tr>";
-                        }
+                        render.contractBankList(res.data, function(str) {
+                            $("#contractBankList").append(str);
+                        });
 
                         $('#contractBankModal').modal("setting", "transition", "fade down").modal("hide");
-                        $("#contractBankList").append(contractBankItem);
                     }else {
                         render.modalMsg(res.message);
                     }
