@@ -19,7 +19,7 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
                                  + "<td>" + list[i].end_time + "</td>"
                                  + "<td>" + list[i].contract_price + "</td>"
                                  + "<td>" + list[i].deposit + "</td>"
-                                 + "<td>" + parseInt(list[i].contract_price + list[i].deposit) + "</td>"
+                                 + "<td>" + parseInt(parseInt(list[i].contract_price) + parseInt(list[i].deposit)) + "</td>"
                                  + "<td>" + list[i].saler_name + "</td>"
                                  + "<td>" + (list[i].create_time || "--") + "</td>"
                                  + "</tr>";
