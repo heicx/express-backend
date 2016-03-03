@@ -179,8 +179,8 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
 				contract_status: $("#contractStatus").val(),
 				contract_type: $("#contractType").val(),
 				region_id: $("#regionDropdown").val(),
-				province_id: $("#provinceDropdown").val(),
-				city_id: $("#cityDropdown").val()
+				province_id: $("#provinceDropdown").val() || "",
+				city_id: $("#cityDropdown").val() || "",
 			}
 
             if(isPagination) {
@@ -296,18 +296,22 @@ define(["jquery", "jquery-ui", "base", "transition", "dimmer", "modal", "popup"]
             $('#provinceDropdown').dropdown('set text', "请选择省");
             $('#cityDropdown').dropdown('set text', "请选择市");
 
-            base.common.getData(base.api.getProvince, params, false, function(resultData) {
-                var i = 0;
-                var oProvince = resultData.province;
-                var strOptions = "<option value=''>请选择省</option>";
+            if($(this).val() != -1) {
+                base.common.getData(base.api.getProvince, params, false, function(resultData) {
+                    var i = 0;
+                    var oProvince = resultData.province;
+                    var strOptions = "<option value=''>请选择省</option>";
 
 
-                for(; i < oProvince.length; i++) {
-                    strOptions += "<option value='" + oProvince[i].area_id + "'>" + oProvince[i].province_name + "</option>";
-                }
+                    for(; i < oProvince.length; i++) {
+                        strOptions += "<option value='" + oProvince[i].area_id + "'>" + oProvince[i].province_name + "</option>";
+                    }
 
-                $("#provinceDropdown").html(strOptions);
-            }, function(err) {});
+                    $("#provinceDropdown").html(strOptions);
+                }, function(err) {});
+            }else {
+                $("#provinceDropdown, #cityDropdown").html("");
+            }
         });
 
         /**
