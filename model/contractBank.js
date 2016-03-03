@@ -1,4 +1,5 @@
 var when = require("when");
+
 module.exports = function(orm, db) {
 	var contractBank = db.define("contract_bank", {
 		id: {type: "serial", key: true},
@@ -25,32 +26,31 @@ module.exports = function(orm, db) {
 	}
 
     /**
-     * 添加合同
+     * 添加银行
      * @param params(contractBankName: 入账银行名称)
-     * @param callback
      */
-    contractBank.addContractBank = function(params, callback) {
-        // 合同类型名称查重
+    contractBank.addContractBank = function(params) {
+        var def = when.defer();
+
+        // 银行名称查重
         contractBank.find(params, function(err, item) {
             if(!err) {
                 if(item.length > 0) {
-                    callback(err, {status: false, message: "入账银行名称已存在"});
+                    def.reject("入账银行名称已存在");
                 }else {
-                    // 添加合同类型
-                    contractBank.create(params, function(err, items) {
-                        if(items) {
-                            // 获取新增合同类型的信息
-                            contractBank.getContractBankList({contractBankName: items.bank_name}, function(err, newItem) {
-                                callback(err, {status: true, data: newItem});
-                            });
-                        }else {
-                            callback(err, {status: false, message: "添加失败"})
-                        }
+                    // 添加银行
+                    contractBank.create(params, function(err, item) {
+                        if(item)
+                            def.resolve(item);
+                        else
+                            def.reject("银行添加失败");
                     });
                 }
             }else {
-                callback(err, {status: false, message: "入账银行名称查重失败"});
+                def.reject("入账银行名称查重失败");
             }
         });
+
+        return def.promise;
     }
 }
