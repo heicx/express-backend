@@ -61,6 +61,7 @@ var contractBank = require("./routes/contractBank");
 var region = require("./routes/region");
 var area = require("./routes/area");
 var contractPayment = require("./routes/contractPayment")
+var deposit = require("./routes/deposit")
 
 app.use("/", login.routes);
 app.use("/user", user);
@@ -73,6 +74,7 @@ app.use("/dictionary/contractBank", contractBank);
 app.use("/dictionary/region", region);
 app.use("/area", area);
 app.use("/payment", contractPayment);
+app.use("/deposit", deposit);
 
 app.get("*", function(req, res) {
     res.status(404).end("404");
