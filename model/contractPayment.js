@@ -103,7 +103,7 @@ module.exports = function(orm, db) {
         var sql = "SELECT count(*) as contractCount FROM contract_info a right join contract_payment p on p.contract_number = a.contract_number "
             + "JOIN contract_first_party b ON a.first_party_id = b.id "
             + "JOIN contract_second_party c ON a.second_party_id = c.id JOIN contract_type d ON "
-            + "a.contract_type = d.id LEFT JOIN contract_invoice e ON a.contract_number = e.id LEFT JOIN contract_region f ON "
+            + "a.contract_type = d.id LEFT JOIN contract_region f ON "
             + "b.region_id = f.id LEFT JOIN area h ON b.province_id = h.id LEFT JOIN area i ON b.city_id = i.id "
             + "left JOIN contract_bank j ON j.id = p.bank_id "
             + "left JOIN contract_user k ON k.id = p.user_id "
@@ -116,7 +116,7 @@ module.exports = function(orm, db) {
 
                 sql = "SELECT a.contract_number, b.first_party_name, c.second_party_name, d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days,"
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
-                    + "a.contract_price, a.deposit, a.paid_price, l.user_name as saler_name, a.contract_status,"
+                    + "a.contract_price, a.deposit, a.price_paid, a.deposit_paid, l.user_name as saler_name, a.contract_status,"
                     + "DATE_FORMAT(p.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
                     + "p.payment_type, j.bank_name, p.payment, date_format(p.payment_time, '%Y-%m-%d') as payment_time, k.user_name "
                     + "FROM contract_info a "
@@ -130,7 +130,8 @@ module.exports = function(orm, db) {
                     + "left JOIN contract_bank j ON j.id = p.bank_id "
                     + "left JOIN contract_user k ON k.id = p.user_id "
                     + "left JOIN contract_user l ON l.id = a.user_id "
-                    + strCondition + "  LIMIT ?,?";
+                    + strCondition + " LIMIT ?,?";
+
 
                 db.driver.execQuery(sql, arrArgs.concat(arrLimit), function (err, list) {
                     if(!err) {
