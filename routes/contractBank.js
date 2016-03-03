@@ -2,8 +2,12 @@ var express = require("express");
 var router = express.Router();
 var login = require("./login");
 
-// 获取银行列表
-var fetchContractBankList = function (req, res, next) {
+/**
+ * 获取银行列表
+ * @param req
+ * @param res
+ */
+var fetchContractBankList = function (req, res) {
 	var contractBankModel = req.models.contract_bank;
 	var async = req.query.async || false;
 	var params = req.query;
@@ -19,15 +23,21 @@ var fetchContractBankList = function (req, res, next) {
     });
 }
 
-// 添加银行
+/**
+ * 添加银行
+ * @param req
+ * @param res
+ */
 var addContractBank = function(req, res) {
     var contractBankModel = req.models.contract_bank;
     var params = {
         bank_name: req.body.contractBankName
     };
 
-    contractBankModel.addContractBank(params, function(err, contractBank) {
-        res.json(contractBank);
+    contractBankModel.addContractBank(params).then(function(contractBank) {
+        res.json({status: true, data: contractBank});
+    }).catch(function(errMsg) {
+        res.json({status: false, message: errMsg});
     });
 }
 
