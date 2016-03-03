@@ -45,6 +45,7 @@ block content
                 label 大区
                 select.ui.dropdown#regionDropdown
                     option(value="") 请选择大区
+                    option(value="-1") 全部
                     each region, i in contract.region
                         option(value="#{region.id}") #{region.region_name}
             div.field
@@ -76,6 +77,7 @@ block content
                     th.sorted.ascending 保证金
                     th.sorted.ascending 应付总额
                     th.sorted.ascending 已付金额
+                    th.sorted.ascending 已付保证金
                     th.sorted.ascending 已开票数量
                     th.sorted.ascending 已开票金额
                     th 对应销售
@@ -96,7 +98,8 @@ block content
                         td #{list.contract_price}
                         td #{list.deposit}
                         td #{Number(list.contract_price) + Number(list.deposit)}
-                        td #{list.paid_price}
+                        td #{Number(list.price_paid) + Number(list.deposit_paid)}
+                        td #{list.deposit_paid}
                         td #{list.invoice_count || 0}
                         td #{list.invoice_price || 0}
                         td #{list.saler_name}
