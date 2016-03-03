@@ -13,10 +13,10 @@ module.exports = function(orm, db) {
 		effective_time: Date,
 		end_time: Date,
 		create_time: {type: "date", defaultValue: moment().format("YYYY-MM-DD")},
-		paid_price: {type: "text", defaultValue: 0},
+		price_paid: {type: "text", defaultValue: 0},
 		deposit: {type: "text", defaultValue: 0},
 		contract_price: String,
-		deposit_remaining: {type: "text", defaultValue: 0},
+		deposit_paid: {type: "text", defaultValue: 0},
 		contract_status: {type: "integer", defaultValue: 0}
 	});
 
@@ -48,7 +48,7 @@ module.exports = function(orm, db) {
 	Contract.getContractInfo = function (params) {
         var def = when.defer();
 		var pageNo = params.pageNo || 1;
-		var prePageNum = 2;
+		var prePageNum = 20;
 		var container = {
 			pageIndex: pageNo
 		}
@@ -125,6 +125,11 @@ module.exports = function(orm, db) {
             delete params.contract_type;
         }
 
+        // 大区id为-1表示全部
+        if(params.region_id == -1) {
+            delete params.region_id;
+        }
+
         if(params.fuzzy === "false") {
             arrOutput.contract_number = "a";
         }else {
@@ -154,7 +159,7 @@ module.exports = function(orm, db) {
 
                 sql = "SELECT a.contract_number, b.first_party_name, c.second_party_name, d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days,"
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
-                    + "a.contract_price, a.deposit, a.paid_price, j.user_name as saler_name, a.contract_status, a.first_party_id, a.second_party_id, a.contract_type,"
+                    + "a.contract_price, a.deposit, a.price_paid, a.deposit_paid, j.user_name as saler_name, a.contract_status, a.first_party_id, a.second_party_id, a.contract_type,"
                     + "DATE_FORMAT(a.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
                     + "COUNT(e.id) AS invoice_count, SUM(e.price) AS invoice_price FROM contract_info a "
                     + "LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
@@ -288,54 +293,98 @@ module.exports = function(orm, db) {
 
         Contract.find({contract_number: params.contractNumber}, function(err, contract) {
             if(!err) {
-                var totalPrice = utils.Math.accAdd(contract[0].contract_price, contract[0].deposit);
-                var paidPrice = utils.Math.accAdd(contract[0].paid_price, 0);
+                /**
+                 * deposit:         保证金金额
+                 * contractPrice:   合同金额
+                 * totalPrice:      总计金额
+                 * pricePaid:       已付合同金额
+                 * depositPaid:     已付保证金金额
+                 * remanentDeposit: 剩余保证金金额
+                 * remanentPrice:   剩余合同金额
+                 * payment:         当前回款金额
+                 * paymentType:     当前回款方式
+                 */
+                var deposit = utils.Math.accAdd(contract[0].deposit, 0);
+                var contractPrice = utils.Math.accAdd(contract[0].contract_price, 0);
+                var totalPrice = utils.Math.accAdd(deposit, contractPrice);
+                var pricePaid = utils.Math.accAdd(contract[0].price_paid, 0);
+                var depositPaid = utils.Math.accAdd(contract[0].deposit_paid, 0);
+                var remanentDeposit = utils.Math.accSub(deposit, depositPaid);
+                var remanentPrice = utils.Math.accSub(contractPrice, pricePaid);
+                var payment = utils.Math.accAdd(params.payment, 0);
+                var paymentType = params.paymentType;
 
-                if(utils.Math.accSub(totalPrice, paidPrice) >= params.payment) {
-                    contract[0].paid_price = utils.Math.accAdd(params.payment, contract[0].paid_price);
+                if(paymentType === "1") {
+                    if(payment <= remanentPrice) {
+                        contract[0].price_paid = utils.Math.accAdd(payment, pricePaid);
 
-                    if(utils.Math.accSub(totalPrice, paidPrice) == params.payment) {
-                        contract[0].contract_status = 2;
-                    }
-
-                    if(params.paymentType === "2") {
-                         if(params.payment <= utils.Math.accAdd(contract[0].deposit_remaining, 0)) {
-                             contract[0].deposit_remaining = utils.Math.accSub(contract[0].deposit_remaining, params.payment);
-
-                             contract[0].save(function(err) {
-                                 if(!err)
-                                     def.resolve();
-                                 else
-                                     def.reject("回款添加失败");
-                             });
-                         }else {
-                             if(utils.Math.accDiv(contract[0].deposit_remaining, 10000) === 0)
-                                 def.reject("保证金回款已完成");
-                             else
-                                 def.reject("剩余保证金 " + utils.Math.accDiv(contract[0].deposit_remaining, 10000).toFixed(2) + "万元");
-                         }
-                    }else if(params.paymentType === "1") {
-                        var contractPriceRemaining = utils.Math.accSub(utils.Math.accSub(totalPrice, paidPrice), contract[0].deposit_remaining);
-
-                        if(contractPriceRemaining < params.payment) {
-                            if(utils.Math.accDiv(contractPriceRemaining, 10000) === 0)
-                                def.reject("合同回款已完成");
-                            else
-                                def.reject("剩余合同金 " + utils.Math.accDiv(contractPriceRemaining, 10000).toFixed(2) + "万元");
-                        }else {
-                            contract[0].save(function(err) {
-                                if(!err)
-                                    def.resolve();
-                                else
-                                    def.reject("回款添加失败");
-                            });
+                        if(totalPrice == utils.Math.accAdd(contract[0].price_paid, contract[0].deposit_paid)) {
+                            contract[0].contract_status = 2;
                         }
+
+                        contract[0].save(function(err) {
+                            if(!err)
+                                def.resolve();
+                            else
+                                def.reject("回款添加失败");
+                        });
+                    }else {
+                        if(pricePaid == contractPrice)
+                            def.reject("合同回款已完成");
+                        else
+                            def.reject("回款金额大于待回款的合同金额");
                     }
+                }else if(paymentType === "2") {
+                    if(payment <= remanentDeposit) {
+                        contract[0].deposit_paid = utils.Math.accAdd(payment, depositPaid);
+
+                        if(totalPrice == utils.Math.accAdd(contract[0].price_paid, contract[0].deposit_paid)) {
+                            contract[0].contract_status = 2;
+                        }
+
+                        contract[0].save(function(err) {
+                            if(!err)
+                                def.resolve();
+                            else
+                                def.reject("回款添加失败");
+                        });
+                    }else {
+                        if(depositPaid == deposit)
+                            def.reject("保证金回款已完成");
+                        else
+                            def.reject("回款金额大于待回款的保证金金额");
+                    }
+                }
+            }
+        });
+
+        return def.promise;
+    }
+
+    /**
+     * 扣除保证金
+     * @param params
+     */
+    Contract.deductDeposit = function(params) {
+        var def = when.defer();
+
+        Contract.find({contract_number: params.contract_number}, function(err, contract) {
+            console.log(params.contract_number);
+            if(!err) {
+                var remainedPaid = utils.Math.accSub(contract[0].deposit_paid, params.deduct_price);
+
+                if(remainedPaid >= 0) {
+                    contract[0].deposit_paid = remainedPaid;
+                    contract[0].contract_status = 1;
+
+                    contract[0].save(function(err) {
+                        if(!err)
+                            def.resolve();
+                        else
+                            def.reject("扣除保证金失败");
+                    });
                 }else {
-                    if(paidPrice === totalPrice)
-                        def.reject("回款已完成");
-                    else
-                        def.reject("回款金额大于剩余金额, 应付总额: " + utils.Math.accDiv(totalPrice, 10000).toFixed(2) +"万元, 已付金额: " + utils.Math.accDiv(paidPrice, 10000).toFixed(2) + "万元");
+                    def.reject("剩余保证金不足");
                 }
             }
         });
