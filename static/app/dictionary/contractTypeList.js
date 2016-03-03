@@ -5,16 +5,13 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
          * 渲染模块
          */
         var render = {
-            contractTypeList: function(res, cb) {     /** 渲染合同类型列表 **/
-                var strJoint = "";
+            contractTypeList: function(arr, cb) {     /** 渲染合同类型列表 **/
+                var strJoint = "", i = 0;
 
-                if(res.status) {
-                    var i = 0;
-
-                    for(; i < res.data.length; i++) {
-                        strJoint += "<tr class='center aligned'><td>" + res.data[i].contract_type_name
-                                  + "</td></tr>";
-                    }
+                arr = (typeof arr === "object"&& Object.prototype.toString.call(arr).toLowerCase() === "[object object]") ? [arr]: arr;
+                for(; i < arr.length; i++) {
+                    strJoint += "<tr class='center aligned'><td>" + arr[i].contract_type_name
+                              + "</td></tr>";
                 }
 
                 cb(strJoint);
@@ -54,7 +51,7 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
             params["contractTypeName"] = contractTypeName;
             base.common.getData(base.api.queryContractType, params, false, function(resultData) {
                 if(resultData.status) {
-                    render.contractTypeList(resultData, function(str) {
+                    render.contractTypeList(resultData.data, function(str) {
                         $("#contractTypeList").html(str);
                     });
                 }
@@ -84,15 +81,11 @@ define(["jquery", "base", "transition", "dimmer", "modal", "popup"], function($,
                 // 添加合同类型
                 base.common.postData(base.api.addContractType, params, false, function(res) {
                     if(res.status) {
-                        var i = 0, contractTypeItem = "";
-
-                        for(; i < res.data.length; i++) {
-                            contractTypeItem += "<tr class='center aligned'><td>" + res.data[i].contract_type_name
-                                            + "</td></tr>";
-                        }
+                        render.contractTypeList(res.data, function(str) {
+                            $("#contractTypeList").append(str);
+                        });
 
                         $('#contractTypeModal').modal("setting", "transition", "fade down").modal("hide");
-                        $("#contractTypeList").append(contractTypeItem);
                     }else {
                         render.modalMsg(res.message);
                     }
