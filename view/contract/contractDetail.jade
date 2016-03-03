@@ -41,21 +41,21 @@ block content
                                 span #{contractItems.region_name + "-" + contractItems.province_name + "-" + contractItems.city_name}
                             td.collapsing
                                 | 应付总额:
-                                span #{(contractItems.contract_price*1000 + contractItems.deposit*1000)/1000 + " 元"}
+                                span #{(contractItems.contract_price*10000 + contractItems.deposit*10000)/10000 + " 元"}
                         tr
                             td.collapsing
                                 | 乙方名称:
                                 span #{contractItems.second_party_name || contractItems.defaultVal}
                             td.collapsing
                                 | 已付金额:
-                                span #{(contractItems.paid_price*10000)/10000 + " 元"}
+                                span #{(contractItems.price_paid*10000 + contractItems.deposit_paid*10000)/10000 + " 元"}
                         tr
                             td.collapsing
                                 | 合同类型:
                                 sapn #{contractItems.contract_type_name}
                             td.collapsing
                                 | 待付金额:
-                                span #{(contractItems.contract_price*1000 + contractItems.deposit*1000 - contractItems.paid_price*1000)/1000 + " 元"}
+                                span #{(contractItems.contract_price*10000 + contractItems.deposit*10000 - contractItems.price_paid*10000 - contractItems.deposit_paid*10000)/10000 + " 元"}
                         tr
                             td.collapsing
                                 | 生效时间:
@@ -221,12 +221,57 @@ block content
                                             label 开票时间
                                             input(type="text", id="nInvoiceTime", placeholder="开票时间", readonly="true")
                                         div.field
+                                            label 记录人
+                                            input(type="text", disabled="true", value="#{userinfo.user_name}")
                                     div.field
                                         button.ui.fluid.primary.button#confirmInvoiceBtn 确定
                                 div.ui.bottom.attached.hidden.warning.message#invoiceModalMsg
                                     i.icon.help
                                     span
             div.ui.bottom.attached.tab.segment#depositTab(data-tab="deposit")
+                div.ten.wide.column.centered
+                    table.ui.grey.compact.selectable.celled.striped.table
+                        thead
+                            tr.center.aligned
+                                th 合同编号
+                                th 扣除金额
+                                th 扣除方式
+                                th 扣除时间
+                                th 记录时间
+                        tbody#depositList
+                        tfoot
+                            tr
+                                th(colspan="6")
+                                    div#addDepositRecordBtn.ui.right.floated.small.primary.labeled.icon.button 扣除保证金
+                                        i.plus.icon
+                        div.ui.inverted.dimmer(id="depositListLoader")
+                            div.ui.loader
+                        div#depositModal.ui.modal
+                            div.header 扣除保证金
+                            i.close.icon
+                            div.content
+                                div.ui.segment.small.form.attached
+                                    div.two.fields
+                                        div.field
+                                            label 待扣费金额
+                                            input(type="text", id="nDeductPrice", placeholder="待扣费金额")
+                                        div.field
+                                            label 扣费时间
+                                            input(type="text", id="nDeductTime", readonly="true", placeholder="扣费时间")
+                                    div.two.fields
+                                        div.field
+                                            label 扣费方式
+                                            select.ui.dropdown#nDeductTypeDropdown
+                                                option(value="1") 退还
+                                                option(value="2") 扣除
+                                        div.field
+                                            label 记录人
+                                            input(type="text", disabled="true", value="#{userinfo.user_name}")
+                                    div.field
+                                        button.ui.fluid.primary.button#confirmDepositBtn 确定
+                                div.ui.bottom.attached.hidden.warning.message#depositModalMsg
+                                    i.icon.help
+                                    span
     script.
         require(["/app/config.js"], function () {
             require(["/app/contract/contractDetail.js"]);
