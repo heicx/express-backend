@@ -134,7 +134,7 @@ module.exports = function(orm, db) {
                 sql = "SELECT e.invoice_number, e.price AS invoice_price, a.contract_number, b.first_party_name, c.second_party_name,"
                     + "d.contract_type_name,TIMESTAMPDIFF(DAY,DATE_FORMAT(a.end_time, '%Y-%m-%d'),NOW()) AS overdue_days, j.user_name,"
                     + "DATE_FORMAT(a.effective_time, '%Y-%m-%d') AS effective_time, DATE_FORMAT(a.end_time, '%Y-%m-%d') AS end_time,"
-                    + "a.contract_price, a.deposit, a.paid_price, k.user_name as saler_name, a.contract_status,"
+                    + "a.contract_price, a.deposit, a.price_paid, a.deposit_paid, k.user_name as saler_name, a.contract_status,"
                     + "DATE_FORMAT(e.create_time, '%Y-%m-%d') AS create_time, f.region_name, h.area_name AS province_name, i.area_name AS city_name,"
                     + "DATE_FORMAT(e.invoice_time, '%Y-%m-%d') AS invoice_time FROM contract_info a "
                     + "LEFT JOIN contract_first_party b ON a.first_party_id = b.id "
