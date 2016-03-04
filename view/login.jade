@@ -2,7 +2,8 @@ extends layout
 
 block frame
     div.login-form.ui.segment.container
-        h2.ui.center.aligned.header.grey 后台登录
+        h2.ui.center.aligned.header.grey
+            i.smaug.icon
         div.ui.form
             form(action="/login" method="POST")
                 div.field
@@ -18,6 +19,7 @@ block frame
                 div#loginBtn.ui.blue.submit.button.fluid Login
                 div#formMsg.ui.tral.warning.message.aligned.center
                     div.header 请输入用户名
+    canvas
                 script.
                     require(["/app/config.js"], function() {
                         require(["/app/login.js"]);
