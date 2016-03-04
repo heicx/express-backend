@@ -1,11 +1,19 @@
 html,body{
     height: 0;
 }
-.login-form.ui.segment {
-    margin-top: 15%;
+.login-form.ui.segment i.smaug {
+    background: url(../images/dragon.png) no-repeat;
+    background-size: cover;
+    width: 200px;
+    height: 125px;
 }
+
 .login-form.ui.segment.container {
     width: 300px;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -70%);
 }
 
 .ui.footer {
