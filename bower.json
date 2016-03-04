@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "express-backend",
   "description": "",
   "main": "app.js",
   "authors": [
