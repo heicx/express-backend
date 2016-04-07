@@ -36,6 +36,16 @@ define(["jquery", "jquery-ui", "base", "md5", "transition", "dimmer", "modal", "
                 }else {
                     $("#modalMsg").closest(".hidden").transition("fade");
                 }
+            },
+            modalAlertMsg: function(msg){ 
+                var _msg = msg || "";
+                $("#modalMsgAlert #context").text(_msg);
+                if(_msg){ 
+                    $("#modalMsgAlert").modal('show');
+                    setTimeout(function(){ 
+                        $("#modalMsgAlert").modal('hide');
+                    },3000);
+                }
             }
         }
 
@@ -59,6 +69,15 @@ define(["jquery", "jquery-ui", "base", "md5", "transition", "dimmer", "modal", "
                     return {status: false, message: "用户密码至少6位"};
                 }else
                     return {status: true};
+            },
+            userAgainPwd: function(pwd,pwdtwo){ 
+                console.info('pwd: '+pwd);
+                console.info('pwdtwo: '+pwdtwo);
+                if(pwd === pwdtwo){ 
+                    return {status: true};
+                }else{ 
+                    return {status: false, message: "两次密码输入不一致"};
+                }
             }
         }
 
@@ -129,6 +148,51 @@ define(["jquery", "jquery-ui", "base", "md5", "transition", "dimmer", "modal", "
          */
         $("#addUserBtn").on("click", function() {
             $('#regUserModal').modal("setting", "transition", "fade down").modal("show");
+        });
+        
+        
+        /**
+         * 修改密码
+         */        
+        $("#modifyPassBtn").on("click",function(){
+            var errMsg = "";
+            var arrValidateItem = [];            
+            var params = {
+                user_name: $("#userName").val(),
+                user_password_old: $("#userPwdOld").val(),
+                user_password: $("#userPwd").val(),
+                user_password_again: $("#userPwdAgain").val()
+            };            
+            
+            arrValidateItem.push(validate.userPassword(params.user_password_old));
+            arrValidateItem.push(validate.userPassword(params.user_password));
+            arrValidateItem.push(validate.userAgainPwd(params.user_password,params.user_password_again));
+            
+            for(var i in arrValidateItem){
+                if(arrValidateItem[i].status === false) {
+                    errMsg = arrValidateItem[i].message;
+                    break;
+                }
+            }
+
+            if(errMsg === "") {
+                params.user_password = md5(params.user_password).toString();
+                params.user_password_old = md5(params.user_password_old).toString();
+                
+                base.common.postData(base.api.modifyPwd, params, false, function(ret) {
+                    if(ret.status) {
+                        render.modalMsg("");
+                        render.modalAlertMsg(ret.message);
+                    }else {
+                        render.modalMsg(ret.message);
+                    }
+
+                }, function() {});
+            }else {
+                render.modalMsg(errMsg);
+            }            
+            
+            
         });
 	});
 });
