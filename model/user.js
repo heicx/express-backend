@@ -110,4 +110,65 @@ module.exports = function(orm, db) {
 
         return def.promise;
     }
+    
+    
+    /**
+     * 修改密码
+     * @param params
+     * @returns {promise}
+     */
+    User.modifyUserPass =function(params){ 
+        var def = when.defer();
+        
+        User.find({
+            user_name: params.user_name
+        }, function (err, user) {
+            if (!err) {
+                user[0].user_password = params.user_password;
+
+                user[0].save(function (err) {
+                    if (!err){
+                        def.resolve("修改成功");
+                    }
+                    else
+                        def.reject("修改密码失败");
+                });
+            } else {
+                def.reject("用户不存在");
+            }
+        });
+
+        return def.promise;
+        
+    }
+    
+    
+    /**
+     * 通过用户名密码返回旧密码输入是否正确
+     * @param params
+     * @returns {promise}
+     */
+	User.getUserValid = function (params) {
+	    var def = when.defer();
+
+	    User.find({
+	        user_name: params.user_name,
+	        user_password: params.user_password_old
+	    }, function (err, user) {
+	        if (!err) {
+                if(user.length>0){ 
+                    def.resolve();
+                }else{ 
+                    def.reject("旧密码输入错误");
+                }
+	        } else {
+	            def.reject("获取用户信息失败");
+	        }
+	    })
+
+	    return def.promise;
+	}
+    
+    
+    
 }

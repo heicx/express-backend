@@ -70,9 +70,69 @@ var addUser = function(req, res) {
     });
 }
 
+/**
+ * 跳转修改密码页
+ * @param req
+ * @param res
+ */
+var modifyView = function(req, res){ 
+    res.render("user/modifyPassword",{userinfo: JSON.parse(req.session.user)});
+}
+
+
+/**
+ * 生成器
+ *
+ * 修改密码
+ * @param params
+ *
+ * 1. 验证输入旧密码
+ * 2. 修改密码
+ */
+var genModifyPass = function* (req, params) {
+    userModel = userModel || req.models.contract_user;
+
+    yield userModel.getUserValid(params);    
+    yield userModel.modifyUserPass(params);
+    
+}
+
+
+/**
+ * 修改密码
+ * @param req
+ * @param res
+ */
+var modifyUserPass = function(req, res){ 
+    var params = {
+        user_name: req.body.user_name,
+        user_password: req.body.user_password,
+        user_password_old: req.body.user_password_old
+    };
+
+    console.info(params);
+    
+    var genModify=genModifyPass(req, params);
+    
+    var validPass=genModify.next().value;
+    validPass.then(function(result){                        
+        genModify.next().value.then(function(result){ 
+            res.json({status: true, message:result});
+        }).catch(function(errMsg) {
+            res.json({status: false, message: errMsg});
+        });
+    }).catch(function(errMsg) {
+        res.json({status:false, message:errMsg});
+    });
+}
+
+
+
 router.use(login.islogin);
 
 router.get("/list", fetchUserList);
 router.post("/add", addUser);
+router.get("/modify", modifyView);
+router.post("/modify", modifyUserPass);
 
 module.exports = router;
