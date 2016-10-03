@@ -11,4 +11,4 @@
 4. 最新版本的依赖关系可以通过 `npm` & `bower` 安装，具体依赖关系请查阅根目录相关 `json` 配置文件。
 
 ## 启动运行
-> sudo node|supervisor|forever [start] app.js
+> `sudo node|supervisor|forever [start] app.js`
