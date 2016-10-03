@@ -12,7 +12,7 @@
 
 ## 启动运行
 - 启动 `redis` 服务。  
-- 启动 `node` 服务。
+- 启动 `node` 服务。 
 
-> 1. `src/redis-server`  
-> 2. `sudo node|supervisor|forever [start] app.js`
+> `src/redis-server`  
+> `sudo node|supervisor|forever [start] app.js`
