@@ -3,7 +3,7 @@ module.exports = {
         "protocol": "mysql",
         "host": "127.0.0.1",
         "user": "root",
-        "password": "root123",
-        "database": "contract_test"
+        "password": "qwer1234",
+        "database": "contract"
     }
 };

@@ -7,6 +7,7 @@ var bodyParser = require("body-parser");
 var favicon = require("serve-favicon");
 var session = require('express-session');
 var RedisStore = require("connect-redis")(session);
+var compression = require('compression')
 
 var port = process.env.PORT || 3000;
 var app = express();
@@ -28,6 +29,7 @@ app.set("view engine", "jade");
 app.use(express.static(path.join(__dirname, "static")));
 app.use(favicon(__dirname + "/static/assets/images/favicon.ico"));
 app.use(logger("dev"));
+app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser());
 app.use(session({
