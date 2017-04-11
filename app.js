@@ -26,6 +26,7 @@ client.on("error", function(err) {
 
 app.set("views", path.join(__dirname, 'view'));
 app.set("view engine", "jade");
+app.disable('x-powered-by');
 app.use(express.static(path.join(__dirname, "static")));
 app.use(favicon(__dirname + "/static/assets/images/favicon.ico"));
 app.use(logger("dev"));
